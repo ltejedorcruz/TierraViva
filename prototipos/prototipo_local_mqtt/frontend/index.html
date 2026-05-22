@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TierraViva Dashboard (c) Lucía Tejedor</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; min-width: 300px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; }
+        th { background: #27ae60; color: white; }
+        .status { font-weight: bold; color: #27ae60; }
+    </style>
+</head>
+<body>
+    <h1>🌱 TierraViva Dashboard (c) Lucía Tejedor</h1>
+    <div class="card">
+        <h2>Últimas Lecturas</h2>
+        <div id="datos">Cargando...</div>
+        <table id="tabla-lecturas">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Sensor</th>
+		    <th>Temp</th>
+		    <th>Hum</th>
+		    <th>Luz</th>
+		    <th>Suelo</th>
+		    <th>Pres</th>                 
+		</tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function actualizar() {
+            try {
+                const response = await fetch('/lecturas?limit=10');
+                const datos = await response.json();
+                const tbody = document.querySelector('#tabla-lecturas tbody');
+                tbody.innerHTML = '';
+                
+                datos.forEach(l => {
+			const lux = (l.lux === null || l.lux === undefined) ? "-" : `${Number(l.lux).toFixed(1)} lux`;
+			const soil = (l.soil_raw === null || l.soil_raw === undefined) ? "-" : l.soil_raw;
+			const pres = (l.pres_hpa === null || l.pres_hpa === undefined) ? "-" : `${Number(l.pres_hpa).toFixed(1)} hPa`;
+
+			const fila = `<tr>
+			    <td>${l.timestamp}</td>
+			    <td>${l.sensor_id}</td>
+			    <td>${Number(l.temperatura).toFixed(2)}ºC</td>
+			    <td>${Number(l.humedad).toFixed(1)}%</td>
+			    <td>${lux}</td>
+			    <td>${soil}</td>
+			    <td>${pres}</td>
+			</tr>`;
+                    tbody.innerHTML += fila;
+                });
+            } catch (e) {
+                console.error("Error cargando datos", e);
+            }
+        }
+        setInterval(actualizar, 1000); // Actualiza cada 1 segundos
+        actualizar();
+    </script>
+</body>
+</html>
