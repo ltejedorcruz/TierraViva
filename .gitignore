@@ -1,2 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 
+# Arduino local libraries
+**/libraries/
+
+# Datos locales / secretos
+.env
+*.env
+*.db
+*.sqlite
+*.log
+secrets.*
+credentials.*
+api_keys.*
+
+# Binarios y archivos de sistema
+*.exe
+*.msi
+*.zip
+*.rar
+*.7z
 .DS_Store
+Thumbs.db
