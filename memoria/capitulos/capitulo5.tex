@@ -1,0 +1,60 @@
+\chapter{Implementación hardware y firmware de estaciones}
+\label{cap:implementacion_hardware_firmware}
+
+Una vez definida la arquitectura final del sistema, este capítulo describe la implementación hardware y firmware de las estaciones de campo de TierraViva. El propósito no es repetir las decisiones de diseño ya justificadas en capítulos anteriores, sino documentar cómo se preparó, conectó y validó cada bloque de la estación: controlador, sensores, comunicación LTE, publicación de telemetría, actuación sobre el riego y alimentación.
+
+En la arquitectura final, la estación no es un simple nodo que obedece instrucciones externas. Cada estación debe medir, evaluar reglas locales, accionar el riego cuando corresponda y publicar su estado. Por ello, la implementación hardware y el firmware tienen un papel central dentro del prototipo.
+
+La implementación se ha desarrollado de forma incremental. En primer lugar, se preparó el entorno de trabajo con Arduino UNO y se comprobó la programación básica de la placa. A continuación, se validaron los sensores de forma individual y conjunta, se integró el módulo de comunicaciones LTE A7670E-LASA, se implementó el envío de telemetría hacia ThingSpeak y se preparó la lógica de actuación mediante relé y bomba de agua. Esta secuencia permitió reducir riesgos, ya que cada bloque fue probado antes de incorporarse al firmware completo de la estación.
+
+\section{Preparación de Arduino UNO}
+\label{sec:preparacion_arduino_uno}
+
+La primera fase de implementación consistió en preparar la placa Arduino UNO que actúa como controlador local de la estación de campo. Antes de conectar sensores, módulo LTE o relé, era necesario comprobar que el entorno de programación reconocía correctamente la placa y que era posible cargar un programa básico sin errores. Esta comprobación inicial evita arrastrar problemas de comunicación USB o configuración del entorno a fases posteriores del montaje.
+
+El entorno de desarrollo utilizado fue Arduino IDE 2.3.8 sobre Windows 11. La placa empleada no fue una Arduino UNO oficial, sino una placa compatible basada en el microcontrolador ATmega328P. Este tipo de placas es habitual en prototipos de bajo coste, pero puede requerir una preparación adicional cuando el conversor USB-serie no es reconocido automáticamente por el sistema operativo.
+
+Durante la primera conexión por USB, la placa recibía alimentación y encendía sus indicadores luminosos, pero no aparecía ningún puerto disponible en el menú \textit{Tools} $\rightarrow$ \textit{Port} del Arduino IDE. Esto indicaba que el ordenador detectaba alimentación eléctrica, pero no disponía todavía de una comunicación serie utilizable para programar la placa.
+
+La comprobación en el Administrador de dispositivos de Windows mostró el dispositivo como \texttt{USB2.0-Serial} dentro del apartado de otros dispositivos. Esta situación permitió identificar el problema: el sistema no tenía instalado el controlador correspondiente al conversor USB-serie de la placa. La inspección física del Arduino confirmó que el chip situado junto al conector USB era un \texttt{CH340G}, mientras que el microcontrolador principal era un \texttt{ATmega328P}.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.30\textwidth}|p{0.30\textwidth}|}
+\hline
+\textbf{Elemento comprobado} & \textbf{Resultado observado} & \textbf{Acción realizada} \\
+\hline
+Sistema operativo & Windows 11 & Preparación del entorno en PC. \\
+\hline
+Entorno de desarrollo & Arduino IDE 2.3.8 & Instalación y configuración inicial. \\
+\hline
+Placa conectada & Arduino UNO compatible & Selección de placa Arduino Uno. \\
+\hline
+Detección inicial & \texttt{USB2.0-Serial} sin puerto COM disponible & Diagnóstico de falta de driver. \\
+\hline
+Conversor USB-serie & \texttt{CH340G} & Instalación del driver CH340/CH341. \\
+\hline
+Microcontrolador principal & \texttt{ATmega328P} & Validación de compatibilidad con Arduino UNO. \\
+\hline
+Puerto tras instalar driver & \texttt{COM3} & Selección del puerto en Arduino IDE. \\
+\hline
+Prueba básica & \textit{Blink} cargado correctamente & Verificación de programación de la placa. \\
+\hline
+\end{tabular}
+\caption{Preparación inicial del Arduino UNO compatible}
+\label{cuadro:preparacion_arduino_uno}
+\end{center}
+\end{table}
+
+Una vez identificado el chip \texttt{CH340G}, se instaló el driver CH340/CH341 correspondiente. Tras reconectar la placa, Windows pasó a reconocerla como un dispositivo serie asociado al puerto \texttt{COM3}. A partir de ese momento, el Arduino IDE permitió seleccionar la placa como \textit{Arduino Uno} y utilizar el puerto serie correcto para la carga de programas.
+
+La primera prueba realizada fue el ejemplo \textit{Blink}, incluido en el propio Arduino IDE. Esta prueba consiste en cargar un programa sencillo que conmuta periódicamente el LED integrado de la placa. Aunque funcionalmente es una prueba mínima, resulta útil como validación de la cadena completa de programación: detección USB, selección de placa, selección de puerto, compilación, carga del programa y ejecución en el microcontrolador.
+
+El resultado fue correcto: el programa se cargó en la placa a través de \texttt{COM3} y el LED integrado respondió según lo esperado. Además, el registro de carga mostró la comunicación con el microcontrolador \texttt{ATmega328P}, confirmando que la placa era programable desde el entorno configurado. Esta validación permitió continuar con las pruebas de sensores sin que la conexión USB o el driver fueran una fuente de error adicional.
+
+Desde el punto de vista de documentación del proyecto, esta incidencia es relevante porque refleja una condición real del montaje. El uso de placas compatibles reduce el coste del prototipo, pero puede introducir pequeños problemas de preparación, como la necesidad de instalar drivers adicionales. Registrar este paso mejora la reproducibilidad del trabajo, ya que otra persona que replique el sistema podría encontrarse con el mismo síntoma: placa encendida, pero sin puerto COM disponible.
+
+Para dejar evidencia de esta fase, se recomienda incluir en el anexo de pruebas iniciales una captura del Administrador de dispositivos antes y después de instalar el driver, una captura del Arduino IDE con la placa y el puerto seleccionados, y una fotografía de la placa donde se aprecien el \texttt{CH340G} y el \texttt{ATmega328P}. Estas evidencias no son necesarias en el cuerpo principal del capítulo, pero sí refuerzan la trazabilidad del proceso de implementación.
+
+Con la placa correctamente reconocida y la prueba \textit{Blink} superada, el Arduino UNO quedó preparado para la siguiente fase: la conexión y validación de los sensores de la estación de campo. Esta comprobación permitió utilizar la placa como base del firmware autónomo de TierraViva, encargado posteriormente de leer sensores, comunicarse con el módulo LTE, controlar el relé y aplicar la lógica local de riego.

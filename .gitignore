@@ -7,6 +7,59 @@ venv/
 # Arduino local libraries
 **/libraries/
 
+# LaTeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.xdy
+
+# Listas auxiliares / nomenclatura / glosarios
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.loa
+*.lol
+*.nlo
+*.nls
+
+# Archivos auxiliares específicos de la plantilla
+*.locode
+*.lomyequation
+
+# Listas auxiliares / nomenclatura / glosarios
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.loa
+*.lol
+*.nlo
+*.nls
+
+# Archivos auxiliares específicos de la plantilla
+*.locode
+*.lomyequation
+
 # Datos locales / secretos
 .env
 *.env

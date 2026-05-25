@@ -1,0 +1,719 @@
+\chapter{Métodos, materiales y decisiones de diseño}
+\label{cap:capitulo3}
+Este capítulo concreta el diseño de TierraViva a partir del marco técnico descrito en el capítulo anterior. Aquí se fijan los requisitos del sistema, se explican los criterios de elección y se documentan las decisiones que han guiado el prototipo: qué debe medir cada estación, cómo se comunica, qué papel conserva la Raspberry Pi y qué condiciones deben cumplirse antes de actuar sobre el riego.
+
+A diferencia del estado del arte, el análisis se centra ya en el proyecto desarrollado. Algunas decisiones se tomaron de forma incremental, a medida que se validaban sensores, comunicaciones y software de supervisión. Por ello, el capítulo no se limita a enumerar materiales, sino que justifica por qué TierraViva adopta una arquitectura distribuida con decisión local en las estaciones.
+
+\section{Requisitos funcionales del sistema}
+\label{sec:requisitos_funcionales}
+
+Los requisitos funcionales definen las capacidades que debe proporcionar el sistema para cumplir con el alcance planteado para el proyecto. En el caso de TierraViva, estos requisitos no se limitan a la lectura de sensores, sino que cubren el ciclo completo de funcionamiento: adquisición de datos en campo, transmisión remota, almacenamiento, visualización, toma de decisiones y actuación sobre el riego.
+
+La definición de estos requisitos permite separar con claridad qué debe hacer el sistema de cómo se implementa cada parte. Esta distinción es importante porque las decisiones tecnológicas concretas se justifican en apartados posteriores. En este punto se describe el comportamiento esperado del prototipo y la forma prevista de comprobar que cada función queda cubierta durante la validación.
+
+El sistema se plantea a partir de estaciones de campo capaces de obtener medidas del entorno, evaluar localmente reglas sencillas de riego y enviar la información a una plataforma intermedia. A partir de esos datos, el sistema de supervisión debe poder registrar el histórico, visualizar el estado del prototipo y mostrar las actuaciones realizadas por cada estación. La estación de campo debe ejecutar la actuación de forma autónoma y segura, evitando activaciones indefinidas, riegos repetidos o estados peligrosos ante lecturas inválidas, errores de comunicación o fallos eléctricos.
+
+En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requisitos funcionales considerados para el diseño del prototipo.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.13\textwidth}|p{0.23\textwidth}|p{0.36\textwidth}|p{0.18\textwidth}|}
+\hline
+\textbf{Código} & \textbf{Requisito} & \textbf{Descripción} & \textbf{Validación prevista} \\
+\hline
+RF-01 & Medición de humedad del suelo & El sistema debe obtener lecturas periódicas de la humedad del sustrato en la zona monitorizada. & Prueba con sensor capacitivo de humedad del suelo. \\
+\hline
+RF-02 & Medición ambiental & El sistema debe medir variables ambientales relevantes, incluyendo temperatura, humedad relativa y presión atmosférica. & Prueba con sensor ambiental. \\
+\hline
+RF-03 & Medición de luminosidad & El sistema debe registrar la luminosidad o nivel de luz ambiente para contextualizar las condiciones del entorno. & Prueba con variación de luz. \\
+\hline
+RF-04 & Envío remoto de telemetría & Las estaciones de campo deben enviar sus medidas a una plataforma remota para que puedan ser consultadas posteriormente. & Prueba de comunicación remota y recepción en plataforma cloud. \\
+\hline
+RF-05 & Identificación de estación & Cada lectura debe poder asociarse a la estación de origen, permitiendo distinguir los datos de distintas zonas o nodos. & Comprobación de registros diferenciados por estación. \\
+\hline
+RF-06 & Almacenamiento histórico & El sistema debe registrar las lecturas recibidas para conservar un histórico de funcionamiento. & Verificación de inserciones en SQLite. \\
+\hline
+RF-07 & Visualización del estado & El sistema debe ofrecer una interfaz de consulta que permita ver las últimas lecturas y el estado general del prototipo. & Prueba de dashboard web en navegador. \\
+\hline
+RF-08 & Decisión local de riego & Cada estación debe evaluar localmente si las condiciones medidas justifican una actuación sobre el riego. & Prueba de regla local de humedad, cooldown y estado seguro. \\
+\hline
+RF-09 & Actuación local sobre el riego & La estación debe accionar físicamente el sistema de riego mediante relé y bomba de agua durante un tiempo limitado por firmware. & Prueba controlada con relé y bomba/carga de prueba. \\
+\hline
+RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé y un código de estado o evento que permita conocer si se ha producido una actuación, una situación de reposo o una incidencia. & Verificación de relay\_state y status/event code en ThingSpeak. \\
+\hline
+RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, cooldown activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
+\hline
+\end{tabular}
+\caption{Requisitos funcionales del sistema TierraViva}
+\label{cuadro:requisitos_funcionales}
+\end{center}
+\end{table}
+
+Los tres primeros requisitos se relacionan con la adquisición de información en campo. La humedad del suelo es la variable más directamente vinculada con la decisión de riego, mientras que las variables ambientales permiten interpretar mejor las condiciones en las que se encuentra la zona monitorizada. En esta fase no se busca realizar un análisis agronómico completo, sino obtener un conjunto de medidas suficiente para validar el comportamiento del prototipo.
+
+Los requisitos RF-04, RF-05 y RF-06 cubren el flujo de datos desde la estación hasta la plataforma intermedia y el sistema de supervisión. La telemetría debe recibirse de forma remota, quedar asociada a una estación concreta y almacenarse para su consulta posterior. Esta trazabilidad es necesaria para que el sistema no dependa únicamente de la última lectura recibida y para poder analizar la evolución de las variables durante las pruebas.
+
+El requisito RF-07 se centra en la interacción con el usuario. Aunque el sistema pueda funcionar internamente, su utilidad queda limitada si no existe una forma clara de consultar el estado de las estaciones. Por ello, el dashboard debe permitir revisar las medidas recientes, detectar si los datos llegan correctamente y comprobar el estado general del sistema sin recurrir a mensajes de consola o consultas manuales a la base de datos.
+
+Los requisitos RF-08, RF-09 y RF-10 introducen la parte de control. En la arquitectura final, la decisión de riego se ejecuta localmente en cada estación mediante reglas verificables, especialmente durante esta primera versión del prototipo. La estación no depende de una decisión externa para actuar: evalúa sus sensores, comprueba las condiciones de seguridad, activa la bomba si corresponde y publica después su estado. Esta publicación permite que la Raspberry Pi supervise lo ocurrido y conserve un histórico, sin convertirse en un punto único de decisión para el riego.
+
+El requisito RF-11 se ha definido de forma explícita porque la actuación sobre riego implica un riesgo mayor que la simple monitorización. Un fallo de software, una lectura inválida, un reinicio inesperado o una comunicación incompleta no deben provocar una activación indefinida de la bomba. Por ese motivo, el sistema debe adoptar un comportamiento conservador: ante una situación no válida o no verificable, el estado seguro será mantener la bomba apagada.
+
+Estos requisitos funcionales servirán como base para las decisiones de diseño del resto del capítulo y para la estrategia de validación descrita más adelante. Cada requisito debe poder relacionarse con una prueba concreta, de forma que el cumplimiento del sistema no se justifique solo por diseño, sino también mediante evidencias experimentales.
+
+\section{Requisitos no funcionales}
+\label{sec:requisitos_no_funcionales}
+
+Los requisitos no funcionales describen las condiciones de calidad que debe cumplir el sistema, más allá de las funciones concretas indicadas en el apartado anterior. En TierraViva estos requisitos son especialmente importantes porque el proyecto no consiste únicamente en que cada bloque funcione de forma aislada, sino en que el conjunto pueda integrarse, probarse, ampliarse y defenderse como un prototipo de ingeniería.
+
+Al tratarse de un Trabajo Fin de Grado, el sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No se pretende desarrollar un producto industrial cerrado, pero sí una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta. La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.13\textwidth}|p{0.25\textwidth}|p{0.50\textwidth}|}
+\hline
+\textbf{Código} & \textbf{Requisito} & \textbf{Descripción} \\
+\hline
+RNF-01 & Modularidad & El sistema debe organizarse en bloques diferenciados: estación de campo autónoma, comunicación, almacenamiento, supervisión, visualización y actuación local. \\
+\hline
+RNF-02 & Bajo coste & Los componentes seleccionados deben ser asumibles para un prototipo académico, evitando soluciones industriales de coste elevado cuando no sean necesarias. \\
+\hline
+RNF-03 & Reproducibilidad & El montaje, la configuración y las pruebas deben poder repetirse a partir de la documentación generada durante el proyecto. \\
+\hline
+RNF-04 & Facilidad de depuración & El sistema debe permitir probar los bloques por separado, identificar errores y consultar salidas intermedias durante el desarrollo. \\
+\hline
+RNF-05 & Consumo razonable & El diseño debe evitar consumos innecesarios y permitir una futura alimentación autónoma, aunque la optimización energética completa no sea el objetivo principal. \\
+\hline
+RNF-06 & Tolerancia a fallos & El sistema debe contemplar fallos de lectura, comunicación o actuación, adoptando estados seguros cuando no sea posible garantizar un funcionamiento correcto. \\
+\hline
+RNF-07 & Escalabilidad & La arquitectura debe permitir incorporar más de una estación de campo sin rediseñar completamente el sistema. \\
+\hline
+RNF-08 & Claridad de visualización & La interfaz debe presentar la información de forma comprensible, diferenciando lecturas, estados y posibles incidencias. \\
+\hline
+RNF-09 & Adecuación académica & El alcance debe ser realizable dentro del tiempo y medios disponibles para el TFG, priorizando funciones verificables frente a desarrollos excesivamente complejos. \\
+\hline
+\end{tabular}
+\caption{Requisitos no funcionales del sistema TierraViva}
+\label{cuadro:requisitos_no_funcionales}
+\end{center}
+\end{table}
+
+La modularidad es uno de los requisitos más importantes del proyecto. Separar el sistema en bloques permite desarrollar y validar cada parte de forma progresiva, evitando que la actuación sobre el riego dependa de un único componente externo. Por ejemplo, la lectura de sensores puede comprobarse antes de integrar la comunicación remota, y la visualización puede probarse inicialmente con datos simulados o recibidos por otros medios. Esta forma de trabajo reduce el riesgo de que un fallo en una capa impida avanzar en el resto del sistema.
+
+El bajo coste no se interpreta como elegir siempre el componente más barato, sino como seleccionar materiales razonables para el alcance del prototipo. En un TFG resulta más adecuado emplear plataformas y módulos accesibles, bien documentados y fáciles de sustituir, siempre que proporcionen prestaciones suficientes para validar la arquitectura. Esta decisión también favorece la reproducibilidad, ya que otros estudiantes o desarrolladores podrían replicar el montaje sin depender de equipos propietarios o excesivamente específicos.
+
+La reproducibilidad está directamente relacionada con la documentación del proceso. Las conexiones, configuraciones, pruebas, errores encontrados y decisiones de diseño deben quedar registrados con suficiente detalle. Esto no solo facilita la redacción de la memoria, sino que también permite justificar ante el tribunal que el sistema no se ha construido como una prueba puntual difícil de repetir, sino como un prototipo técnico verificable.
+
+La facilidad de depuración también ha condicionado el planteamiento del trabajo. En un sistema con sensores, comunicaciones, base de datos, dashboard y actuación física, no es práctico probar todo únicamente al final. El sistema debe permitir observar salidas intermedias, comprobar lecturas por separado, revisar registros, analizar respuestas de comunicación y validar la actuación en condiciones controladas. Esta capacidad resulta clave para detectar errores de cableado, problemas de alimentación, fallos de formato en los datos o comportamientos inesperados en la lógica de control.
+
+El consumo energético debe mantenerse en valores razonables. Aunque la optimización completa de autonomía no forma parte del núcleo del TFG, el sistema se orienta a estaciones de campo que podrían funcionar con batería o alimentación solar en futuras versiones. Por ello, el diseño no debe ignorar el consumo de módulos de comunicación, sensores y actuadores. En especial, la actuación sobre una bomba de agua y el uso de comunicaciones remotas obligan a considerar la alimentación como una restricción real del sistema.
+
+La tolerancia a fallos es especialmente relevante porque TierraViva incorpora actuación sobre el riego. Un error en una medida puede ser aceptable si queda registrado y no se utiliza de forma crítica, pero un error que provoque la activación indefinida de la bomba sí comprometería el funcionamiento del sistema. Por este motivo, el comportamiento ante fallos debe ser conservador: si falta información, si una lectura no es válida o si se supera un límite de seguridad, el sistema debe priorizar el apagado de la bomba.
+
+La escalabilidad se plantea de forma limitada pero necesaria. El prototipo debe poder trabajar con más de una estación de campo, al menos desde el punto de vista de identificación, almacenamiento y visualización. Esto implica que los datos no deben tratarse como si procedieran de un único nodo, sino que deben conservar la referencia de la estación de origen. Esta decisión facilita futuras ampliaciones a varias zonas de riego o parcelas diferenciadas.
+
+Por último, la claridad de visualización y la adecuación al alcance académico condicionan la forma de presentar el sistema. El dashboard debe servir para entender el estado del prototipo sin obligar al usuario a interpretar directamente tramas, códigos internos o registros de depuración. Al mismo tiempo, el proyecto debe evitar prometer funcionalidades que no puedan validarse con rigor dentro del tiempo disponible. En este sentido, se priorizan decisiones simples, trazables y defendibles frente a soluciones más complejas que aumentarían el riesgo de integración sin aportar una mejora proporcional al objetivo del TFG.
+
+\section{Especificaciones temporales y operativas}
+\label{sec:especificaciones_temporales_operativas}
+
+Además de los requisitos funcionales y no funcionales, el sistema necesita definir una serie de parámetros temporales y criterios operativos que regulen su comportamiento durante el funcionamiento. En un sistema IoT de riego, estos valores son importantes porque afectan al consumo energético, a la carga de comunicaciones, a la capacidad de respuesta y, sobre todo, a la seguridad de la actuación sobre la bomba de agua.
+
+Las especificaciones temporales no se plantean como valores rígidos e inmodificables, sino como parámetros iniciales de diseño. Durante el desarrollo y la validación del prototipo pueden ajustarse en función de los resultados obtenidos, siempre manteniendo dos criterios principales: evitar comunicaciones innecesarias y garantizar que cualquier actuación sobre el riego quede limitada en el tiempo.
+
+En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales especificaciones temporales y operativas consideradas para TierraViva.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.13\textwidth}|p{0.30\textwidth}|p{0.18\textwidth}|p{0.29\textwidth}|}
+\hline
+\textbf{Código} & \textbf{Parámetro} & \textbf{Valor inicial} & \textbf{Criterio operativo} \\
+\hline
+ET-01 & Periodo de lectura de sensores & 30 s & Las estaciones toman medidas periódicas del entorno sin necesidad de lectura continua. \\
+\hline
+ET-02 & Frecuencia de envío de telemetría & 30 s & Cada estación envía sus datos de forma periódica, evitando tráfico innecesario. \\
+\hline
+ET-03 & Frecuencia de actualización del dashboard & 3--5 s & La interfaz consulta el estado con mayor frecuencia que la llegada real de nuevos datos. \\
+\hline
+ET-04 & Intervalo de evaluación local & 30 s & Cada estación evalúa periódicamente sus lecturas y comprueba si se cumplen las condiciones locales de riego. \\
+\hline
+ET-05 & Tiempo máximo de bomba activa & 60 s & La activación de la bomba queda limitada para evitar riego indefinido ante errores de control. \\
+\hline
+ET-06 & Tiempo mínimo entre riegos & Configurable & Se aplica un periodo de espera para evitar actuaciones repetidas en poco tiempo. \\
+\hline
+ET-07 & Tiempo máximo sin publicación válida & 5 min & Si la estación no consigue publicar telemetría durante este periodo, registra la incidencia cuando sea posible y garantiza que una actuación en curso no permanezca activa sin control. \\
+\hline
+ET-08 & Estado seguro por defecto & Bomba apagada & Al arrancar, ante error de lectura, fallo de comunicación o condición no verificable, la estación mantiene desactivado el riego. \\
+\hline
+ET-09 & Comportamiento ante dato inválido & Ignorar y registrar & Las lecturas no válidas no deben provocar una actuación automática. \\
+\hline
+ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actuación & La pérdida de comunicación no debe dejar la bomba activa. \\
+\hline
+\end{tabular}
+\caption{Especificaciones temporales y operativas iniciales del sistema}
+\label{cuadro:especificaciones_temporales}
+\end{center}
+\end{table}
+
+El periodo de lectura y envío de telemetría se fija inicialmente en 30 segundos. Este valor permite observar la evolución de las variables medidas sin generar un volumen excesivo de comunicaciones. En un sistema de riego no resulta necesario enviar datos cada segundo, ya que la humedad del suelo y las condiciones ambientales no cambian con tanta rapidez como para justificar una frecuencia tan elevada. Para demostraciones o pruebas concretas, este intervalo podría reducirse temporalmente, pero no se considera necesario para el funcionamiento normal del prototipo.
+
+La actualización del dashboard se plantea con una frecuencia mayor que la recepción de nuevos datos. Esto permite que la interfaz sea más dinámica y pueda mostrar información como la última actualización recibida, el estado de conexión o posibles avisos de datos obsoletos. No obstante, debe quedar claro que refrescar la interfaz cada pocos segundos no implica que la estación esté generando nuevas medidas con esa misma frecuencia.
+
+El intervalo de evaluación local se vincula al periodo de lectura y envío de telemetría. Como la decisión de riego se ejecuta en la propia estación, no es necesario mantener un mecanismo remoto de control para decidir la actuación. La estación lee sus sensores, actualiza su estado interno y comprueba si se cumplen las condiciones de riego en cada ciclo. Este enfoque reduce la dependencia de la conectividad externa y simplifica la lógica de actuación.
+
+La actuación sobre la bomba de agua se trata como el punto más crítico desde el punto de vista operativo. Cualquier activación debe estar limitada por un tiempo máximo, ya que un fallo software, una lectura errónea, un reinicio inesperado o un problema de comunicación no deben traducirse en un riego indefinido. Aunque la duración concreta pueda ajustarse durante las pruebas, el firmware debe impedir que la bomba permanezca activa más tiempo del permitido.
+
+Además, después de cada actuación debe aplicarse un tiempo mínimo entre riegos. Este periodo de espera evita activaciones continuas provocadas por lecturas inestables, reinicios, ruido en la medida o pequeñas oscilaciones alrededor del umbral de decisión. En una primera versión del prototipo, este parámetro puede configurarse de forma conservadora y ajustarse posteriormente a partir de las pruebas.
+
+El estado seguro por defecto del sistema es la bomba apagada. Esta decisión afecta tanto al arranque como a las situaciones de error. Si la estación se reinicia, si detecta una lectura inválida, si entra en cooldown, si pierde comunicación o si se supera el tiempo máximo de actuación, el sistema debe volver a un estado conservador. En este proyecto se considera preferible no regar ante una situación no verificable antes que mantener la bomba funcionando sin control.
+
+Finalmente, los datos inválidos no deben utilizarse para tomar decisiones automáticas. Una lectura fuera de rango, ausente o incoherente debe registrarse como incidencia o descartarse, pero no debe activar la bomba por sí sola. Esta especificación refuerza el criterio general del sistema: TierraViva debe poder actuar sobre el riego, pero solo cuando la información disponible y el estado operativo sean suficientemente fiables.
+
+\section{Metodología de trabajo}
+\label{sec:metodologia_trabajo}
+
+La metodología seguida en TierraViva se ha basado en un desarrollo incremental por bloques. En lugar de intentar construir el sistema completo desde el primer momento, se ha dividido el proyecto en fases más pequeñas, cada una orientada a validar una parte concreta de la arquitectura. Este enfoque resulta adecuado para un sistema IoT con sensores, comunicaciones, almacenamiento, visualización y actuación física, ya que permite aislar errores y reducir el riesgo de integración.
+
+La idea principal ha sido avanzar desde pruebas controladas hacia una arquitectura cada vez más cercana al funcionamiento final. Primero se analizaron las necesidades del problema y las alternativas tecnológicas disponibles. Después se desarrollaron prototipos parciales para comprobar sensores, comunicaciones, almacenamiento y visualización. Finalmente, las distintas partes se fueron conectando hasta formar una solución de monitorización y control más completa.
+
+Esta forma de trabajo también ha permitido documentar decisiones y cambios de enfoque. En un proyecto de este tipo, no todas las decisiones se pueden cerrar desde el principio, ya que algunas dependen de la disponibilidad real de hardware, de la facilidad de integración o de los resultados obtenidos en pruebas. Por ello, la metodología no se ha limitado a implementar una arquitectura previamente fija, sino que ha incorporado revisión, validación y corrección de decisiones durante el desarrollo.
+
+En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales seguidas durante el proyecto.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.10\textwidth}|p{0.28\textwidth}|p{0.48\textwidth}|}
+\hline
+\textbf{Fase} & \textbf{Nombre} & \textbf{Objetivo principal} \\
+\hline
+1 & Análisis inicial del problema & Identificar la necesidad de monitorizar y controlar el riego en un entorno no supervisado de forma continua. \\
+\hline
+2 & Revisión tecnológica & Estudiar alternativas de sensorización, plataformas embebidas, comunicaciones, almacenamiento, visualización y actuación. \\
+\hline
+3 & Diseño conceptual de la arquitectura & Definir los bloques principales del sistema y la relación entre estaciones autónomas de campo, plataforma intermedia, sistema de supervisión y actuador. \\
+\hline
+4 & Prototipo local con Raspberry & Validar una primera cadena de adquisición, mensajería, almacenamiento y visualización mediante Raspberry Pi, MQTT, SQLite, FastAPI y dashboard. \\
+\hline
+5 & Validación de sensores & Comprobar el funcionamiento de los sensores de humedad de suelo, luminosidad y variables ambientales antes de integrarlos en una estación. \\
+\hline
+6 & Validación de comunicaciones & Probar la comunicación remota necesaria para publicar telemetría y estado desde las estaciones. \\
+\hline
+7 & Elección de plataforma cloud & Seleccionar una plataforma intermedia que permitiera publicar telemetría, consultar datos remotos y supervisar el estado de las estaciones de forma sencilla y verificable. \\
+\hline
+8 & Diseño de actuación local & Definir el control autónomo de la bomba de agua mediante relé, incluyendo reglas locales, tiempos máximos, cooldown y estado seguro. \\
+\hline
+9 & Integración de subsistemas & Conectar adquisición, comunicación, supervisión, almacenamiento, visualización, decisión local y actuación en una arquitectura coherente. \\
+\hline
+10 & Validación experimental & Comprobar el funcionamiento del sistema mediante pruebas parciales, pruebas de estación autónoma y pruebas de supervisión extremo a extremo. \\
+\hline
+11 & Documentación de incidencias y decisiones & Registrar problemas encontrados, alternativas descartadas, cambios de enfoque y criterios técnicos adoptados. \\
+\hline
+\end{tabular}
+\caption{Fases principales de la metodología de trabajo}
+\label{cuadro:metodologia_fases}
+\end{center}
+\end{table}
+
+La primera fase consistió en analizar el problema desde el punto de vista funcional. No se trataba únicamente de medir humedad o mostrar datos, sino de diseñar un sistema capaz de observar el entorno, transmitir información, registrar un histórico, visualizar el estado y actuar sobre el riego de forma controlada. Esta fase permitió transformar una necesidad práctica en un conjunto de requisitos técnicos, descritos en los apartados anteriores.
+
+A continuación, se realizó una revisión tecnológica centrada en las áreas que condicionaban el diseño: sensores agrícolas, arquitecturas IoT, plataformas embebidas, comunicaciones para entornos rurales, plataformas cloud, protocolos de aplicación y mecanismos de automatización. Esta revisión no tuvo como objetivo elegir la tecnología más avanzada en términos absolutos, sino identificar qué opciones eran viables para un prototipo académico, reproducible y defendible.
+
+La tercera fase fue el diseño conceptual de la arquitectura. En este punto se definieron los bloques principales del sistema: estaciones de campo, adquisición de datos, comunicación remota, plataforma intermedia, sistema de supervisión, almacenamiento, dashboard y actuación. Esta separación en bloques permitió trabajar de forma progresiva, validando cada parte antes de integrarla con el resto.
+
+Una fase especialmente útil fue el desarrollo de un prototipo local previo con Raspberry Pi. En esta etapa se utilizó una arquitectura basada en MQTT, SQLite, FastAPI y un dashboard web para comprobar la cadena de tratamiento de datos. Este prototipo no debe interpretarse como la arquitectura final de comunicaciones del sistema, sino como una fase intermedia de validación. Permitió probar la recepción de mensajes, el almacenamiento en base de datos, la exposición de datos mediante API y la visualización en navegador antes de incorporar la comunicación remota definitiva de las estaciones.
+
+La validación de sensores se realizó de forma independiente. Primero se comprobó el bus I2C y las direcciones de los sensores digitales, y después se integraron las lecturas de luminosidad, temperatura, humedad relativa, presión y humedad de suelo. Esta fase fue necesaria para evitar que un fallo de cableado, dirección I2C o librería se confundiera posteriormente con un problema de comunicación o de backend. En el caso del sensor de humedad de suelo, además, se trabajó inicialmente con valores brutos, dejando la calibración completa con suelo seco y húmedo como parte de la validación experimental.
+
+La validación de comunicaciones se planteó también de forma separada. Antes de integrar el módulo de comunicaciones con el firmware de estación, se comprobó su funcionamiento mediante comandos AT, verificando aspectos como identificación del módulo, estado de la SIM, nivel de señal, registro en red, dirección IP y capacidad de comunicación HTTP. Esta forma de trabajo permitió aislar los problemas propios del módem antes de mezclarlos con la lectura de sensores o la lógica de control.
+
+Tras estas pruebas, se valoró la plataforma cloud más adecuada para el prototipo. La decisión debía tener en cuenta que las estaciones de campo no estarían conectadas físicamente a la Raspberry Pi, por lo que la telemetría y el estado de funcionamiento debían publicarse en una plataforma accesible por red. Por este motivo, la plataforma intermedia debía permitir la escritura de datos desde las estaciones y la consulta posterior desde el sistema de supervisión, sin exigir una comunicación directa entre los nodos de campo y la Raspberry Pi.
+
+El diseño de actuación se abordó como un bloque crítico. A diferencia de la monitorización, la actuación sobre riego tiene consecuencias físicas: una bomba activa durante demasiado tiempo puede provocar consumo innecesario de agua o funcionamiento incorrecto del sistema. Por ello, el control mediante relé se diseñó con un criterio conservador: bomba apagada por defecto, tiempo máximo de activación, validación de lecturas, cooldown, bloqueo ante estados no verificables y publicación del estado de la actuación.
+
+La integración de subsistemas se realizó después de validar las partes principales. Esta integración incluyó la unión entre adquisición de datos, comunicación, almacenamiento, visualización, lógica local de decisión y actuación. El objetivo no era solo que cada bloque funcionara por separado, sino comprobar que la estación podía medir, decidir, actuar y publicar su estado, y que la Raspberry Pi podía supervisar ese comportamiento a partir de los datos disponibles en la plataforma intermedia.
+
+La validación experimental se planteó en varios niveles. En primer lugar, se realizaron pruebas unitarias de sensores y comunicación. Después, pruebas parciales de almacenamiento, API y dashboard. Finalmente, se prevén pruebas de integración para comprobar el flujo completo: adquisición de datos en estación, decisión local de riego, actuación sobre el relé, publicación de telemetría y estado, registro histórico y visualización desde la Raspberry Pi.
+
+Por último, durante el desarrollo se ha mantenido una documentación de incidencias y decisiones. Esta parte es relevante porque el proyecto ha requerido corregir supuestos iniciales, separar prototipos previos de arquitectura final y ajustar decisiones conforme se obtenían resultados reales. Registrar estos cambios no se considera una debilidad, sino una parte natural del proceso de ingeniería, ya que permite justificar por qué se adoptó una solución concreta y qué alternativas quedaron descartadas o reservadas para trabajos futuros.
+
+El cambio de enfoque más importante fue separar definitivamente supervisión y control local. En una versión inicial se valoró que la Raspberry Pi centralizara parte de la lógica de riego, pero finalmente se optó por desplazar esa responsabilidad al firmware de cada estación. Esta modificación simplificó el flujo de comunicación, eliminó la necesidad de transportar órdenes de riego por la nube y redujo la dependencia de la Raspberry como punto único de decisión.
+
+\section{Arquitectura general planteada}
+\label{sec:arquitectura_general_planteada}
+
+A partir de los requisitos definidos en los apartados anteriores, la arquitectura general de TierraViva se plantea como un sistema IoT distribuido, formado por estaciones autónomas de campo, una plataforma intermedia de comunicación y un sistema de supervisión basado en Raspberry Pi. El objetivo de esta arquitectura es separar claramente la adquisición de datos, la decisión local, la actuación física, la publicación de telemetría, el almacenamiento histórico y la visualización.
+
+La arquitectura se ha diseñado teniendo en cuenta una restricción importante: las estaciones de campo no están conectadas físicamente a la Raspberry Pi. Por tanto, no se puede asumir una comunicación directa mediante USB, puerto serie o red local entre ambos extremos. Las estaciones deben poder enviar datos de forma remota mediante el módulo LTE, y la Raspberry debe consultar esa información desde la plataforma intermedia. Esto condiciona el diseño completo del sistema y evita que el riego dependa de una conexión local o de una orden enviada desde la Raspberry.
+
+En términos generales, el sistema se divide en cuatro bloques principales:
+
+\begin{itemize}
+    \item \textbf{Estaciones autónomas de campo}: encargadas de medir las variables del entorno, evaluar reglas locales de riego, accionar la bomba mediante relé y publicar telemetría y estado.
+    \item \textbf{Capa de comunicaciones y plataforma intermedia}: responsable de recibir los datos publicados por las estaciones y hacerlos accesibles para consulta remota.
+    \item \textbf{Sistema de supervisión}: implementado sobre Raspberry Pi, encargado de consultar datos, almacenarlos, exponer una API y servir el dashboard.
+    \item \textbf{Interfaz de usuario}: orientada a visualizar el estado del sistema, revisar el histórico y supervisar las actuaciones realizadas por las estaciones.
+\end{itemize}
+
+La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general de la arquitectura planteada.
+
+\begin{figure}[H]
+  \hspace{-0.5cm}\centerline{\resizebox{.92\textwidth}{!}{\includegraphics{figs/arquitecturaTierraViva.png}}}
+  \caption{Arquitectura general planteada para TierraViva.}
+\label{fig:arquitectura_general_tierraviva}
+\end{figure}
+
+En esta sección no se entra todavía en el detalle de implementación; ese desarrollo se reserva para el capítulo siguiente. Lo importante aquí es dejar fijado el reparto de responsabilidades entre estaciones, plataforma intermedia, Raspberry Pi y dashboard. Las estaciones de campo se encargan de la interacción directa con el entorno físico y de la actuación sobre el riego. ThingSpeak permite publicar y consultar la telemetría de forma remota. La Raspberry Pi actúa como sistema de supervisión, histórico y visualización, sin convertirse en el elemento responsable de decidir la activación de la bomba.
+
+Esta división condiciona el resto de decisiones del proyecto. La actuación sobre el riego debe ejecutarse localmente en la estación, donde se encuentra físicamente la bomba. De este modo, una pérdida de conectividad o una indisponibilidad temporal de la Raspberry no impide que la estación conserve un comportamiento seguro. El detalle de la arquitectura final, incluyendo los canales concretos de ThingSpeak, el flujo de telemetría, la publicación de estado y el papel de la Raspberry Pi como sistema de supervisión, se desarrolla en el Capítulo~\ref{cap:capitulo4}.
+
+\section{Elección de variables y sensores}
+\label{sec:eleccion_variables_sensores}
+
+La selección de variables medidas se ha realizado teniendo en cuenta el papel que deben cumplir dentro del prototipo: monitorizar el estado de una zona de cultivo y aportar información suficiente para alimentar la decisión local de riego en cada estación. No se pretende medir todos los parámetros agronómicos posibles, sino elegir un conjunto reducido de variables que permita validar el comportamiento del prototipo de forma razonable, reproducible y coherente con el alcance del TFG.
+
+En TierraViva se combinan variables del suelo y variables ambientales. La humedad del suelo se considera la variable principal para la decisión local de riego, ya que aporta información directa sobre la disponibilidad de agua en el sustrato. Las variables ambientales, como temperatura, humedad relativa, presión atmosférica y luminosidad, no sustituyen a la humedad del suelo, pero ayudan a interpretar el contexto en el que evoluciona la zona monitorizada. Esta combinación es habitual en sistemas de agricultura de precisión basados en sensores, donde el interés no está solo en una lectura aislada, sino en la observación conjunta del entorno \cite{soussi2024smart}.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
+\hline
+\textbf{Variable} & \textbf{Función en el sistema} & \textbf{Motivo de selección} \\
+\hline
+Humedad del suelo & Variable principal para la decisión de riego. & Indica de forma directa si el sustrato presenta condiciones de sequedad o humedad. \\
+\hline
+Temperatura ambiente & Variable de contexto ambiental. & Ayuda a interpretar evaporación, estrés térmico y condiciones generales del entorno. \\
+\hline
+Humedad relativa & Información ambiental complementaria. & Permite contextualizar la pérdida de agua y las condiciones de evaporación. \\
+\hline
+Presión atmosférica & Dato adicional del sensor ambiental. & Aporta contexto ambiental y se obtiene sin añadir un sensor específico. \\
+\hline
+Luminosidad & Indicador de exposición solar. & Permite identificar condiciones de luz que pueden influir en evaporación y demanda hídrica. \\
+\hline
+\end{tabular}
+
+\caption{Variables seleccionadas para la monitorización de TierraViva}
+\label{cuadro:variables_medidas}
+\end{center}
+\end{table}
+
+La humedad del suelo se ha seleccionado como variable principal porque es la más relacionada con la necesidad de riego. Un sistema que decidiera únicamente a partir de temperatura o luminosidad podría detectar condiciones de calor o exposición solar, pero no sabría si el terreno conserva todavía suficiente agua. Por este motivo, la lógica de riego debe apoyarse prioritariamente en el estado del sustrato.
+
+Para esta medida se ha utilizado un sensor capacitivo de humedad de suelo. Frente a sensores resistivos más simples, este tipo de sensor reduce el problema de corrosión asociado al contacto con humedad, ya que la medida se basa en el cambio capacitivo del entorno del sensor. Además, proporciona una salida analógica fácil de leer desde Arduino mediante una entrada ADC. En el prototipo se emplea un módulo capacitivo de humedad de suelo V1.2 compatible con Arduino, comercializado por AZ-Delivery, cuya documentación lo describe como un sensor analógico de medida capacitiva orientado a la monitorización de humedad en sustrato \cite{azdelivery_soil_v12}. La lectura se obtiene inicialmente como un valor bruto, por lo que no debe interpretarse directamente como un porcentaje absoluto sin calibración previa.
+
+Esto afecta directamente a la forma de validar la lectura. El sistema puede trabajar inicialmente con valores \textit{raw}, pero para una decisión de riego más ajustada será necesario calibrar el sensor con muestras de suelo seco y suelo húmedo. Durante las primeras pruebas se comprobó que el valor analógico variaba al modificar las condiciones de contacto del sensor, lo que permitió validar la respuesta básica de la lectura antes de plantear una calibración completa en sustrato real.
+
+La temperatura ambiente se incluye como variable de contexto. No permite decidir por sí sola si hay que regar, pero ayuda a interpretar el comportamiento del suelo. A igualdad de humedad inicial, un entorno con temperatura elevada puede favorecer mayor evaporación y acelerar la pérdida de agua. Registrar la temperatura permite entender mejor la evolución de las medidas y comparar condiciones de prueba distintas.
+
+La humedad relativa aporta información complementaria sobre el ambiente. Una humedad relativa baja puede estar asociada a mayor demanda evaporativa, mientras que una humedad relativa elevada puede indicar condiciones en las que la pérdida de agua por evaporación es menor. En esta primera versión del sistema no se utiliza como criterio principal de riego, pero sí mejora la interpretación del entorno y puede ser útil para futuras reglas más completas.
+
+La presión atmosférica se obtiene como dato adicional del sensor ambiental. Su influencia directa sobre la decisión de riego es menor que la de la humedad del suelo, la temperatura o la humedad relativa. Sin embargo, al estar disponible en el mismo sensor, no añade complejidad hardware significativa. En este trabajo se conserva como dato de contexto y como parte del histórico ambiental registrado.
+
+Para medir temperatura, humedad relativa y presión se ha seleccionado el BME280. Este componente integra en un único sensor digital la medida de temperatura, humedad y presión, lo que reduce el número de módulos necesarios y simplifica el cableado. Bosch Sensortec lo describe como un sensor combinado de humedad, presión y temperatura, orientado a aplicaciones de bajo consumo y tamaño reducido \cite{bosch_bme280_datasheet}. En el prototipo se utiliza mediante bus I2C, lo que permite compartir las líneas de comunicación con otros sensores digitales.
+
+La luminosidad se incorpora como indicador de exposición solar. Aunque no determina directamente el contenido de agua del suelo, ayuda a contextualizar las condiciones ambientales. Una zona con mayor exposición solar puede presentar mayor evaporación y calentamiento, mientras que una zona sombreada puede conservar humedad durante más tiempo. Esta variable resulta útil para interpretar diferencias entre estaciones o entre distintos momentos del día.
+
+Para esta medida se ha seleccionado el BH1750, integrado habitualmente en módulos GY-302. Se trata de un sensor digital de luminosidad con interfaz I2C. Su elección se debe a que entrega directamente medidas en lux, evitando estimar la luminosidad a partir de una lectura analógica sin escala física clara. La documentación del BH1750FVI lo describe como un sensor digital de luz ambiente con interfaz I2C y conversión directa de iluminancia \cite{rohm_bh1750_datasheet}.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.26\textwidth}|p{0.36\textwidth}|}
+\hline
+\textbf{Sensor} & \textbf{Variable medida} & \textbf{Justificación de elección} \\
+\hline
+Sensor capacitivo de humedad de suelo V1.2 & Humedad del sustrato mediante lectura analógica. & Variable principal para riego; bajo coste; integración sencilla con Arduino; menor corrosión que sensores resistivos. \\
+\hline
+BME280 & Temperatura, humedad relativa y presión atmosférica. & Integra tres variables ambientales en un único módulo digital; reduce cableado; comunicación I2C. \\
+\hline
+BH1750 / GY-302 & Luminosidad ambiente en lux. & Proporciona medida digital de luz; comparte bus I2C; facilita interpretar exposición solar. \\
+\hline
+\end{tabular}
+\caption{Sensores seleccionados para las estaciones de campo}
+\label{cuadro:sensores_seleccionados}
+\end{center}
+\end{table}
+
+La elección de estos sensores responde también a criterios prácticos. Son módulos habituales en prototipos con Arduino, tienen bajo coste, disponen de documentación y librerías accesibles, y permiten validar el sistema sin recurrir a instrumentación industrial. Además, el uso de I2C para el BME280 y el BH1750 simplifica la integración, ya que ambos sensores pueden compartir las líneas SDA y SCL del Arduino UNO siempre que sus direcciones no coincidan.
+
+El detalle de los componentes empleados, las conexiones eléctricas de los sensores, las pruebas iniciales de lectura y los fragmentos de código utilizados durante la validación se recoge en los Anexos~\ref{anexo:materiales}, \ref{anexo:esquemas_conexion}, \ref{anexo:pruebas_sensores} y \ref{anexo:codigo}. De esta forma, el cuerpo principal mantiene la justificación técnica de la elección de variables y sensores, mientras que la información reproducible del montaje queda documentada como material complementario.
+
+En conjunto, la combinación seleccionada cubre las variables mínimas necesarias para una primera versión funcional de TierraViva: una variable principal de decisión, la humedad del suelo, y varias variables ambientales de contexto. En fases posteriores podrían añadirse sensores más avanzados, como caudal, nivel de depósito, conductividad eléctrica o pH, pero incorporarlos en esta primera versión aumentaría la complejidad sin ser imprescindible para validar la arquitectura general del sistema.
+
+\section{Elección de plataforma de control local y supervisión}
+\label{sec:eleccion_plataformas_control}
+
+La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un lado, las estaciones de campo necesitan una plataforma sencilla y cercana al hardware, capaz de leer sensores, comunicarse con el módulo LTE, aplicar reglas locales de riego y controlar el relé de la bomba. Por otro lado, el sistema necesita una plataforma con mayor capacidad software para consultar datos, almacenarlos, exponer una API y servir el dashboard web. Esta segunda plataforma no actúa como cerebro del riego, sino como sistema de supervisión e histórico. Esta diferencia de funciones justifica el uso combinado de Arduino UNO y Raspberry Pi 5, en lugar de concentrar todo el sistema en una única plataforma.
+
+Arduino UNO se ha seleccionado como plataforma principal de las estaciones de campo. Se trata de una placa basada en el microcontrolador ATmega328P, con funcionamiento a 5 V, 14 pines digitales, 6 entradas analógicas, 32 KB de memoria flash, 2 KB de SRAM y frecuencia de reloj de 16 MHz \cite{arduino_uno_rev3_specs}. Aunque sus prestaciones son limitadas frente a plataformas más modernas, resultan suficientes para las tareas previstas en la estación: lectura de sensores, gestión de tiempos, comunicación serie con el módulo A7670E-LASA y control de una salida digital asociada al relé.
+
+Una ventaja importante de Arduino UNO en este proyecto es su sencillez de integración. La lectura del sensor capacitivo de humedad del suelo puede realizarse mediante una entrada analógica, mientras que los sensores BME280 y BH1750 pueden compartir el bus I2C del Arduino. Además, el control del relé requiere únicamente una salida digital. Esta correspondencia directa entre necesidades del sistema y recursos de la placa facilita el desarrollo y la depuración del prototipo.
+
+También se ha tenido en cuenta la disponibilidad de documentación, librerías y ejemplos. En un TFG con integración de varios subsistemas, la plataforma de estación no debe convertirse en el principal foco de incertidumbre. Arduino UNO permite validar de forma rápida sensores, salidas digitales, comunicación serie y temporización. Esta característica ha resultado útil durante las pruebas iniciales, donde se pudo comprobar primero el funcionamiento básico de la placa, después el bus I2C y finalmente la lectura integrada de sensores.
+
+No obstante, la elección de Arduino UNO implica aceptar limitaciones. La memoria disponible es reducida, no dispone de sistema operativo, no incorpora conectividad inalámbrica integrada y su capacidad de procesamiento es limitada. Tampoco es una plataforma adecuada para ejecutar una base de datos, un servidor web o procesos software complejos. Por ello, en TierraViva Arduino no se utiliza como controlador global del sistema, sino como controlador local de estación. Su papel es ejecutar tareas concretas, repetitivas y cercanas al hardware.
+
+La Raspberry Pi 5 se ha seleccionado como sistema de supervisión del prototipo. A diferencia de Arduino UNO, Raspberry Pi 5 es un computador de placa reducida capaz de ejecutar un sistema operativo completo. La documentación oficial la describe con un procesador Arm Cortex-A76 de cuatro núcleos a 2,4 GHz, lo que la sitúa en un nivel de capacidad muy superior al de un microcontrolador clásico \cite{raspberry_pi5_product_brief}. En este proyecto, esa capacidad permite ejecutar varios componentes software: lectura de datos desde la plataforma cloud, almacenamiento en SQLite, API mediante FastAPI y dashboard web.
+
+Esta elección permite separar las funciones críticas de adquisición y actuación local de las funciones de supervisión y análisis. La Raspberry Pi no necesita estar conectada físicamente a las estaciones ni leer directamente los sensores. Su función es actuar como sistema de supervisión: consulta la información disponible, mantiene un histórico, expone datos mediante una API y permite visualizar el estado del prototipo. Esta separación es importante en TierraViva porque las estaciones se plantean como nodos remotos desplegados en campo, mientras que la Raspberry puede ubicarse en otro lugar y comunicarse con ellas a través de la plataforma intermedia.
+
+Centralizar todo en Arduino UNO no sería adecuado para el alcance completo del sistema. Aunque Arduino puede leer sensores y controlar un relé, no está pensado para mantener una base de datos, servir una interfaz web, ejecutar una API o gestionar históricos de forma cómoda. Forzar esas funciones en una plataforma tan limitada aumentaría la complejidad del firmware y reduciría la capacidad de depuración. Además, mezclar adquisición, comunicación, almacenamiento, visualización y lógica global en un único microcontrolador haría que el sistema fuera menos modular y más difícil de mantener.
+
+Tampoco sería conveniente utilizar únicamente Raspberry Pi en las estaciones de campo. Aunque Raspberry Pi ofrece mucha más potencia, también introduce un consumo mayor, tiempos de arranque más largos y dependencia de un sistema operativo. Además, no dispone de entradas analógicas nativas, por lo que la lectura directa de sensores analógicos requeriría componentes adicionales. Para una estación remota alimentada en campo, que debe leer sensores, controlar un relé y mantener un estado seguro, un microcontrolador sencillo resulta más apropiado que un computador completo.
+
+La combinación de ambas plataformas permite asignar a cada una el papel para el que resulta más adecuada. Arduino UNO se encarga de la interacción directa con el entorno físico: sensores, módulo de comunicaciones y relé. Raspberry Pi 5 aporta la capacidad necesaria para almacenar datos, servir una API y ofrecer una interfaz de supervisión. Esta separación reduce riesgos de integración y facilita validar cada bloque por separado.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
+\hline
+\textbf{Aspecto} & \textbf{Arduino UNO} & \textbf{Raspberry Pi 5} \\
+\hline
+Rol en TierraViva & Controlador local autónomo de estación de campo. & Sistema de supervisión, almacenamiento y visualización. \\
+\hline
+Relación con sensores & Lectura directa de sensores analógicos y digitales. & No lee sensores directamente en la arquitectura final. \\
+\hline
+Actuación & Decisión local y control del relé asociado a la bomba. & No participa en la actuación física ni genera órdenes de riego. \\
+\hline
+Capacidad software & Firmware sencillo y tareas embebidas. & Sistema operativo, API, base de datos y dashboard. \\
+\hline
+Consumo y arranque & Menor consumo y arranque inmediato. & Mayor consumo y arranque dependiente del sistema operativo. \\
+\hline
+Adecuación principal & Nodo de campo sencillo y robusto. & Procesamiento, histórico y supervisión. \\
+\hline
+\end{tabular}
+\caption{Comparación funcional entre Arduino UNO y Raspberry Pi 5 en TierraViva}
+\label{cuadro:arduino_raspberry_tierraviva}
+\end{center}
+\end{table}
+
+La Tabla~\ref{cuadro:arduino_raspberry_tierraviva} resume esta división de responsabilidades. La decisión no se basa en considerar una plataforma mejor que la otra, sino en asignar cada tarea al dispositivo más adecuado. En una arquitectura distribuida, esta separación es más importante que la potencia individual de cada placa.
+
+Durante el diseño también se consideraron alternativas. ESP32, por ejemplo, incorpora WiFi y Bluetooth, ofrece mayor capacidad de procesamiento que Arduino UNO y trabaja de forma nativa a 3,3 V. Podría ser una opción interesante en sistemas IoT donde se quiera integrar conectividad inalámbrica directamente en el nodo. Sin embargo, en este proyecto la comunicación remota se realiza mediante un módulo LTE externo, por lo que la conectividad integrada del ESP32 no era imprescindible. Además, mantener Arduino UNO permitía aprovechar una plataforma ya disponible, conocida y suficiente para las funciones de estación.
+
+Otras alternativas, como STM32 o placas equivalentes, ofrecen más prestaciones y mayor control sobre periféricos. Sin embargo, también suelen aumentar la complejidad de configuración, depuración y desarrollo. Para el alcance de este TFG, la prioridad no era elegir la plataforma embebida más potente, sino una suficientemente fiable y sencilla para validar la arquitectura completa.
+
+En conjunto, la elección de Arduino UNO y Raspberry Pi 5 responde a una decisión de diseño modular. Arduino permite construir estaciones de campo simples, reproducibles y cercanas al hardware. Raspberry Pi 5 aporta la capacidad necesaria para almacenar datos, servir una API y ofrecer una interfaz de supervisión. Esta combinación mantiene el equilibrio entre sencillez, coste, capacidad técnica y adecuación al alcance académico del proyecto.
+
+\section{Selección de solución de comunicaciones para estaciones remotas}
+\label{sec:seleccion_comunicaciones_remotas}
+
+La comunicación entre las estaciones de campo y el resto del sistema es una de las decisiones más importantes de TierraViva. A diferencia de un montaje de laboratorio, donde los sensores pueden conectarse directamente a un ordenador o a una Raspberry Pi mediante USB o red local, el escenario planteado requiere estaciones remotas capaces de enviar datos y estado desde una zona de cultivo sin depender de una red WiFi local ni de una conexión física con la Raspberry Pi. Por tanto, la solución de comunicaciones debía ser compatible con un despliegue en campo, funcionar sin depender de una red WiFi local y permitir la integración con una plataforma de datos externa para supervisión remota.
+
+Durante la fase inicial del proyecto se valoraron principalmente dos enfoques: una solución basada en LoRa/LoRaWAN y una solución basada en conectividad móvil LTE. Ambas alternativas eran técnicamente razonables, pero respondían a prioridades distintas. LoRa y LoRaWAN resultaban especialmente atractivas por su bajo consumo, largo alcance y orientación a redes de sensores distribuidas. LTE, en cambio, ofrecía una integración más directa con servicios en Internet, a cambio de un mayor consumo energético y de la dependencia de cobertura móvil.
+
+La alternativa LoRa/LoRaWAN encajaba bien con la idea inicial del proyecto. LoRa es una modulación de largo alcance y bajo consumo diseñada para comunicaciones de baja tasa de datos, muy adecuada para sensores que envían medidas periódicas y no necesitan transmitir grandes volúmenes de información \cite{semtech2015lora_modulation,augustin2016lora}. En un sistema agrícola, esta característica resulta interesante porque las estaciones suelen transmitir pocos datos: humedad del suelo, temperatura, humedad relativa, luminosidad, presión atmosférica y estado del actuador. Además, el enfoque de bajo consumo es coherente con estaciones alimentadas mediante batería o energía solar.
+
+LoRaWAN añadía una capa de red sobre LoRa, proporcionando una arquitectura más estructurada para gestionar dispositivos, gateways y servidores de red \cite{lora_alliance_104}. Desde el punto de vista académico, esta opción tenía mucho interés: permitía estudiar una tecnología ampliamente utilizada en IoT, analizar su arquitectura y plantear un despliegue de nodos de campo con comunicaciones de largo alcance. También era coherente con escenarios rurales donde no siempre hay conectividad WiFi y donde interesa cubrir distancias superiores a las habituales en redes domésticas.
+
+Sin embargo, al trasladar esta alternativa al prototipo real aparecieron dificultades prácticas importantes. La primera era la necesidad de disponer de infraestructura adicional. En LoRa punto a punto bastaría con módulos compatibles en las estaciones y en el receptor, pero se perderían parte de las ventajas de una arquitectura LoRaWAN completa. En LoRaWAN, por el contrario, sería necesario contar con un gateway, configurar la red, gestionar la integración con un servidor LoRaWAN y conectar posteriormente esa información con el sistema de supervisión. Esta infraestructura aumentaba el alcance del proyecto y desplazaba una parte importante del esfuerzo hacia la propia red de comunicaciones.
+
+También se detectó un riesgo de integración asociado a la selección de módulos. Para un despliegue en Europa es necesario trabajar en la banda adecuada, normalmente 868 MHz, y comprobar que los módulos, antenas, placas adaptadoras y niveles lógicos sean compatibles entre sí. En el caso de Arduino UNO, además, muchos módulos LoRa trabajan a 3,3 V, mientras que la placa funciona a 5 V, por lo que puede ser necesario añadir conversores de nivel y una alimentación de 3,3 V suficientemente estable. Estos detalles no invalidan la solución, pero introducen más puntos de fallo en una fase del proyecto donde el objetivo principal era validar una arquitectura completa de monitorización, almacenamiento, visualización y actuación.
+
+Otro aspecto relevante fue la diferencia entre LoRa y LoRaWAN. Aunque a veces se mencionan juntos, no son equivalentes. LoRa define la capa física, mientras que LoRaWAN define una arquitectura de red con gateways, servidor de red y mecanismos de gestión de dispositivos \cite{adelantado2017limits}. Para el proyecto, esta distinción era importante porque una solución LoRa punto a punto habría sido más sencilla, pero menos representativa de una red IoT completa; y una solución LoRaWAN habría sido más completa, pero también más costosa en tiempo e infraestructura.
+
+La alternativa basada en LTE se planteó como una forma de reducir ese riesgo de integración. En lugar de desplegar una infraestructura radio propia, cada estación utiliza un módulo A7670E-LASA con tarjeta SIM para conectarse directamente a la red móvil. La comunicación con el exterior se realiza mediante comandos AT y peticiones HTTP, lo que permite enviar datos a una plataforma cloud sin necesidad de gateway propio. Esta decisión simplifica la arquitectura de comunicaciones: la estación no necesita que exista una Raspberry Pi cercana ni una pasarela local en la parcela, sino únicamente cobertura móvil suficiente y una configuración correcta del APN.
+
+La elección de LTE no elimina las restricciones técnicas. El módulo requiere una alimentación más exigente que una solución LoRa, especialmente por los picos de corriente durante el registro en red o la transmisión de datos. Además, el sistema pasa a depender de la cobertura del operador móvil, de la disponibilidad de una tarjeta SIM y del acceso a Internet. Estas limitaciones son relevantes y deben tenerse en cuenta en el diseño energético y en el modo seguro de funcionamiento. Si la estación no puede comunicar, el sistema no debe quedar en un estado peligroso ni mantener el riego activo de forma indefinida.
+
+Aun así, para el alcance concreto del TFG, LTE ofrecía una ventaja decisiva: permitía validar antes el ciclo completo de publicación y supervisión. Las estaciones podían leer sensores, enviar telemetría mediante HTTP, integrarse con ThingSpeak y dejar sus datos disponibles para que la Raspberry Pi los consultara posteriormente. Esto encaja con la arquitectura final de TierraViva, en la que la Raspberry Pi no está conectada físicamente a las estaciones ni decide el riego, sino que actúa como sistema de supervisión e histórico. La comunicación entre estaciones y sistema de supervisión, por tanto, no se resuelve mediante USB, puerto serie o red local, sino mediante la publicación y consulta de datos a través de Internet y de la plataforma intermedia.
+
+La Tabla~\ref{cuadro:comparacion_lora_lte_tierraviva} resume los criterios principales considerados en la decisión.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
+\hline
+\textbf{Criterio} & \textbf{LoRa/LoRaWAN} & \textbf{LTE con A7670E-LASA} \\
+\hline
+Alcance & Muy adecuado para largas distancias con baja tasa de datos. & Depende de la cobertura de red móvil disponible. \\
+\hline
+Consumo & Bajo consumo, especialmente en envíos periódicos. & Mayor consumo y picos de corriente durante transmisión. \\
+\hline
+Infraestructura & Puede requerir gateway, servidor LoRaWAN o receptor propio. & No requiere gateway propio; usa red móvil existente. \\
+\hline
+Integración cloud & Necesita pasarela o backend intermedio. & Integración directa mediante HTTP. \\
+\hline
+Complejidad inicial & Mayor si se despliega LoRaWAN completo. & Menor para validar telemetría HTTP. \\
+\hline
+Coste operativo & Sin SIM ni tarifa de datos si la red es propia. & Requiere tarjeta SIM y servicio de datos. \\
+\hline
+Riesgo para el TFG & Riesgo de consumir mucho tiempo en la red. & Riesgo menor para obtener un prototipo funcional completo. \\
+\hline
+Adecuación al prototipo & Muy interesante como línea futura o alternativa avanzada. & Adecuada para validar el sistema completo en el alcance actual. \\
+\hline
+\end{tabular}
+\caption{Comparación entre LoRa/LoRaWAN y LTE para TierraViva}
+\label{cuadro:comparacion_lora_lte_tierraviva}
+\end{center}
+\end{table}
+
+La decisión final fue utilizar LTE con el módulo A7670E-LASA. Esta elección no implica que LoRa/LoRaWAN sea una alternativa peor desde el punto de vista tecnológico. De hecho, para una versión futura orientada a bajo consumo y despliegue en parcelas sin cobertura móvil, LoRa o LoRaWAN podrían ser opciones muy adecuadas. La decisión se basa en el contexto del proyecto: se buscaba una solución funcional, verificable y defendible dentro del tiempo disponible, priorizando la integración completa del sistema frente al desarrollo de una infraestructura de comunicaciones propia.
+
+La validación preliminar del módulo LTE reforzó esta decisión. Antes de integrarlo con Arduino, el A7670E-LASA se probó mediante comandos AT desde un ordenador. Las pruebas permitieron comprobar que el módulo respondía correctamente, reconocía la SIM, obtenía señal, se registraba en red LTE, disponía de dirección IP y podía realizar peticiones HTTP. Estos resultados no sustituyen a las pruebas de integración completas, que se desarrollan más adelante, pero sí permitieron confirmar que la vía LTE era viable para el prototipo.
+
+En términos de diseño, la consecuencia principal de esta elección es que ThingSpeak se convierte en una capa intermedia de comunicación. Las estaciones publican su telemetría y estado mediante HTTP, y la Raspberry Pi consulta esos datos desde la nube para almacenarlos, visualizarlos y supervisar el funcionamiento del prototipo. La decisión de riego no depende de un flujo descendente de órdenes, sino de reglas locales ejecutadas en cada estación. Este enfoque reduce la dependencia de la conectividad externa para la actuación física y reserva la comunicación remota para telemetría, estado, histórico y supervisión.
+
+Por tanto, la solución LTE adoptada responde a un criterio de ingeniería pragmático. LoRa/LoRaWAN se estudió por su adecuación a IoT agrícola, bajo consumo y largo alcance, pero se descartó como solución principal por el riesgo de aumentar demasiado la complejidad de comunicaciones. LTE con A7670E-LASA permite centrar el esfuerzo en el objetivo global de TierraViva: construir un prototipo capaz de medir, comunicar, almacenar, visualizar y actuar de forma segura mediante decisión local en las estaciones.
+
+\section{Elección de plataforma cloud: ThingSpeak}
+\label{sec:eleccion_plataforma_cloud}
+
+La elección de la plataforma cloud se ha realizado teniendo en cuenta el papel que debía desempeñar dentro de TierraViva. En este proyecto, la nube no se utiliza como un elemento añadido únicamente para representar gráficas, sino como una capa intermedia entre las estaciones de campo y el sistema de supervisión. Las estaciones deben poder enviar telemetría desde una ubicación remota mediante LTE y la Raspberry Pi debe poder consultar esos datos sin estar conectada físicamente a ellas. En la arquitectura final, esta capa no se utiliza para enviar órdenes de riego, sino para publicar telemetría, estado de relé y códigos de funcionamiento generados por las propias estaciones.
+
+En el capítulo anterior se describieron varias alternativas de plataformas cloud para IoT, como Ubidots, Adafruit IO, Blynk, ThingsBoard o soluciones basadas en un broker MQTT propio. Todas ellas podrían ser válidas en determinados escenarios, pero no ofrecen el mismo equilibrio entre sencillez, control, coste, curva de aprendizaje y facilidad de integración con un prototipo académico. En este TFG no se buscaba desplegar una infraestructura cloud compleja, sino disponer de una plataforma suficientemente fiable y accesible para validar el ciclo completo de monitorización y control.
+
+Una alternativa posible habría sido utilizar un broker MQTT accesible desde Internet. Esta opción resulta atractiva desde el punto de vista técnico, ya que MQTT está diseñado para comunicaciones IoT y permite un modelo de publicación/suscripción más adecuado para sistemas con múltiples nodos. Sin embargo, en el caso concreto de TierraViva habría implicado añadir un servidor o servicio externo, configurar autenticación, gestionar reconexiones y adaptar la comunicación del módulo LTE a ese esquema. Para un prototipo cuyo objetivo principal es validar una arquitectura completa, esta complejidad adicional no aportaba una mejora proporcional.
+
+También se consideraron plataformas más completas, como ThingsBoard, que ofrecen más posibilidades de gestión de dispositivos, reglas, visualización y escalabilidad. No obstante, precisamente por ser más completas, requieren una configuración inicial mayor. En una solución industrial o en un despliegue con muchos dispositivos, esta inversión puede estar justificada. En TierraViva, donde el número de estaciones es reducido y la prioridad es demostrar el funcionamiento extremo a extremo, una plataforma más ligera resulta más adecuada.
+
+ThingSpeak se ha seleccionado porque proporciona una estructura sencilla basada en canales y campos, una API HTTP fácil de utilizar desde dispositivos embebidos y herramientas básicas de visualización. Según la documentación de MathWorks, ThingSpeak permite escribir datos en canales mediante llamadas HTTP de la API REST, además de otros métodos como MQTT o funciones de MATLAB \cite{thingspeak_docs,thingspeak_write_data}. Esta característica encaja especialmente bien con el módulo A7670E-LASA, ya que el envío de datos puede implementarse mediante comandos AT y peticiones HTTP, sin necesidad de incorporar una pila de comunicación más compleja en el firmware de Arduino.
+
+El concepto de canal resulta especialmente útil para organizar la información del sistema. Cada canal puede agrupar varias variables relacionadas mediante campos numerados. En TierraViva, este modelo permite representar de forma clara las medidas y estados de una estación: humedad del suelo, temperatura, humedad relativa, luminosidad, presión atmosférica, estado del relé, código de estado o evento y un campo auxiliar reservado para depuración o ampliaciones. De esta forma, cada publicación de telemetría queda almacenada como una entrada temporal asociada a un conjunto de campos.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.30\textwidth}|p{0.32\textwidth}|}
+\hline
+\textbf{Elemento en ThingSpeak} & \textbf{Uso en TierraViva} & \textbf{Motivo de utilización} \\
+\hline
+Canal TierraViva\_A & Registro de telemetría y estado de la estación A. & Permite separar los datos de la estación A y consultar su histórico de forma independiente. \\
+\hline
+Canal TierraViva\_B & Registro de telemetría y estado de la estación B. & Permite separar los datos de la estación B y facilita el crecimiento a varias zonas monitorizadas. \\
+\hline
+Field 1 & Humedad del suelo (raw). & Valor bruto utilizado como variable principal para la decisión local de riego. \\
+\hline
+Field 2 & Temperatura ambiente. & Variable de contexto para interpretar las condiciones del entorno. \\
+\hline
+Field 3 & Humedad relativa ambiente. & Variable ambiental útil para contextualizar evaporación y condiciones de humedad. \\
+\hline
+Field 4 & Luminosidad. & Permite interpretar exposición solar y condiciones de luz. \\
+\hline
+Field 5 & Presión atmosférica. & Dato ambiental adicional proporcionado por el sensor BME280. \\
+\hline
+Field 6 & Estado del relé, 0 apagado y 1 activo. & Permite supervisar si la estación está actuando sobre el riego. \\
+\hline
+Field 7 & Código de estado o evento. & Permite distinguir funcionamiento normal, riego ejecutado, cooldown, error de sensor o modo seguro. \\
+\hline
+Field 8 & Campo auxiliar o código de depuración. & Queda disponible para diagnóstico o ampliaciones sin modificar la estructura principal. \\
+\hline
+API HTTP & Escritura de telemetría desde las estaciones y lectura desde Raspberry Pi. & Reduce la complejidad de integración frente a soluciones que requieren infraestructura propia. \\
+\hline
+\end{tabular}
+\caption{Uso previsto de ThingSpeak dentro de TierraViva}
+\label{cuadro:uso_thingspeak_tierraviva}
+\end{center}
+\end{table}
+
+La Tabla~\ref{cuadro:uso_thingspeak_tierraviva} resume el papel de ThingSpeak en la arquitectura. La separación por canales de estación evita mezclar los datos de distintas zonas monitorizadas y permite que la Raspberry Pi consulte de forma independiente la telemetría y el estado de cada nodo. Esta decisión mejora la trazabilidad del sistema y facilita la depuración, ya que se puede comprobar por separado si cada estación está enviando medidas correctamente, si publica su estado operativo y si se han registrado eventos de riego o incidencias.
+
+En la estructura actual se utilizan canales diferenciados para cada estación: TierraViva\_A y TierraViva\_B. Durante el diseño se valoró utilizar ThingSpeak también como mecanismo de control descendente, pero esa opción se descartó al desplazar la decisión de riego al firmware de cada estación. De este modo, la plataforma queda reservada para telemetría y estado, y se evita que una entrada antigua en la nube pueda condicionar una actuación física.
+
+Otra razón importante para elegir ThingSpeak es la facilidad de lectura desde la Raspberry Pi. La Raspberry Pi puede consultar los últimos datos publicados mediante peticiones HTTP y recibir la información en formato estructurado. La documentación de MathWorks permite leer datos de un canal mediante la API y obtener respuestas en formatos como JSON o CSV \cite{thingspeak_read_data}. Esto encaja con la arquitectura software planteada para la Raspberry, donde los datos recibidos se almacenan posteriormente en SQLite y se presentan mediante una API y un dashboard propios.
+
+ThingSpeak también permite mantener una primera visualización de los datos directamente en la plataforma. Aunque el dashboard final de TierraViva se desarrolla en la Raspberry Pi, las gráficas de ThingSpeak resultan útiles durante la fase de pruebas, porque permiten comprobar rápidamente si los datos están llegando a la nube antes de integrarlos en el resto del sistema. Durante las pruebas, disponer de esa doble visualización ayuda a acotar el fallo: si una lectura aparece en ThingSpeak pero no en el dashboard local, el problema estará probablemente en la lectura desde la Raspberry o en el almacenamiento; si no aparece en ThingSpeak, el fallo estará antes, en la estación, en el módulo LTE o en la petición HTTP.
+
+La plataforma también presenta limitaciones que deben asumirse. ThingSpeak no se comporta como un sistema de tiempo real estricto. El envío y la consulta de datos se basan en peticiones y en intervalos de actualización, por lo que existe una latencia asociada. En la arquitectura final de TierraViva esta limitación no compromete la actuación sobre el riego, ya que la decisión crítica se ejecuta localmente en la estación y no depende de recibir una instrucción externa de riego.
+
+En el caso de TierraViva, la latencia de ThingSpeak es aceptable porque su papel principal es registrar telemetría, estado y eventos para supervisión posterior. El riego no requiere que la Raspberry responda en milisegundos, sino que la estación aplique reglas verificables, limite el tiempo de bomba activa y publique información suficiente para reconstruir lo ocurrido. Por ello, resulta más importante diseñar correctamente el firmware local y los códigos de estado que reducir al mínimo la latencia de consulta desde la Raspberry Pi.
+
+La elección de ThingSpeak, por tanto, responde a un criterio de equilibrio. No es la plataforma más completa ni la más flexible para un despliegue industrial, pero sí es adecuada para un prototipo académico donde se necesita integrar sensores, LTE, almacenamiento remoto, consulta desde Raspberry Pi y supervisión de estados publicados por estaciones autónomas. Su principal ventaja es que permite validar la arquitectura completa sin desplazar el esfuerzo hacia el mantenimiento de una infraestructura cloud propia.
+
+En conjunto, ThingSpeak actúa como punto de desacoplo entre las estaciones y la Raspberry Pi. Las estaciones no necesitan conocer la ubicación de la Raspberry ni mantener una conexión directa con ella; publican telemetría, estado del relé y códigos de evento en la nube. La Raspberry, por su parte, consulta esa información para construir el histórico, alimentar la API y servir el dashboard, sin intervenir en la decisión local de riego. Esta separación es coherente con el objetivo de TierraViva: construir un sistema modular, verificable y preparado para funcionar con estaciones remotas autónomas.
+
+La estructura concreta de canales utilizada en TierraViva se desarrolla con mayor detalle en el Capítulo~\ref{cap:capitulo4}, donde se documentan los canales TierraViva\_A y TierraViva\_B, así como la codificación de los campos empleados para telemetría, estado y eventos.
+
+\section{Elección de arquitectura software de supervisión en Raspberry Pi}
+\label{sec:eleccion_arquitectura_software_raspberry}
+
+La Raspberry Pi se ha seleccionado como sistema de supervisión software de TierraViva. Su función no es sustituir a las estaciones de campo, leer directamente los sensores ni decidir la activación de la bomba, sino consultar la información publicada por las estaciones, registrar un histórico local y ofrecer una interfaz de consulta. Esta separación resulta importante porque las estaciones se encuentran en campo y se comunican de forma remota, mientras que la Raspberry actúa como nodo de supervisión e histórico.
+
+Durante el desarrollo se implementó primero un prototipo local basado en MQTT, SQLite, FastAPI y un dashboard web. Esta fase previa permitió validar la cadena software sin depender todavía de la comunicación LTE ni de la plataforma cloud final. En ese prototipo, los datos llegaban a la Raspberry, se publicaban en un broker MQTT local, eran procesados por un backend en Python, se almacenaban en SQLite y se exponían mediante una API para que el dashboard pudiera consultarlos.
+
+Este prototipo local no representa la arquitectura final de comunicación con las estaciones remotas, pero sí tuvo un papel importante dentro del proceso de desarrollo. Permitió comprobar ante el tutor que la Raspberry Pi podía recibir telemetría, almacenarla, servirla mediante una API y mostrarla en una interfaz web. El código de esta fase se conserva en el repositorio del proyecto dentro del directorio de prototipos, dejando explícito que se trata de una validación previa y no del sistema final basado en LTE y ThingSpeak \cite{tierraviva_github_mqtt}.
+
+El uso de MQTT en esta fase se justificó por su sencillez para desacoplar productores y consumidores de información. Un proceso podía publicar lecturas de sensores y otro proceso podía escucharlas sin necesidad de una conexión directa entre ambos. Sin embargo, al definir la arquitectura final con estaciones remotas conectadas mediante LTE y ThingSpeak, el broker MQTT local dejó de ser el mecanismo principal de comunicación con las estaciones. Mantener MQTT como solución remota habría requerido desplegar o contratar un broker accesible desde Internet, gestionar autenticación, reconexiones y suscripciones desde el módulo LTE, aumentando la complejidad del prototipo. Por este motivo, MQTT se conserva como parte del prototipo local previo y como experiencia de validación, pero no como núcleo de la comunicación final entre Raspberry y estaciones.
+
+El almacenamiento local se ha planteado mediante SQLite. SQLite es adecuado para este proyecto porque permite disponer de una base de datos ligera, autocontenida y sin necesidad de desplegar un servidor de base de datos independiente. La documentación oficial lo describe como un motor SQL pequeño, rápido y autocontenido, integrado directamente en la aplicación \cite{sqlite_about}. Para TierraViva, esto permite guardar lecturas, estados y eventos de riego en la propia Raspberry Pi, manteniendo un histórico independiente de la plataforma cloud.
+
+Esta independencia respecto a la nube tiene valor técnico. ThingSpeak almacena la telemetría recibida y facilita su consulta, pero no debe ser el único punto donde se conserve la información del sistema. Al replicar los datos relevantes en SQLite, la Raspberry puede mantener un histórico propio, adaptar el modelo de datos a las necesidades del proyecto y registrar incidencias de supervisión, como periodos sin datos, campos ausentes o cambios inesperados en el estado de una estación. De esta forma, el sistema de supervisión no se limita a visualizar datos externos, sino que construye su propio registro operativo.
+
+La API se ha desarrollado con FastAPI. Esta herramienta permite construir servicios web en Python de forma sencilla, utilizando rutas HTTP para exponer los datos que necesita el dashboard. La documentación oficial presenta FastAPI como un framework moderno para construir APIs con Python a partir de anotaciones de tipo estándar \cite{fastapi_docs}. En el proyecto, su papel es servir como capa intermedia entre la base de datos y la interfaz web: consulta SQLite, transforma los registros en una respuesta estructurada y permite que el dashboard obtenga las últimas lecturas mediante peticiones HTTP.
+
+En las pruebas realizadas, la API se ejecutó mediante Uvicorn, un servidor ASGI para aplicaciones Python \cite{uvicorn_docs}. Esta decisión separa la definición de la aplicación, implementada en FastAPI, del proceso que la sirve por red. Desde el punto de vista del prototipo, esto facilita probar la API desde un navegador o desde otro equipo de la misma red, comprobar los endpoints disponibles y depurar de forma independiente la parte de visualización.
+
+El dashboard web constituye la capa de presentación. Su objetivo es mostrar al usuario el estado del sistema sin obligarle a consultar manualmente la base de datos, revisar mensajes de consola o interpretar directamente las respuestas de ThingSpeak. En una primera versión, el dashboard se centró en mostrar las últimas lecturas almacenadas. Posteriormente, se amplió para incluir variables como humedad de suelo, luminosidad y presión, además de temperatura y humedad ambiental. Esta evolución permitió acercar la interfaz a las necesidades reales del sistema, no solo a una demostración mínima de comunicación.
+
+La arquitectura software de la Raspberry se organiza, por tanto, en varias capas diferenciadas: lectura de datos desde la plataforma cloud, almacenamiento local, API y dashboard. Esta separación evita que toda la lógica quede mezclada en un único programa. También facilita las pruebas: se puede comprobar por separado si ThingSpeak entrega datos, si SQLite almacena correctamente, si la API devuelve la información esperada y si el dashboard representa bien el estado del sistema.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.34\textwidth}|p{0.29\textwidth}|}
+\hline
+\textbf{Bloque software} & \textbf{Función en TierraViva} & \textbf{Motivo de elección} \\
+\hline
+Prototipo MQTT local & Validación inicial de recepción y tratamiento de datos en Raspberry. & Permite documentar una fase previa de desarrollo y separar prototipos de la arquitectura final. \\
+\hline
+Ingesta desde ThingSpeak & Consulta periódica de telemetría y estado publicados por las estaciones. & Permite alimentar el histórico local y el dashboard sin conexión directa con los nodos de campo. \\
+\hline
+SQLite & Almacenamiento local de lecturas, estados e incidencias. & Base de datos ligera, autocontenida y suficiente para el prototipo. \\
+\hline
+FastAPI & Exposición de datos mediante endpoints HTTP. & Facilita crear una API sencilla entre la base de datos y el dashboard. \\
+\hline
+Dashboard web & Visualización de medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo sin acceder a consola o consultas SQL. \\
+\hline
+\end{tabular}
+\caption{Bloques principales de la arquitectura software de supervisión en Raspberry Pi}
+\label{cuadro:arquitectura_software_raspberry}
+\end{center}
+\end{table}
+
+La lógica de decisión de riego no se mantiene en la Raspberry Pi en la arquitectura final. Aunque este dispositivo tiene capacidad suficiente para comparar estaciones o aplicar reglas más complejas, se ha decidido desplazar la decisión crítica al nodo de campo. Esta elección reduce la dependencia de la red, elimina la necesidad de enviar comandos remotos y permite que cada estación mantenga un comportamiento seguro aunque la Raspberry no esté disponible.
+
+La Raspberry conserva un papel relevante dentro del sistema, pero orientado a supervisión. Puede detectar si una estación deja de publicar datos, mostrar el último estado conocido del relé, conservar históricos y facilitar el análisis posterior de las pruebas. De esta forma, el sistema mantiene trazabilidad sin convertir la supervisión en un requisito para que el riego pueda ejecutarse.
+
+Una ventaja adicional de mantener un histórico local es la posibilidad de analizar el comportamiento del sistema más allá de la última lectura recibida. El histórico permite revisar tendencias, detectar periodos sin comunicación, comparar estaciones y documentar pruebas. También deja preparada la arquitectura para futuras mejoras, como reglas más avanzadas, detección de anomalías o modelos predictivos basados en datos acumulados. En esta versión del TFG, estas posibilidades no se presentan como inteligencia artificial implementada de forma completa, sino como una evolución razonable cuando exista un volumen suficiente de datos fiables.
+
+Con esta organización, la Raspberry Pi mantiene un papel claro dentro del sistema: no controla físicamente el riego, pero sí convierte los datos publicados por las estaciones en información consultable y persistente. SQLite evita desplegar una base de datos pesada, FastAPI proporciona una API clara y el dashboard facilita la supervisión. El prototipo local con MQTT permitió validar esta cadena software en una fase temprana, mientras que la arquitectura final utiliza ThingSpeak como capa intermedia con las estaciones remotas. De esta forma, la Raspberry queda definida como sistema de supervisión: consulta, registra y expone información, mientras que la decisión y la ejecución segura de la actuación permanecen en la estación de campo.
+
+\section{Materiales empleados}
+\label{sec:materiales_empleados}
+
+La selección de materiales se ha realizado buscando un equilibrio entre funcionalidad, coste, disponibilidad y facilidad de integración. Al tratarse de un prototipo de TFG, no se han empleado componentes industriales cerrados, sino módulos habituales en sistemas IoT y prototipos electrónicos que permiten validar la arquitectura de forma progresiva y reproducible.
+
+Los materiales empleados no deben entenderse como una simple lista de compra, sino como el conjunto de bloques físicos necesarios para que TierraViva pueda medir, comunicar, almacenar, visualizar y actuar sobre el riego. Cada componente cumple una función concreta dentro de la arquitectura y se ha seleccionado en coherencia con los requisitos definidos anteriormente.
+
+En la Tabla~\ref{cuadro:materiales_cap3} se resumen los principales materiales utilizados o previstos en el prototipo.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.32\textwidth}|p{0.30\textwidth}|}
+\hline
+\textbf{Componente} & \textbf{Función} & \textbf{Justificación} \\
+\hline
+
+\multicolumn{3}{|l|}{\textbf{Sensórica}} \\
+\hline
+Sensor capacitivo de humedad de suelo & Medición de humedad del sustrato mediante lectura analógica. & Variable principal para la decisión de riego; menor degradación que sensores resistivos. \\
+\hline
+BME280 & Medición de temperatura, humedad relativa y presión atmosférica. & Sensor ambiental integrado; reduce el número de módulos y simplifica el cableado. \\
+\hline
+BH1750 / GY-302 & Medición de luminosidad ambiente. & Medida digital en lux mediante I2C; útil para interpretar exposición solar. \\
+\hline
+
+\multicolumn{3}{|l|}{\textbf{Control y procesamiento}} \\
+\hline
+Arduino UNO & Adquisición de datos y control local de la estación. & Plataforma sencilla, disponible, documentada y suficiente para lectura de sensores y control de relé. \\
+\hline
+Raspberry Pi 5 & Backend de supervisión, histórico local, API y dashboard. & Mayor capacidad software para ejecutar servicios, almacenar datos y visualizar el sistema. \\
+\hline
+
+\multicolumn{3}{|l|}{\textbf{Comunicación}} \\
+\hline
+A7670E-LASA & Conectividad LTE de la estación. & Permite envío HTTP mediante red móvil sin necesidad de gateway propio. \\
+\hline
+Tarjeta SIM de datos & Acceso a red móvil para el módulo LTE. & Necesaria para publicar telemetría y estado desde las estaciones. \\
+\hline
+
+\multicolumn{3}{|l|}{\textbf{Actuación}} \\
+\hline
+Relé + bomba de agua 12 V & Activación física del riego durante un tiempo controlado. & Permite cerrar el ciclo de monitorización y control, manteniendo la bomba apagada como estado seguro. \\
+\hline
+
+\multicolumn{3}{|l|}{\textbf{Alimentación y montaje}} \\
+\hline
+Alimentación 12 V + LM2596 (regulador) & Alimentación principal y adaptación de tensión a 5 V. & Permite alimentar la bomba y regular la tensión para Arduino, sensores y módulos compatibles. \\
+\hline
+Cableado, protoboard, conectores, resistencias y condensadores & Interconexión, adaptación eléctrica y estabilización del prototipo. & Facilitan pruebas, depuración, adaptación de niveles y reducción de inestabilidades en la alimentación. \\
+\hline
+
+\end{tabular}
+\caption{Resumen de materiales principales empleados en TierraViva}
+\label{cuadro:materiales_cap3}
+\end{center}
+\end{table}
+
+El bloque de sensórica está formado por tres tipos de sensores. El sensor capacitivo de humedad de suelo se utiliza como entrada principal para la decisión de riego, ya que proporciona información directa sobre el estado del sustrato. El BME280 permite obtener temperatura, humedad relativa y presión atmosférica en un único módulo, aportando contexto ambiental sin aumentar demasiado la complejidad del montaje. Por último, el BH1750 mide la luminosidad ambiente en lux, lo que permite interpretar mejor la exposición solar de la zona monitorizada.
+
+La elección de Arduino UNO como plataforma de estación responde a una decisión de simplicidad y control local. La estación necesita leer sensores, comunicarse con el módulo LTE y accionar un relé, pero no ejecutar una base de datos ni servir una interfaz web. Para esas tareas, Arduino UNO resulta suficiente y facilita la depuración del prototipo. Además, permite trabajar de forma directa con entradas analógicas, bus I2C y salidas digitales.
+
+El módulo A7670E-LASA se incorpora como solución de comunicación remota mediante red móvil. Su función es permitir que cada estación publique telemetría y estado en la plataforma cloud. Esta elección evita desplegar un gateway propio y permite integrar la estación con servicios externos mediante peticiones HTTP, aunque introduce dependencia de cobertura móvil, tarjeta SIM y una alimentación adecuada para los picos de consumo del módulo.
+
+La Raspberry Pi 5 se utiliza como sistema de supervisión software. A diferencia de Arduino, su papel no es interactuar directamente con los sensores ni accionar la bomba mediante pines físicos, sino consultar datos, almacenarlos, exponer una API y servir el dashboard. Esta separación permite mantener una arquitectura distribuida: las estaciones trabajan en campo y la Raspberry actúa como nodo de supervisión e histórico.
+
+El bloque de actuación está formado por un módulo relé y una bomba de agua de 12 V. La bomba se controla desde la estación de campo, no desde la Raspberry Pi de forma directa. Esta decisión es importante porque el actuador debe encontrarse físicamente en el lugar donde se realiza el riego. La decisión y ejecución segura de la actuación corresponde al firmware de la estación, que aplica reglas locales y mantiene la bomba apagada ante cualquier estado no verificable.
+
+La alimentación se plantea a partir de una fuente o batería de 12 V, ya que la bomba requiere una tensión superior a la utilizada por la lógica de control. Para alimentar Arduino y los módulos compatibles se emplea un regulador LM2596 ajustado a 5 V. Esta separación entre alimentación de potencia y alimentación lógica permite integrar el actuador sin comprometer la estabilidad del resto de la electrónica, siempre que se mantenga una masa común y se verifiquen las tensiones antes de conectar los módulos.
+
+También se consideran materiales auxiliares como cableado Dupont (sin soldadura), protoboard, conectores, resistencias y condensadores. Aunque puedan parecer componentes secundarios, son relevantes durante la fase de prototipado porque permiten modificar conexiones, aislar fallos, adaptar niveles eléctricos y estabilizar la alimentación de los módulos. En particular, la adaptación de nivel entre Arduino y el módulo LTE debe cuidarse para evitar aplicar señales de 5 V a entradas que trabajen a niveles inferiores. Del mismo modo, el uso de condensadores de desacoplo y estabilización ayuda a reducir caídas puntuales de tensión y comportamientos erráticos asociados a módulos con consumo variable, como el A7670E-LASA o el bloque de actuación.
+
+Con estos materiales se puede construir una arquitectura completa sin recurrir a equipos industriales de alto coste. El detalle completo de componentes, referencias comerciales, conexiones eléctricas y estado de validación se recoge en los Anexos~\ref{anexo:materiales} y \ref{anexo:esquemas_conexion}.
+
+\section{Riesgos técnicos y medidas de mitigación}
+\label{sec:riesgos_tecnicos_mitigacion}
+
+El diseño de TierraViva debe contemplar no solo el funcionamiento esperado del sistema, sino también los fallos que pueden aparecer durante la integración y el uso del prototipo. Esta consideración es especialmente importante porque el sistema incorpora actuación física sobre el riego mediante una bomba de agua. Una lectura incorrecta puede registrarse y descartarse, pero una actuación no controlada podría provocar consumo innecesario de agua, funcionamiento indebido de la bomba o pérdida de fiabilidad del prototipo.
+
+Por este motivo, se han identificado los principales riesgos técnicos del sistema y se han definido medidas de mitigación asociadas. Estas medidas no eliminan por completo la posibilidad de fallo, pero reducen su impacto y permiten que el sistema adopte un comportamiento conservador ante situaciones no verificables. La Tabla~\ref{cuadro:riesgos_mitigacion} resume los riesgos considerados.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.13\textwidth}|p{0.24\textwidth}|p{0.27\textwidth}|p{0.26\textwidth}|}
+\hline
+\textbf{Código} & \textbf{Riesgo técnico} & \textbf{Impacto posible} & \textbf{Medidas de mitigación} \\
+\hline
+RT-01 & Fallo de alimentación & Reinicios, lecturas erróneas, fallo de comunicación o activación inestable del relé. & Regulación mediante LM2596, comprobación de tensiones, masa común y estabilización de alimentación. \\
+\hline
+RT-02 & Picos de consumo del módulo LTE & Reinicio del A7670E-LASA o pérdida de conexión durante transmisión. & Fuente adecuada, condensadores de estabilización y pruebas previas del módulo por comandos AT. \\
+\hline
+RT-03 & Regla local mal configurada & Activación del riego con umbral incorrecto o en condiciones no deseadas. & Umbrales configurables, pruebas controladas, histéresis/cooldown y validación progresiva antes de riego real. \\
+\hline
+RT-04 & Lecturas inestables cerca del umbral & Activaciones repetidas o comportamiento oscilante de la bomba. & Tiempo mínimo entre riegos, filtrado básico, descarte de valores incoherentes y límites de seguridad. \\
+\hline
+RT-05 & Activación prolongada de la bomba & Riego indefinido o consumo innecesario de agua. & Tiempo máximo de activación, apagado forzado y estado seguro por defecto. \\
+\hline
+RT-06 & Pérdida de comunicación & Ausencia temporal de telemetría en la plataforma o imposibilidad de supervisión remota. & Decisión local independiente, registro de estado, reintentos de comunicación y conservación del estado seguro. \\
+\hline
+RT-07 & Pérdida de datos históricos & Imposibilidad de revisar pruebas, tendencias o eventos de riego. & Almacenamiento local en SQLite y consulta periódica de la plataforma cloud. \\
+\hline
+RT-08 & Lecturas erróneas de sensores & Decisiones de riego basadas en datos no fiables. & Validación de rangos, descarte de datos incoherentes y registro de errores. \\
+\hline
+RT-09 & Fallo de software en Raspberry Pi & Pérdida temporal de dashboard, API o histórico local. & Separación por módulos, logs, reinicio controlado de servicios y autonomía de decisión en las estaciones. \\
+\hline
+\end{tabular}
+\caption{Riesgos técnicos principales y medidas de mitigación}
+\label{cuadro:riesgos_mitigacion}
+\end{center}
+\end{table}
+
+El fallo de alimentación es uno de los riesgos más importantes en sistemas con sensores, comunicaciones y actuación. La estación debe alimentar elementos con necesidades distintas: Arduino, sensores, módulo LTE, relé y bomba de agua. Por ello, se plantea una alimentación principal de 12 V y una regulación a 5 V mediante LM2596 para la electrónica compatible. Antes de conectar los módulos, es necesario ajustar y comprobar la tensión de salida del regulador. Además, todos los elementos deben compartir una referencia común de masa para evitar comportamientos erráticos en las señales de control.
+
+El módulo LTE introduce una dificultad adicional porque puede presentar picos de consumo durante el registro en red o el envío de datos. Si la alimentación no es suficientemente estable, el módulo puede reiniciarse o perder comunicación. Para mitigar este riesgo se han realizado pruebas previas del A7670E-LASA por USB mediante comandos AT, comprobando SIM, señal, registro en red, dirección IP y comunicación HTTP. En la integración final se incorporan condensadores de estabilización en la alimentación para reducir caídas puntuales de tensión y mejorar el comportamiento del sistema ante consumos variables durante la transmisión LTE.
+
+La lógica local de riego constituye otro punto crítico. Al estar implementada en la estación, debe diseñarse de forma conservadora: no debe actuar ante lecturas imposibles, debe limitar el tiempo máximo de bomba activa y debe aplicar un periodo mínimo entre riegos. Esta decisión reduce la dependencia de la Raspberry Pi, pero exige que el firmware de estación incorpore las comprobaciones de seguridad necesarias.
+
+La pérdida de comunicación se interpreta de forma distinta en esta arquitectura. Si una estación no puede publicar temporalmente en ThingSpeak, la supervisión remota se ve afectada, pero la estación no debe quedar bloqueada ni activar la bomba por esa causa. El comportamiento seguro debe seguir residiendo en el nodo de campo: ante una situación no verificable, la bomba permanece apagada y se registra el estado cuando la comunicación vuelve a estar disponible.
+
+La lógica local de riego constituye otro punto crítico. Al estar implementada en la estación, debe diseñarse de forma conservadora: no debe actuar ante lecturas imposibles, debe limitar el tiempo máximo de bomba activa y debe aplicar un periodo mínimo entre riegos. Esta decisión reduce la dependencia de la Raspberry Pi, pero exige que el firmware de estación incorpore las comprobaciones de seguridad necesarias.
+
+La activación de la bomba de agua se trata como el riesgo de mayor impacto físico. La regla de diseño es que la bomba debe permanecer apagada por defecto y solo activarse durante un tiempo limitado. Si la lectura de humedad no es válida, si el sistema está en cooldown, si se detecta una condición no verificable o si se supera el tiempo máximo permitido, la estación debe mantener o devolver el relé al estado apagado. Esta lógica evita que un fallo de lectura, un reinicio o un error interno puedan mantener el riego activo indefinidamente.
+
+Además, el bloque de actuación se ha tratado de forma separada respecto a la lógica de control. Durante las pruebas iniciales puede emplearse un LED o una carga de baja potencia para verificar el funcionamiento del relé sin accionar todavía la bomba real. En el montaje final, esa carga de prueba se sustituye por la bomba de agua de 12 V. Esta estrategia permite validar primero la lógica de activación y apagado, y después realizar la prueba con el actuador real en condiciones más controladas.
+
+La pérdida de comunicación también se aborda con un criterio conservador. Si la estación no puede publicar temporalmente en la plataforma cloud, la supervisión remota se ve afectada, pero la decisión de seguridad sigue residiendo en el firmware local. La pérdida de comunicación puede registrarse como incidencia cuando sea posible, pero no debe dejar la bomba activa ni provocar una actuación no controlada.
+
+El almacenamiento local en SQLite permite mitigar la pérdida de información operativa. Aunque ThingSpeak actúa como capa intermedia de telemetría y estado, la Raspberry conserva un histórico propio de lecturas, estados y eventos relevantes. Esto facilita revisar pruebas, detectar periodos sin comunicación y justificar posteriormente el comportamiento del sistema. Además, separar el almacenamiento local de la plataforma cloud reduce la dependencia de un único punto de consulta.
+
+Por último, los fallos de software se mitigan mediante una arquitectura modular. La lectura de datos, el almacenamiento, la validación de datos, la API y el dashboard se han planteado como bloques diferenciados. Esta separación permite probar cada parte de forma independiente, registrar errores y depurar el sistema sin mezclar todas las responsabilidades en un único programa. En cualquier caso, aunque la Raspberry Pi o el dashboard de supervisión dejen de funcionar temporalmente, la estación de campo debe mantener su lógica local de seguridad y conservar la bomba apagada ante estados no verificables.
+
+En conjunto, las medidas de mitigación adoptadas siguen un criterio común: ante un fallo, dato dudoso o estado no verificable, el sistema debe priorizar la seguridad frente a la actuación. Esta decisión puede provocar que el sistema no riegue en una situación ambigua, pero evita el escenario más peligroso para el prototipo: una activación no controlada de la bomba. De esta forma, TierraViva se plantea como un sistema funcional, pero también prudente y trazable.
