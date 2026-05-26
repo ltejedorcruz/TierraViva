@@ -11,6 +11,15 @@ La agricultura es una de las actividades en las que el uso eficiente de los recu
 
 Tradicionalmente, muchos sistemas de riego se han basado en criterios fijos, como horarios predefinidos o estimaciones manuales del estado del terreno. Aunque este enfoque puede ser suficiente en determinadas situaciones, existen limitaciones claras. Un riego programado de forma rígida puede aportar agua cuando no es necesario o, por el contrario, no hacerlo en momentos en los que el cultivo sí lo necesita. Esta falta de adaptación al estado real del entorno puede traducirse en un consumo innecesario de agua, un peor aprovechamiento de los recursos y una menor capacidad de respuesta ante cambios de temperatura, humedad o exposición solar.
 
+\begin{figure}[H]
+    \centering
+    \makebox[\textwidth][c]{%
+        \includegraphics[width=1.15\textwidth]{figs/riegoTrad_riegoInt.png}%
+    }
+    \caption{Evolución conceptual desde un riego basado en rutinas fijas hacia un riego apoyado en medidas reales del entorno. Elaboración propia.}
+    \label{fig:cap1_rutina_a_criterio}
+\end{figure}
+
 Para dar solución a estas limitaciones, la digitalización del entorno agrícola proporciona las herramientas necesarias para desarrollar sistemas informados y adaptativos. Mediante el despliegue de redes de sensores y equipos de comunicación, es posible adquirir datos en tiempo real y observar el estado del entorno de forma continua. Este planteamiento se relaciona directamente con la agricultura de precisión, cuyo objetivo no es únicamente automatizar tareas, sino utilizar información del propio entorno para mejorar la eficiencia, reducir desperdicios y facilitar la gestión de los recursos.
 
 En este tipo de sistemas, la monitorización ambiental desempeña un papel fundamental. Medir variables como la humedad del suelo, la temperatura, la humedad relativa, la presión atmosférica o la luminosidad permite disponer de una visión más completa del estado de una zona de cultivo, y no todas estas variables tienen el mismo peso en la decisión de riego. Por ejemplo, la humedad del suelo puede indicar de forma directa la necesidad de aportar agua, mientras que la temperatura o la luz ambiental ayudan a interpretar las condiciones en las que se está produciendo la evaporación o el déficit de agua.
@@ -56,6 +65,7 @@ La \textbf{visualización} también forma parte del problema. Un sistema técnic
 Otro punto fundamental es la \textbf{toma de decisiones}. El sistema debe ser capaz de determinar cuándo conviene actuar sobre el riego a partir de las medidas disponibles. En el alcance de este TFG, esta decisión se plantea mediante reglas verificables, como umbrales, condiciones de seguridad y tiempos máximos de actuación. Este enfoque resulta adecuado para un prototipo, ya que permite justificar de forma clara por qué se activa o se detiene el riego, sin depender de modelos predictivos complejos que requerirían una cantidad elevada de datos históricos para entrenarse y validarse correctamente.
 
 El último elemento del problema es la \textbf{actuación física}. Un sistema que solo mide y muestra información se queda en una solución de monitorización. Para avanzar hacia un sistema de riego inteligente, es necesario cerrar el ciclo mediante el control de un actuador. Esto introduce requisitos adicionales de seguridad, ya que una lectura incorrecta, una regla mal configurada, una pérdida de comunicación o un fallo eléctrico no deben provocar que la bomba permanezca activa indefinidamente. Por tanto, el diseño debe contemplar un comportamiento seguro por defecto dentro de la propia estación de campo, priorizando la desactivación de la bomba ante situaciones de error.
+
 En conjunto, el problema planteado puede entenderse como un problema de integración de subsistemas. TierraViva debe coordinar sensores, estación de campo, comunicación remota, plataforma de publicación de datos, sistema de supervisión, interfaz de usuario y actuador. Cada una de estas partes tiene una función concreta, pero el valor del proyecto aparece cuando todas trabajan de forma conjunta. Por esta razón, el desarrollo no se limita a seleccionar componentes, sino que exige definir una arquitectura modular, validar cada bloque por separado y comprobar posteriormente el funcionamiento del sistema completo.
 
 Además, el sistema se diseña pensando en su posible ampliación. Aunque el prototipo pueda validarse inicialmente con una estación, la arquitectura permite incorporar nuevas estaciones de campo, nuevas variables medidas o nuevos mecanismos de decisión. Esta modularidad es importante para que el trabajo no quede como una solución cerrada y difícil de extender, sino como una base sobre la que puedan plantearse mejoras futuras, como autonomía energética, despliegue multizona o mecanismos predictivos basados en datos históricos.
@@ -66,6 +76,13 @@ Además, el sistema se diseña pensando en su posible ampliación. Aunque el pro
 El objetivo no es desarrollar un producto comercial cerrado ni una solución industrial certificada, sino construir una arquitectura completa que permita comprobar, de forma experimental, cómo diferentes tecnologías pueden integrarse para resolver un problema real. Por tanto, el trabajo se evalúa principalmente desde el punto de vista de la integración tecnológica, el funcionamiento del sistema y la validación mediante pruebas.
 
 El prototipo debe ser capaz de medir variables relevantes del entorno, transmitir la información obtenida, registrar o consultar los datos recibidos, permitir su visualización y actuar sobre el riego bajo determinadas condiciones evaluadas localmente en cada estación. De esta forma, el proyecto no se limita a una prueba aislada de sensores ni a una aplicación de visualización, sino que busca cerrar el ciclo completo de monitorización, decisión y actuación. Esta integración constituye el núcleo del trabajo y permite valorar el sistema como una solución IoT aplicada a un caso práctico.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.96\textwidth]{figs/fig_cap1_05_alcance_prototipo.jpeg}
+    \caption{Delimitación del alcance del prototipo TierraViva y de los aspectos que quedan fuera de esta fase del trabajo. Elaboración propia.}
+    \label{fig:cap1_alcance_prototipo}
+\end{figure}
 
 No obstante, es importante delimitar claramente el alcance para evitar interpretar el proyecto como un sistema agrícola final preparado para su instalación directa en cualquier explotación. El prototipo desarrollado no pretende sustituir a soluciones profesionales de riego industrial, ni contempla certificaciones eléctricas, hidráulicas o de comunicaciones. Tampoco se aborda el diseño mecánico definitivo de una caja estanca, la fabricación de una placa electrónica propia ni la optimización completa del consumo energético para funcionamiento durante largos periodos sin mantenimiento.
 
