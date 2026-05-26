@@ -14,6 +14,13 @@ El concepto de Internet de las Cosas, o \textit{Internet of Things} (IoT), hace 
 
 Desde un punto de vista práctico, un sistema IoT conecta el mundo físico con el mundo digital. En el extremo de campo se encuentran dispositivos capaces de medir variables, detectar eventos o modificar el estado de un sistema. Esa información se transmite después hacia otros elementos, donde puede almacenarse, procesarse, visualizarse o utilizarse para apoyar decisiones. Cuando el sistema incorpora control, la actuación física puede resolverse de distintas formas: mediante decisiones centralizadas, mediante control remoto o mediante lógica local en el propio nodo de campo. Esta última alternativa resulta especialmente relevante cuando se busca que el sistema mantenga un comportamiento seguro aunque la conectividad externa no esté disponible.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figs/figura_2_1_cadena_funcional_iot.png}
+    \caption{Cadena funcional básica de un sistema IoT. El sistema capta información del entorno mediante sensorización, la transmite a través de una red, la almacena, la procesa y, cuando procede, actúa sobre el mundo físico cerrando el bucle de control.}
+    \label{fig:cap2_cadena_funcional_iot}
+\end{figure}
+
 En la práctica, IoT debe entenderse como una integración de componentes, no como una tecnología aislada. Sensores, actuadores, microcontroladores, redes de comunicación, plataformas cloud, bases de datos, servicios backend, APIs y dashboards deben encajar entre sí. En un proyecto de ingeniería, el funcionamiento individual de cada bloque no garantiza el funcionamiento del sistema completo. Un diseño puede tener sensores correctos o una interfaz clara, pero fallar si la comunicación, el almacenamiento o la lógica de actuación no se han planteado de forma coherente.
 
 Uno de los elementos básicos de una arquitectura IoT es el nodo o \textit{end-device}. Este nodo se sitúa cerca del fenómeno que se quiere observar o controlar y normalmente integra sensores, una unidad de procesamiento, un sistema de comunicación y una fuente de alimentación. En algunos casos solo mide y envía información; en otros también ejecuta decisiones sencillas o controla actuadores. Estos dispositivos suelen estar limitados en memoria, capacidad de cálculo, consumo energético o ancho de banda disponible, por lo que sus restricciones deben considerarse desde el diseño inicial \cite{alFuqaha2015iot}.
@@ -35,41 +42,13 @@ La visualización suele realizarse mediante dashboards, aplicaciones web o aplic
 Las arquitecturas IoT suelen representarse por capas. Una división sencilla distingue entre capa física, formada por sensores y actuadores; capa de conectividad; capa de procesamiento y almacenamiento; y capa de aplicación. Modelos más completos, como el propuesto por el IoT World Forum, añaden niveles como computación en el borde, acumulación de datos, abstracción y procesos de negocio \cite{hanes2017iot}.
 
 \begin{figure}[H]
-\centering
-\resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[
-    font=\small,
-    block/.style={
-        draw,
-        rounded corners,
-        align=center,
-        minimum height=1.2cm,
-        minimum width=2.8cm,
-        fill=gray!10
-    },
-    arrow/.style={-{Latex[length=2.5mm]}, thick}
-]
-
-\node[block] (fisica) {Capa física\\Sensores y actuadores};
-\node[block, right=1.0cm of fisica] (nodo) {Nodo IoT\\Procesamiento local};
-\node[block, right=1.0cm of nodo] (comunicacion) {Conectividad\\Red de comunicación};
-\node[block, right=1.0cm of comunicacion] (procesamiento) {Procesamiento y\\almacenamiento};
-\node[block, right=1.0cm of procesamiento] (aplicacion) {Aplicación\\Dashboard y supervisión};
-
-\draw[arrow] (fisica) -- (nodo);
-\draw[arrow] (nodo) -- (comunicacion);
-\draw[arrow] (comunicacion) -- (procesamiento);
-\draw[arrow] (procesamiento) -- (aplicacion);
-
-\draw[arrow, dashed] (aplicacion.south) to[out=-90,in=-90] node[below, align=center] {supervisión / configuración} (fisica.south);
-
-\end{tikzpicture}%
-}
-\caption{Esquema genérico de una arquitectura IoT por capas.}
-\label{fig:arquitectura_iot_generica}
+    \centering
+    \includegraphics[width=0.83\textwidth]{figs/figura_2_2_arquitectura_iot_capas.png}
+    \caption{Arquitectura IoT organizada por capas funcionales. La capa física agrupa sensores y actuadores; el nodo o borde proporciona procesamiento local; la conectividad permite el intercambio de información; la plataforma gestiona datos y servicios; y la aplicación facilita la visualización e interacción con el usuario.}
+    \label{fig:cap2_arquitectura_iot_capas}
 \end{figure}
 
-La Figura~\ref{fig:arquitectura_iot_generica} resume esta estructura. En el caso de un sistema de riego, la arquitectura debe cubrir el ciclo completo: medir en campo, comunicar, almacenar, visualizar y actuar de forma segura. No obstante, la actuación no tiene por qué depender siempre de un control remoto; en diseños distribuidos puede ejecutarse localmente en la estación, utilizando la comunicación externa para supervisión, histórico y diagnóstico.
+La Figura~\ref{fig:cap2_arquitectura_iot_capas} resume esta estructura. En el caso de un sistema de riego, la arquitectura debe cubrir el ciclo completo: medir en campo, comunicar, almacenar, visualizar y actuar de forma segura. No obstante, la actuación no tiene por qué depender siempre de un control remoto; en diseños distribuidos puede ejecutarse localmente en la estación, utilizando la comunicación externa para supervisión, histórico y diagnóstico.
 
 \section{Agricultura de precisión y riego inteligente}
 \label{sec:agricultura_precision_riego}
@@ -157,51 +136,13 @@ También deben contemplarse errores de medida. Un sensor puede devolver valores 
 Los nodos de campo suelen tener recursos limitados. Pueden funcionar con batería, comunicarse mediante enlaces de bajo ancho de banda y operar en zonas de cobertura irregular. El diseño debe decidir qué datos se envían, con qué frecuencia, a qué distancia y cuántos nodos formarán parte de la red \cite{alFuqaha2015iot}.
 
 \begin{figure}[H]
-\centering
-\resizebox{0.85\textwidth}{!}{%
-\begin{tikzpicture}[
-    font=\small,
-    block/.style={
-        draw,
-        rounded corners,
-        align=center,
-        minimum height=1.1cm,
-        minimum width=3.0cm,
-        fill=gray!10
-    },
-    central/.style={
-        draw,
-        rounded corners,
-        align=center,
-        minimum height=1.3cm,
-        minimum width=3.4cm,
-        fill=gray!20
-    },
-    arrow/.style={-{Latex[length=2.5mm]}, thick},
-    dashedarrow/.style={-{Latex[length=2.5mm]}, thick, dashed}
-]
-
-\node[central] (procesamiento) {Unidad de\\procesamiento};
-
-\node[block, above left=1.2cm and 1.4cm of procesamiento] (sensores) {Sensores\\Variables físicas};
-\node[block, above right=1.2cm and 1.4cm of procesamiento] (comunicaciones) {Subsistema de\\comunicaciones};
-\node[block, below left=1.2cm and 1.4cm of procesamiento] (energia) {Fuente de\\energía};
-\node[block, below right=1.2cm and 1.4cm of procesamiento] (actuador) {Actuador\\opcional};
-
-\draw[arrow] (sensores) -- node[above, sloped] {medidas} (procesamiento);
-\draw[arrow] (procesamiento) -- node[above, sloped] {datos} (comunicaciones);
-\draw[arrow] (procesamiento) -- node[below, sloped] {actuación local} (actuador);
-\draw[dashedarrow] (energia) -- node[below, sloped] {alimentación} (procesamiento);
-\draw[dashedarrow] (energia) -- (comunicaciones);
-\draw[dashedarrow] (energia) -- (sensores);
-
-\end{tikzpicture}%
-}
-\caption{Estructura general de un nodo de campo en una red IoT agrícola.}
-\label{fig:nodo_campo_generico}
+    \centering
+    \includegraphics[width=0.92\textwidth]{figs/figura_2_3_nodo_iot_componentes.png}
+    \caption{Componentes básicos de un nodo IoT. Un nodo integra sensores para observar el entorno, actuadores para ejecutar acciones, una unidad de procesamiento, un subsistema de comunicaciones y una fuente de energía que condiciona su autonomía.}
+    \label{fig:cap2_nodo_iot_componentes}
 \end{figure}
 
-La Figura~\ref{fig:nodo_campo_generico} muestra los bloques habituales de un nodo de campo. En una aplicación agrícola real, la fiabilidad depende del conjunto formado por sensor, nodo, alimentación, comunicación, protección física y tratamiento de datos \cite{soussi2024smart}. Cuando el nodo incorpora un actuador, también debe asumir reglas mínimas de actuación segura, ya que es el elemento que se encuentra físicamente conectado al sistema de riego.
+La Figura~\ref{fig:cap2_nodo_iot_componentes} muestra los bloques habituales de un nodo de campo. En una aplicación agrícola real, la fiabilidad depende del conjunto formado por sensor, nodo, alimentación, comunicación, protección física y tratamiento de datos \cite{soussi2024smart}. Cuando el nodo incorpora un actuador, también debe asumir reglas mínimas de actuación segura, ya que es el elemento que se encuentra físicamente conectado al sistema de riego.
 
 \section{Controladores y plataformas embebidas para IoT}
 \label{sec:controladores_plataformas_embebidas}
@@ -247,6 +188,13 @@ La Tabla~\ref{cuadro:microcontroladores_sbc} resume esta diferencia. En un siste
 La conectividad condiciona la viabilidad de cualquier sistema IoT desplegado en campo. En aplicaciones agrícolas, los nodos pueden estar separados de la vivienda, del laboratorio o del sistema de supervisión, y no siempre existe una infraestructura de red disponible. No se puede asumir WiFi estable, alimentación cercana ni cobertura móvil suficiente en todos los puntos.
 
 El tráfico típico de estos sistemas suele ser reducido. Normalmente se envían medidas pequeñas cada cierto intervalo: humedad, temperatura, estado de un actuador, tensión de batería o avisos de error. La prioridad no es el caudal, sino la cobertura, el consumo, la disponibilidad y la fiabilidad del enlace.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_2_5_criterios_comunicacion_iot.png}
+    \caption{Criterios principales para seleccionar una tecnología de comunicación en un sistema IoT. La elección depende del equilibrio entre alcance, consumo energético, volumen de datos, frecuencia de envío, número de nodos y movilidad del escenario de aplicación.}
+    \label{fig:cap2_criterios_comunicacion_iot}
+\end{figure}
 
 Las redes LPWAN, del inglés \textit{Low Power Wide Area Networks}, se diseñan para ese tipo de escenario. Proporcionan comunicaciones de largo alcance y bajo consumo para dispositivos distribuidos que envían pequeñas cantidades de datos. A cambio, aceptan bajo caudal, mayor latencia o mensajes poco frecuentes \cite{raza2017lpwan}. Este compromiso encaja con muchas aplicaciones agrícolas, donde las variables del entorno no requieren actualización continua a escala de milisegundos.
 
@@ -305,6 +253,13 @@ Esta distinción fue relevante durante el desarrollo, porque una tecnología té
 \label{sec:plataformas_cloud_iot}
 
 En una arquitectura IoT, la plataforma cloud actúa como punto intermedio entre los dispositivos de campo y las aplicaciones que consumen la información. Recibe datos de los nodos, los almacena, los organiza y permite consultarlos desde otros sistemas o interfaces de usuario. Esta capa aporta acceso remoto y reduce la infraestructura inicial necesaria. En arquitecturas con control local, su papel principal no es decidir la actuación, sino facilitar la publicación de telemetría, la consulta remota y la supervisión del sistema.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_2_6_edge_fog_cloud.png}
+    \caption{Distribución del procesamiento en arquitecturas IoT. El procesamiento puede situarse cerca del dispositivo, en el borde de la red, en capas intermedias tipo fog o en plataformas cloud, según los requisitos de latencia, ancho de banda, autonomía, disponibilidad de conectividad y capacidad de análisis.}
+    \label{fig:cap2_edge_fog_cloud}
+\end{figure}
 
 Una función habitual es el almacenamiento de telemetría. La telemetría incluye medidas de sensores, estados de funcionamiento, eventos o errores. Las plataformas IoT suelen organizar esta información como series temporales asociadas a un dispositivo, canal, variable o identificador. Así puede consultarse tanto el último valor recibido como la evolución de una magnitud.
 
