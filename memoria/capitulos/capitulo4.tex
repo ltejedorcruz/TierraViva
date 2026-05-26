@@ -5,7 +5,7 @@ Una vez definidos los requisitos, los materiales y las principales decisiones de
 
 La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, una plataforma cloud intermedia basada en ThingSpeak y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema se ha diseñado para cubrir el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, actuación sobre la bomba, publicación de telemetría y estado, almacenamiento histórico, API y visualización mediante dashboard web.
 
-El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi no actúa como cerebro del riego. La decisión crítica se desplaza al firmware de cada estación, que evalúa sus propias lecturas y aplica reglas locales de seguridad. La Raspberry conserva un papel importante, pero orientado a supervisión, histórico y visualización.
+El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi no actúa como elemento central de decisión del riego. La decisión crítica se desplaza al firmware de cada estación, que evalúa sus propias lecturas y aplica reglas locales de seguridad. La Raspberry conserva un papel importante, pero orientado a supervisión, histórico y visualización.
 
 \section{Visión general de la arquitectura}
 \label{sec:vision_general_arquitectura}
@@ -23,13 +23,13 @@ La Figura~\ref{fig:arquitectura_final_tierraviva} muestra la arquitectura final 
 \label{fig:arquitectura_final_tierraviva}
 \end{figure}
 
-El flujo de funcionamiento comienza en las estaciones de campo. Cada estación toma lecturas de sus sensores, evalúa localmente si se cumplen las condiciones de riego y, si procede, activa la bomba de agua mediante el relé durante un tiempo limitado. Después publica en ThingSpeak tanto las medidas ambientales como el estado del relé y el código de estado o evento correspondiente.
+El flujo de funcionamiento comienza en las estaciones de campo. Cada estación toma lecturas de sus sensores, evalúa localmente si se cumplen las condiciones de riego y, si procede, activa la bomba de agua mediante el relé durante un tiempo limitado. Después publica en ThingSpeak tanto las medidas ambientales como el estado del relé y el código de estado correspondiente.
 
 ThingSpeak actúa como punto de desacoplo entre los nodos de campo y el sistema de supervisión. Las estaciones no necesitan conocer la ubicación de la Raspberry ni mantener una conexión directa con ella; únicamente publican información en la nube. La Raspberry, por su parte, consulta periódicamente los canales de ThingSpeak y almacena los datos relevantes en su base de datos local.
 
 La Raspberry Pi 5 funciona como sistema de supervisión. Su papel no es accionar directamente la bomba, leer sensores por cable ni decidir cuándo debe regarse. Su función es consultar la telemetría disponible, registrar el histórico en SQLite, exponer los datos mediante una API y servir el dashboard web. Así, una caída de la Raspberry no impide que la estación mantenga su comportamiento local de seguridad.
 
-El dashboard web representa la capa de visualización. A partir de la información procesada por la Raspberry Pi, permite consultar las últimas lecturas, el estado de las estaciones, el estado del relé y los eventos de riego publicados por cada nodo. No participa directamente en la actuación, pero resulta fundamental para supervisar el comportamiento del prototipo y detectar posibles incidencias.
+El dashboard web representa la capa de visualización. A partir de la información procesada por la Raspberry Pi, permite consultar las últimas lecturas, el estado de las estaciones, el estado del relé y los estados de funcionamiento publicados por cada nodo. No participa directamente en la actuación, pero resulta fundamental para supervisar el comportamiento del prototipo y detectar posibles incidencias.
 
 La arquitectura final puede resumirse de forma sencilla: las estaciones miden, deciden y actúan en campo; ThingSpeak comunica y almacena telemetría; la Raspberry registra y supervisa; y el dashboard permite visualizar. Esta organización facilita la validación por bloques, permite trabajar con más de una estación y mantiene una separación clara entre adquisición, comunicación, decisión local, actuación y supervisión.
 
@@ -184,7 +184,7 @@ Los canales \texttt{TierraViva\_A} y \texttt{TierraViva\_B} almacenan la telemet
 \hline
 \textbf{Campo} & \textbf{Dato} & \textbf{Descripción} \\
 \hline
-\texttt{field1} & Humedad del suelo (raw) & Valor bruto de humedad del sustrato utilizado por la estación para la decisión local de riego. \\
+\texttt{field1} & Humedad del suelo normalizada (\%) & Valor calculado por el firmware a partir de la lectura bruta del sensor capacitivo. Se utiliza como entrada principal de la regla local de riego. \\
 \hline
 \texttt{field2} & Temperatura (\textdegree C) & Temperatura ambiente medida por el BME280. \\
 \hline
@@ -194,11 +194,11 @@ Los canales \texttt{TierraViva\_A} y \texttt{TierraViva\_B} almacenan la telemet
 \hline
 \texttt{field5} & Presión (hPa) & Presión atmosférica medida por el BME280. \\
 \hline
-\texttt{field6} & Estado del relé & Estado del relé asociado al bloque de actuación: 0 para apagado y 1 para activo. \\
+\texttt{field6} & Estado del relé & Estado del relé asociado al bloque de actuación: \texttt{0} para apagado y \texttt{1} para activo. \\
 \hline
-\texttt{field7} & Código de estado o evento & Código publicado por la estación para indicar funcionamiento normal, riego ejecutado, cooldown, error o modo seguro. \\
+\texttt{field7} & Modo seguro & Indicador de seguridad de la estación: \texttt{0} para funcionamiento normal y \texttt{1} para modo seguro activo. \\
 \hline
-\texttt{field8} & Campo auxiliar & Campo reservado para depuración, diagnóstico o ampliaciones futuras. \\
+\texttt{field8} & Código de estado & Código numérico que resume el estado operativo del ciclo o la incidencia detectada. \\
 \hline
 \end{tabular}
 \caption{Asignación de campos en los canales ThingSpeak de estación}
@@ -208,7 +208,7 @@ Los canales \texttt{TierraViva\_A} y \texttt{TierraViva\_B} almacenan la telemet
 
 La Tabla~\ref{cuadro:canales_thingspeak_estacion} define el contrato de datos utilizado por las estaciones. Mantener la misma estructura en ambos canales simplifica el firmware y la lógica de supervisión, ya que la Raspberry puede aplicar el mismo proceso de lectura para la estación A y para la estación B, cambiando únicamente el identificador del canal y la clave de lectura correspondiente.
 
-Esta estructura permite que el canal no se limite a representar medidas ambientales. En particular, los campos \texttt{field6}, \texttt{field7} y \texttt{field8} aportan información operativa sobre el estado del relé, los eventos de riego, los errores detectados o el comportamiento de seguridad de la estación. Gracias a ello, la Raspberry puede detectar si una estación ha actuado, si está en reposo o si ha publicado una incidencia.
+Esta estructura permite que el canal no se limite a representar medidas ambientales. En particular, los campos \texttt{field6}, \texttt{field7} y \texttt{field8} aportan información operativa sobre el estado del relé, la activación del modo seguro y el código de estado publicado por la estación. Gracias a ello, la Raspberry puede detectar si una estación ha actuado, si está en reposo o si ha publicado una incidencia.
 
 La separación por canales evita mezclar datos de estaciones distintas y facilita la escalabilidad. Si en el futuro se añadiese una nueva estación, bastaría con replicar la estructura de campos en un nuevo canal, asignar las claves correspondientes y ampliar la lógica de supervisión para incluir ese nuevo origen de datos.
 

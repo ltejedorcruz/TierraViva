@@ -58,3 +58,915 @@ Desde el punto de vista de documentación del proyecto, esta incidencia es relev
 Para dejar evidencia de esta fase, se recomienda incluir en el anexo de pruebas iniciales una captura del Administrador de dispositivos antes y después de instalar el driver, una captura del Arduino IDE con la placa y el puerto seleccionados, y una fotografía de la placa donde se aprecien el \texttt{CH340G} y el \texttt{ATmega328P}. Estas evidencias no son necesarias en el cuerpo principal del capítulo, pero sí refuerzan la trazabilidad del proceso de implementación.
 
 Con la placa correctamente reconocida y la prueba \textit{Blink} superada, el Arduino UNO quedó preparado para la siguiente fase: la conexión y validación de los sensores de la estación de campo. Esta comprobación permitió utilizar la placa como base del firmware autónomo de TierraViva, encargado posteriormente de leer sensores, comunicarse con el módulo LTE, controlar el relé y aplicar la lógica local de riego.
+
+\section{Integración de sensores}
+\label{sec:integracion_sensores}
+
+Una vez preparada la placa Arduino UNO, la siguiente fase consistió en integrar y validar los sensores de la estación de campo. Esta etapa era necesaria antes de incorporar la comunicación LTE o la actuación sobre el riego, ya que el sistema completo depende de que las medidas de entrada sean coherentes. En TierraViva se utilizan tres bloques de sensórica: humedad de suelo, variables ambientales y luminosidad.
+
+La integración se realizó de forma incremental. Primero se comprobó el bus I2C, después se validó el sensor de humedad de suelo mediante lectura analógica y, por último, se ejecutó una prueba conjunta con todos los sensores conectados. Este procedimiento permitió aislar fallos de cableado o configuración antes de pasar a un firmware más completo.
+
+El BME280 y el BH1750 se conectan mediante el bus I2C del Arduino UNO. I2C, abreviatura de \textit{Inter-Integrated Circuit}, es un bus de comunicación serie utilizado habitualmente para conectar sensores y circuitos integrados con un microcontrolador empleando únicamente dos líneas principales: \texttt{SDA}, para el intercambio de datos, y \texttt{SCL}, para la señal de reloj. En este tipo de bus, varios dispositivos pueden compartir las mismas líneas siempre que cada uno tenga una dirección diferente.
+
+En Arduino UNO, las líneas I2C corresponden a los pines \texttt{A4/SDA} y \texttt{A5/SCL}, según la documentación oficial de la placa \cite{arduino_uno_r3_pinout,arduino_uno_r3_datasheet}. Por este motivo, el BME280 y el BH1750 pueden conectarse simultáneamente a los mismos pines. En el montaje realizado, el BH1750 fue detectado en la dirección \texttt{0x23} y el BME280 en la dirección \texttt{0x76}, por lo que ambos sensores pudieron trabajar en el mismo bus sin conflicto de direcciones.
+
+El sensor capacitivo de humedad de suelo se conectó de forma independiente al bus I2C, ya que proporciona una salida analógica. Para esta prueba se utilizó la entrada \texttt{A0} del Arduino UNO. Esta lectura no representa directamente un porcentaje de humedad, sino un valor bruto entre 0 y 1023, correspondiente al convertidor analógico-digital del microcontrolador. Por ello, antes de utilizarlo como porcentaje de humedad es necesario realizar una calibración o, al menos, identificar el sentido de variación de la medida.
+
+La Tabla~\ref{cuadro:cableado_sensores} resume las conexiones utilizadas durante la integración de sensores.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|}
+\hline
+\textbf{Sensor} & \textbf{Conexión Arduino UNO} & \textbf{Función} \\
+\hline
+BME280 & \texttt{VCC} a 5 V, \texttt{GND} a GND, \texttt{SDA} a \texttt{A4}, \texttt{SCL} a \texttt{A5} & Medición de temperatura, humedad relativa y presión atmosférica. \\
+\hline
+BH1750 / GY-302 & \texttt{VCC} a 5 V, \texttt{GND} a GND, \texttt{SDA} a \texttt{A4}, \texttt{SCL} a \texttt{A5} & Medición de luminosidad ambiente en lux. \\
+\hline
+Sensor capacitivo de humedad de suelo & \texttt{VCC} a 5 V, \texttt{GND} a GND, \texttt{AO} a \texttt{A0} & Lectura analógica del estado del sustrato. \\
+\hline
+\end{tabular}
+\caption{Conexiones de los sensores integrados en la estación de campo}
+\label{cuadro:cableado_sensores}
+\end{center}
+\end{table}
+
+Durante las pruebas se tuvo en cuenta que todos los módulos deben compartir una referencia común de masa. Este punto es importante porque una referencia de GND incorrecta puede producir lecturas inestables o impedir la comunicación con los sensores digitales. En el caso del bus I2C, también se comprobó que no era necesario utilizar pines alternativos para \texttt{SDA} y \texttt{SCL}, ya que en Arduino UNO el bus hardware está asignado a \texttt{A4} y \texttt{A5}.
+
+La primera comprobación realizada sobre los sensores digitales fue un escaneo del bus I2C. Esta prueba no mide todavía variables físicas, pero permite verificar que los dispositivos están correctamente alimentados, cableados y accesibles desde Arduino. El resultado obtenido fue la detección de dos dispositivos: \texttt{0x23}, correspondiente al BH1750, y \texttt{0x76}, correspondiente al BME280.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.28\textwidth}|p{0.34\textwidth}|}
+\hline
+\textbf{Prueba} & \textbf{Resultado} & \textbf{Interpretación} \\
+\hline
+Escaneo I2C con BME280 & Dispositivo detectado en \texttt{0x76} & El sensor ambiental responde correctamente en el bus I2C. \\
+\hline
+Escaneo I2C con BH1750 y BME280 & Dispositivos detectados en \texttt{0x23} y \texttt{0x76} & Ambos sensores pueden compartir el bus I2C sin conflicto de direcciones. \\
+\hline
+Lectura analógica del sensor de suelo & Valores variables en \texttt{A0} & El sensor capacitivo responde ante cambios de capacitancia/humedad. \\
+\hline
+Prueba conjunta & Lectura de suelo, luz, temperatura, humedad y presión & Los tres sensores pueden integrarse en un único firmware de adquisición. \\
+\hline
+\end{tabular}
+\caption{Pruebas iniciales de validación de sensores}
+\label{cuadro:pruebas_iniciales_sensores}
+\end{center}
+\end{table}
+
+El sensor de humedad de suelo se probó inicialmente mediante un sketch específico que imprimía por el monitor serie el valor bruto leído en \texttt{A0}. En reposo, el sensor mostró valores estables alrededor de \texttt{569--570}. Al tocar la zona sensible del sensor, los valores descendieron aproximadamente al rango \texttt{248--356}. Esta prueba confirmó que el sensor respondía ante cambios físicos y permitió identificar el sentido de variación: en el montaje probado, un aumento de capacitancia asociado a mayor humedad o contacto produce una disminución del valor analógico leído.
+
+Esta prueba no debe interpretarse como una calibración definitiva de humedad de suelo. Para convertir el valor bruto en un porcentaje fiable sería necesario medir el sensor en condiciones controladas, por ejemplo en aire, en suelo seco y en suelo húmedo, manteniendo la electrónica protegida del agua. Sin embargo, para esta fase de integración, el resultado fue suficiente para comprobar que el sensor estaba vivo, conectado al pin correcto y entregaba una señal analógica utilizable.
+
+El BH1750 se integró como sensor digital de luminosidad. Su lectura se realiza en lux, por lo que resulta más directa que la del sensor de suelo. Durante las pruebas conjuntas, este sensor se inicializó en modo de alta resolución continua mediante la librería correspondiente. Además, al estar conectado al mismo bus que el BME280, su detección en \texttt{0x23} permitió confirmar que no existía conflicto con la dirección \texttt{0x76} del sensor ambiental.
+
+El BME280 se utilizó para obtener temperatura, humedad relativa y presión atmosférica. En el firmware de prueba se inicializó mediante la dirección \texttt{0x76}. Esta comprobación era relevante porque algunos módulos comerciales se anuncian como BME/BMP280 y pueden generar dudas durante el montaje. En el caso de TierraViva, la integración se preparó utilizando la librería del BME280, ya que el sistema necesita también la humedad relativa ambiental, no solo temperatura y presión.
+
+Tras validar los sensores por separado, se cargó un sketch integrado para leer todos los valores en una misma ejecución. Este programa inicializaba el bus I2C, configuraba el BH1750, configuraba el BME280 y leía el sensor de suelo en \texttt{A0}. La salida por monitor serie se estructuró en una línea con los campos principales: \texttt{soil\_raw}, \texttt{lux}, \texttt{temp\_c}, \texttt{hum\_pct} y \texttt{pres\_hpa}. Esta forma de imprimir los datos facilita la depuración y deja preparada la estructura para fases posteriores, donde las lecturas deben enviarse como telemetría.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.38\textwidth}|}
+\hline
+\textbf{Variable} & \textbf{Origen} & \textbf{Uso dentro de la estación} \\
+\hline
+\texttt{soil\_raw} & Sensor capacitivo en \texttt{A0} & Variable principal para interpretar el estado del sustrato. \\
+\hline
+\texttt{lux} & BH1750 & Información sobre la exposición luminosa del entorno. \\
+\hline
+\texttt{temp\_c} & BME280 & Temperatura ambiente en grados Celsius. \\
+\hline
+\texttt{hum\_pct} & BME280 & Humedad relativa ambiental en porcentaje. \\
+\hline
+\texttt{pres\_hpa} & BME280 & Presión atmosférica en hectopascales. \\
+\hline
+\end{tabular}
+\caption{Variables obtenidas en la prueba conjunta de sensores}
+\label{cuadro:variables_prueba_conjunta_sensores}
+\end{center}
+\end{table}
+
+La integración conjunta permitió comprobar que el sensor analógico no interfería con el bus I2C y que los sensores digitales podían trabajar simultáneamente. Esta prueba es importante porque el firmware final de la estación no lee los sensores de forma aislada, sino que debe construir una muestra completa de telemetría en cada ciclo de adquisición.
+
+Desde el punto de vista de interpretación de datos, la humedad de suelo requiere especial atención. A diferencia de la temperatura o la luminosidad, que se obtienen en unidades físicas directamente interpretables, el sensor capacitivo entrega un valor dependiente del propio sensor, del suelo, de la alimentación y de las condiciones de montaje. Por ello, en las primeras pruebas se mantuvo como \texttt{soil\_raw}. Más adelante, este valor puede transformarse en porcentaje mediante una calibración con valores de referencia seco y húmedo.
+
+También se decidió mantener las variables ambientales como información de contexto. La temperatura, la humedad relativa, la presión y la luminosidad no determinan por sí solas la activación del riego en esta fase, pero permiten interpretar mejor el estado de la estación. Por ejemplo, una humedad de suelo baja puede tener consecuencias distintas en un momento de baja luminosidad que en una situación de alta exposición solar y temperatura elevada.
+
+Con esta prueba quedó validado el bloque de sensórica de la estación. Se confirmó la comunicación I2C con el BME280 y el BH1750, la lectura analógica del sensor de humedad de suelo y la posibilidad de obtener todas las variables en un único ciclo de adquisición. Con ello, la estación quedó preparada para el siguiente paso de implementación: estructurar el firmware de adquisición y adaptar las lecturas al formato de telemetría utilizado por TierraViva.
+
+\section{Firmware de adquisición}
+\label{sec:firmware_adquisicion}
+
+Una vez comprobado el funcionamiento de los sensores, el siguiente paso consistió en organizar el firmware de adquisición de la estación. Este firmware no se limita a leer variables y enviarlas a la nube, sino que también incorpora la lógica local mínima necesaria para decidir si debe activarse el riego.
+
+El firmware se organiza en varios bloques funcionales. En primer lugar, se inicializan los sensores y el módem LTE. Después, en cada ciclo de ejecución, se leen las variables ambientales y de suelo. A partir de esas lecturas, se actualiza el estado interno de seguridad de la estación y se decide si procede activar el riego. Por último, la estación publica una actualización en ThingSpeak con las medidas y el estado operativo.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.57\textwidth}|}
+\hline
+\textbf{Bloque del firmware} & \textbf{Función principal} \\
+\hline
+Inicialización & Configurar puerto serie, bus I2C, sensores, pin del relé y módulo LTE. \\
+\hline
+Adquisición & Leer humedad de suelo, temperatura, humedad relativa, luminosidad y presión. \\
+\hline
+Interpretación & Convertir la lectura del sensor de suelo a una escala porcentual y comprobar la validez de las medidas. \\
+\hline
+Decisión local & Evaluar umbrales, ciclos de confirmación, cooldown y estado seguro. \\
+\hline
+Actuación & Activar el relé durante un tiempo limitado cuando procede el riego. \\
+\hline
+Telemetría & Enviar a ThingSpeak las variables medidas y el estado operativo de la estación. \\
+\hline
+\end{tabular}
+\caption{Bloques principales del firmware de adquisición y decisión local}
+\label{cuadro:bloques_firmware_adquisicion}
+\end{center}
+\end{table}
+
+La inicialización se realiza en la función \texttt{setup()}. En esta fase se configura el puerto serie de depuración, se inicializa el bus I2C, se comprueba la disponibilidad de los sensores y se prepara el pin de control del relé. Un punto importante es que el relé debe quedar en estado desactivado desde el arranque. De esta forma, \textbf{un reinicio del Arduino no puede provocar una activación accidental de la bomba}.
+
+El bloque de adquisición lee las mismas variables validadas en el apartado anterior. La humedad de suelo se obtiene a partir del sensor capacitivo conectado a la entrada analógica. El BME280 proporciona temperatura, humedad relativa y presión atmosférica. El BH1750 proporciona la luminosidad ambiente en lux. Estas medidas se almacenan en variables internas del firmware para poder ser utilizadas tanto en la decisión local como en la publicación de telemetría.
+
+En el caso de la humedad de suelo, el firmware no trabaja únicamente con el valor bruto del conversor analógico-digital. A partir de los valores de referencia obtenidos durante las pruebas, la lectura se transforma a una escala porcentual mediante una función de conversión. Esta transformación facilita la interpretación posterior: un valor bajo de porcentaje indica una situación de suelo seco, mientras que un valor más alto representa mayor humedad del sustrato.
+
+Un fragmento representativo de esta parte del firmware se muestra en el Código~\ref{cod:lectura_sensores_estacion}. No se incluye aquí el sketch completo, que se recoge en el anexo correspondiente, sino únicamente la lógica esencial de adquisición.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+void readSensors() {
+  lastSoilRaw = readSoilRaw();
+  soilPercent = soilRawToPercent(lastSoilRaw);
+
+  temperatureC = bme.readTemperature();
+  humidityPct = bme.readHumidity();
+  pressureHpa = (int)(bme.readPressure() / 100.0F + 0.5F);
+
+  float luxF = lightMeter.readLightLevel();
+  if (luxF < 0) luxF = 0;
+  luxValue = (int)(luxF + 0.5F);
+}
+\end{lstlisting}
+\caption[Lectura agrupada de sensores en la estación]{Lectura agrupada de sensores en la estación}
+\label{cod:lectura_sensores_estacion}
+\end{code}
+
+La decisión local se apoya en tres ideas: umbral de humedad, confirmación por varios ciclos y tiempo mínimo entre riegos. No se activa el riego por una única lectura aislada, ya que una medida puntual puede verse afectada por ruido, contacto irregular del sensor o pequeñas variaciones del montaje. Por ello, el firmware acumula ciclos consecutivos en los que el suelo aparece seco antes de considerar que realmente procede regar.
+
+Además, se incorpora un periodo de \textit{cooldown}. Después de un riego, la estación bloquea nuevas activaciones durante un tiempo mínimo. Esta medida evita ciclos repetidos de riego en poco tiempo y reduce el riesgo de sobreactuación. La función mostrada en el Código~\ref{cod:cooldown_riego} permite comprobar si todavía se encuentra activo ese periodo de espera.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+bool cooldownActive() {
+  if (lastIrrigationEndMs == 0) return false;
+  return (millis() - lastIrrigationEndMs) < COOLDOWN_MS;
+}
+\end{lstlisting}
+\caption[Comprobación del periodo de espera entre riegos]{Comprobación del periodo de espera entre riegos}
+\label{cod:cooldown_riego}
+\end{code}
+
+El firmware también mantiene un modo seguro local. Si las lecturas de sensores no son válidas, si el sistema no ha acumulado suficientes ciclos correctos o si se detecta una condición no fiable, la estación evita activar el riego. Este modo seguro no depende de una orden externa de la Raspberry Pi; forma parte del comportamiento interno de la estación. En el código, esta lógica se refleja mediante variables como \texttt{safeMode}, \texttt{sensorOk}, \texttt{validCycleCount} y \texttt{dryCycleCount}.
+
+La lógica de decisión local se resume en el Código~\ref{cod:decision_local_riego}. La estación comprueba primero si las lecturas son válidas y si existe un periodo de espera activo. Después aplica el umbral correspondiente según se encuentre o no en modo seguro.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+bool shouldIrrigate() {
+  if (!sensorOk) {
+    statusCode = 400;
+    return false;
+  }
+
+  if (cooldownActive()) {
+    statusCode = 429;
+    return false;
+  }
+
+  if (safeMode) {
+    return (soilPercent <= SAFE_SOIL_THRESHOLD) &&
+           (dryCycleCount >= SAFE_CONFIRM_DRY_CYCLES);
+  }
+
+  return (soilPercent <= NORMAL_SOIL_THRESHOLD) &&
+         (dryCycleCount >= NORMAL_CONFIRM_DRY_CYCLES);
+}
+\end{lstlisting}
+\caption[Decisión local de riego en la estación]{Decisión local de riego en la estación}
+\label{cod:decision_local_riego}
+\end{code}
+
+Cuando la estación decide regar, la actuación se realiza de forma local mediante el relé. El Código~\ref{cod:activacion_temporizada_rele} muestra de forma simplificada esta activación temporizada.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+void irrigateForSeconds(unsigned long seconds) {
+  relayActive = true;
+  digitalWrite(RELAY_PIN, RELAY_ON);
+  statusCode = 200;
+
+  delay(seconds * 1000UL);
+
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+  relayActive = false;
+  lastIrrigationEndMs = millis();
+}
+\end{lstlisting}
+\caption[Activación temporizada del relé de riego]{Activación temporizada del relé de riego}
+\label{cod:activacion_temporizada_rele}
+\end{code}
+
+La publicación en ThingSpeak se realiza después de leer sensores y actualizar el estado interno de la estación. En la arquitectura final, ThingSpeak se utiliza como plataforma de telemetría y supervisión, no como canal de comandos. Cada estación publica en su canal los valores medidos y tres campos de estado que permiten interpretar el comportamiento del nodo.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.30\textwidth}|p{0.42\textwidth}|}
+\hline
+\textbf{Campo} & \textbf{Dato enviado} & \textbf{Descripción} \\
+\hline
+\texttt{field1} & Humedad suelo (\%) & Porcentaje normalizado para el prototipo, calculado a partir de valores de referencia del sensor capacitivo. \\
+\hline
+\texttt{field2} & Temperatura & Temperatura ambiente medida por el BME280. \\
+\hline
+\texttt{field3} & Humedad ambiente & Humedad relativa medida por el BME280. \\
+\hline
+\texttt{field4} & Luminosidad & Nivel de luz ambiente medido por el BH1750. \\
+\hline
+\texttt{field5} & Presión & Presión atmosférica medida por el BME280. \\
+\hline
+\texttt{field6} & Relé activo & Indica si el relé se encuentra activado durante el envío. \\
+\hline
+\texttt{field7} & Modo seguro & Indica si la estación se encuentra en modo seguro. \\
+\hline
+\texttt{field8} & Código de estado & Código que resume el estado operativo o un posible error. \\
+\hline
+\end{tabular}
+\caption{Campos de telemetría enviados por el firmware de estación}
+\label{cuadro:campos_telemetria_firmware}
+\end{center}
+\end{table}
+
+Esta estructura permite que el canal de ThingSpeak no almacene solo medidas ambientales, sino también información operativa. El campo del relé permite comprobar si el actuador estaba activo en el momento de la publicación. El campo de modo seguro informa de si la estación está aplicando una lógica más conservadora. El código de estado permite distinguir entre funcionamiento normal, error de sensor, cooldown u otra condición relevante.
+
+El envío se construye mediante una URL de actualización de ThingSpeak. En el firmware se prepara la petición HTTP incluyendo la clave de escritura y los ocho campos definidos. De forma simplificada, la estructura de la petición HTTP enviada a ThingSpeak se muestra en el Código~\ref{cod:peticion_http_telemetria}.
+
+\begin{code}[h]
+\begin{lstlisting}[language=bash]
+http://api.thingspeak.com/update?api_key=...
+  &field1=soilPercent
+  &field2=temperatureC
+  &field3=humidityPct
+  &field4=luxValue
+  &field5=pressureHpa
+  &field6=relayActive
+  &field7=safeMode
+  &field8=statusCode
+\end{lstlisting}
+\caption[Estructura de la petición HTTP de telemetría]{Estructura de la petición HTTP de telemetría enviada a ThingSpeak}
+\label{cod:peticion_http_telemetria}
+\end{code}
+
+La estación conserva así un ciclo completo de funcionamiento autónomo: mide, interpreta, decide, actúa y publica. La Raspberry Pi puede consultar posteriormente esos datos y representarlos en el dashboard, pero no interviene en el cierre del bucle de control. Esta separación mejora la robustez del prototipo, ya que una caída de la Raspberry no impide que la estación siga aplicando sus reglas locales.
+
+El resultado de esta fase fue un firmware de estación más completo que el empleado únicamente para pruebas de sensores. La estación quedó preparada no solo para generar telemetría, sino para comportarse como un nodo sensor-actuador autónomo, con lógica de riego local, control del relé, cooldown y modo seguro. A partir de este punto, la siguiente fase de implementación se centra en la integración del módulo LTE y en la publicación estable de estos datos en ThingSpeak.
+
+\section{Integración del A7670E}
+\label{sec:integracion_a7670e}
+
+La integración del módulo A7670E-LASA fue una de las fases más sensibles de la estación de campo, ya que de este bloque depende que el nodo pueda publicar datos en ThingSpeak sin utilizar WiFi ni una conexión física con la Raspberry Pi. A diferencia de los sensores, que se comunican directamente con Arduino mediante entradas analógicas o bus I2C, el módulo LTE requiere alimentación estable, comunicación serie, configuración de red móvil y ejecución de comandos AT.
+
+Antes de conectar el A7670E al Arduino, el módulo se validó de forma independiente mediante conexión USB y comandos AT. Esta prueba previa permitió comprobar que el módem respondía correctamente, que la tarjeta SIM estaba operativa, que existía cobertura suficiente, que el registro en red LTE era correcto y que era posible realizar peticiones HTTP. Esta validación redujo el riesgo de mezclar problemas de red móvil con problemas propios de la integración con Arduino.
+
+La Tabla~\ref{cuadro:validacion_previa_a7670e} resume las comprobaciones realizadas antes de la integración definitiva con la estación.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.26\textwidth}|p{0.34\textwidth}|}
+\hline
+\textbf{Elemento comprobado} & \textbf{Resultado} & \textbf{Interpretación} \\
+\hline
+Puerto AT por USB & Correcto & El ordenador podía comunicarse con el módem mediante comandos AT. \\
+\hline
+Respuesta básica del módulo & Correcta & El comando \texttt{AT} devolvía respuesta válida. \\
+\hline
+Tarjeta SIM & Correcta & La SIM estaba preparada para operar en red. \\
+\hline
+Cobertura & Buena & La calidad de señal era suficiente para continuar las pruebas. \\
+\hline
+Registro LTE & Correcto & El módulo conseguía registrarse en la red móvil. \\
+\hline
+Datos móviles & Correctos & El módem obtenía conectividad IP. \\
+\hline
+Ping & Correcto & Se comprobó conectividad hacia Internet. \\
+\hline
+HTTP GET & Correcto & Se validó la capacidad de realizar peticiones HTTP y leer la respuesta. \\
+\hline
+\end{tabular}
+\caption{Validación previa del módulo A7670E-LASA}
+\label{cuadro:validacion_previa_a7670e}
+\end{center}
+\end{table}
+
+Una vez validado el módulo por separado, se abordó la conexión con Arduino UNO. El A7670E se comunica con el microcontrolador mediante una interfaz UART. UART, abreviatura de \textit{Universal Asynchronous Receiver-Transmitter}, es una interfaz serie asíncrona muy utilizada para comunicar microcontroladores con módulos externos. A diferencia de I2C, no emplea una línea de reloj compartida, sino dos líneas principales de datos: una de transmisión y otra de recepción. Por este motivo, las conexiones deben cruzarse: el pin \texttt{TXD} del módem se conecta a la entrada de recepción del Arduino, y la salida de transmisión del Arduino se conecta al pin \texttt{RXD} del módem. Además, ambos dispositivos deben compartir una referencia común de masa para que los niveles eléctricos de la comunicación sean interpretados correctamente.
+
+Como el Arduino UNO solo dispone de un puerto serie hardware, utilizado además para la programación y depuración por USB, se empleó \texttt{SoftwareSerial} para crear un puerto serie adicional destinado al módem.
+
+En el montaje de la estación se mantuvieron los pines \texttt{D10} y \texttt{D11}, ya cableados y probados durante las fases anteriores. El pin \texttt{D10} del Arduino se utiliza como recepción del puerto serie software y se conecta al pin \texttt{TXD} del A7670E. El pin \texttt{D11} se utiliza como transmisión hacia el módem y se conecta al pin \texttt{RXD} del A7670E mediante un divisor resistivo.
+
+La necesidad del divisor resistivo se debe a la diferencia de niveles lógicos entre Arduino UNO y el módulo LTE. Arduino UNO trabaja con señales de 5 V, mientras que la entrada serie del módulo no debe recibir directamente ese nivel si no existe adaptación integrada. Para reducir la tensión de la señal transmitida desde Arduino hacia el A7670E, se incorporó un divisor formado por resistencias de \texttt{1 k$\Omega$} y \texttt{2 k$\Omega$}. De este modo, la señal enviada desde \texttt{D11} se reduce antes de llegar al pin \texttt{RXD} del módem.
+
+La Tabla~\ref{cuadro:cableado_a7670e_arduino} recoge las conexiones principales utilizadas.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.38\textwidth}|}
+\hline
+\textbf{Pin A7670E-LASA} & \textbf{Conexión Arduino / alimentación} & \textbf{Función} \\
+\hline
+\texttt{TXD} & \texttt{D10} del Arduino & Línea de transmisión del módem hacia Arduino. \\
+\hline
+\texttt{RXD} & \texttt{D11} del Arduino mediante divisor resistivo & Línea de recepción del módem desde Arduino, con adaptación de nivel. \\
+\hline
+\texttt{GND} & \texttt{GND} común & Referencia común entre Arduino, módem, sensores y alimentación. \\
+\hline
+\texttt{VCC} & Salida regulada de 5 V & Alimentación del módulo según las especificaciones de la placa utilizada. \\
+\hline
+\texttt{PWRKEY} & Sin control desde Arduino en el montaje base & Pin de encendido no utilizado en el sketch base salvo necesidad específica del módulo. \\
+\hline
+\end{tabular}
+\caption{Conexiones principales entre Arduino UNO y el A7670E-LASA}
+\label{cuadro:cableado_a7670e_arduino}
+\end{center}
+\end{table}
+
+La alimentación del módulo se trató como un aspecto crítico. Los módulos de comunicación celular pueden presentar consumos variables, especialmente durante el registro en red y la transmisión de datos, por lo que la alimentación y el cableado deben respetar las recomendaciones de diseño del fabricante y de la placa de evaluación utilizada \cite{simcom_a7670_hardware_design,waveshare_a7670e_hat}. Por ello, el A7670E no debe alimentarse de forma improvisada desde un pin débil del microcontrolador, sino desde una línea de alimentación capaz de proporcionar corriente suficiente. En la estación, la alimentación parte de una fuente principal de 12 V y se regula mediante el LM2596 ajustado a 5 V para los elementos compatibles. Además, se incorporan condensadores de estabilización para reducir caídas puntuales de tensión y mejorar el comportamiento del conjunto.
+
+En el firmware, la comunicación con el módem se realiza mediante \texttt{SoftwareSerial}. Se mantuvo la configuración de pines que había sido validada en el montaje físico y se evitó cambiar a otros pines o a velocidades más altas sin necesidad. Esta decisión fue importante porque el uso de \texttt{SoftwareSerial} en Arduino UNO puede volverse inestable a baudios elevados. En las pruebas, el funcionamiento estable se consiguió forzando el módem a \texttt{9600} baudios.
+
+El Código~\ref{cod:softwareserial_a7670e} muestra el fragmento básico de configuración del puerto serie software utilizado para el A7670E.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+#include <SoftwareSerial.h>
+
+SoftwareSerial modem(10, 11); 
+// D10: RX Arduino <- TXD del A7670E
+// D11: TX Arduino -> RXD del A7670E mediante divisor resistivo
+\end{lstlisting}
+\caption[Configuración serie del A7670E en Arduino UNO]{Configuración serie del A7670E en Arduino UNO}
+\label{cod:softwareserial_a7670e}
+\end{code}
+
+Durante la integración se incorporó una lógica de detección de baudios del módem. Esta función prueba varias velocidades habituales y comprueba en cuál responde correctamente el comando \texttt{AT}. Si el módem responde a una velocidad distinta de \texttt{9600}, el firmware intenta reconfigurarlo mediante el comando \texttt{AT+IPR=9600}. Esta medida evita depender del estado previo del módem y mejora la reproducibilidad del montaje.
+
+El Código~\ref{cod:deteccion_baudios_a7670e} muestra de forma simplificada esta lógica.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+bool probeBaud(long baud) {
+  modem.end();
+  delay(250);
+  modem.begin(baud);
+  delay(800);
+
+  clearModemBuffer();
+  modem.println("AT");
+
+  String resp = readATResponse(2000);
+  return resp.indexOf("OK") >= 0;
+}
+
+long detectModemBaud() {
+  const long bauds[] = {9600, 115200, 57600, 38400, 19200};
+
+  for (unsigned int i = 0; i < sizeof(bauds) / sizeof(bauds[0]); i++) {
+    if (probeBaud(bauds[i])) {
+      return bauds[i];
+    }
+  }
+
+  return -1;
+}
+\end{lstlisting}
+\caption[Detección de velocidad serie del módulo LTE]{Detección de velocidad serie del módulo LTE}
+\label{cod:deteccion_baudios_a7670e}
+\end{code}
+
+La secuencia de comandos AT utilizada por la estación se divide en varias fases. Primero se comprueba que el módulo responde. Después se verifica el registro en red LTE. A continuación, se configura el contexto de datos con el APN correspondiente y se activa la conexión de datos. Finalmente, se realizan peticiones HTTP para publicar datos en ThingSpeak.
+
+Los comandos AT empleados en esta fase no se definieron de forma arbitraria, sino a partir del manual de comandos de la familia SIMCom A76XX \cite{simcom_a76xx_at_manual}. En el firmware solo se incorporaron aquellos comandos necesarios para el funcionamiento del prototipo: comprobación básica del módem, validación de SIM, consulta de cobertura, registro en red, activación del contexto de datos y ejecución de peticiones HTTP.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.30\textwidth}|p{0.35\textwidth}|}
+\hline
+\textbf{Fase} & \textbf{Comando AT} & \textbf{Objetivo} \\
+\hline
+Comprobación básica & \texttt{AT} & Verificar que el módem responde. \\
+\hline
+SIM & \texttt{AT+CPIN?} & Comprobar que la tarjeta SIM está preparada. \\
+\hline
+Cobertura & \texttt{AT+CSQ} & Obtener una medida de calidad de señal. \\
+\hline
+Registro LTE & \texttt{AT+CEREG?} & Verificar registro en red móvil. \\
+\hline
+Operador & \texttt{AT+COPS?} & Consultar operador de red. \\
+\hline
+Contexto IP & \texttt{AT+CGDCONT=1,"IP","internet"} & Configurar el APN de datos. \\
+\hline
+Adjunto a red & \texttt{AT+CGATT=1} & Activar adjunto a la red de paquetes. \\
+\hline
+Activación PDP & \texttt{AT+CGACT=1,1} & Activar el contexto de datos. \\
+\hline
+Dirección IP & \texttt{AT+CGPADDR=1} & Comprobar dirección IP asignada. \\
+\hline
+\end{tabular}
+\caption{Comandos AT utilizados en la inicialización de red del A7670E}
+\label{cuadro:comandos_at_a7670e}
+\end{center}
+\end{table}
+
+El registro en red se comprobó mediante \texttt{AT+CEREG?}. En el firmware se considera válido que el módulo devuelva un registro local o en itinerancia, representado por respuestas como \texttt{+CEREG: 0,1} o \texttt{+CEREG: 0,5}. Si el módulo no se encuentra registrado, la estación no debe intentar publicar datos en ThingSpeak, ya que todavía no dispone de conectividad móvil válida.
+
+El Código~\ref{cod:registro_lte_a7670e} muestra la comprobación empleada para detectar si el módulo está registrado en red.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+bool isNetworkRegistered() {
+  clearModemBuffer();
+  modem.println("AT+CEREG?");
+
+  String resp = readATResponse(3000);
+
+  return (resp.indexOf("+CEREG: 0,1") >= 0) ||
+         (resp.indexOf("+CEREG: 0,5") >= 0);
+}
+\end{lstlisting}
+\caption[Comprobación de registro LTE del A7670E]{Comprobación de registro LTE del A7670E}
+\label{cod:registro_lte_a7670e}
+\end{code}
+
+Una vez registrado en red, el firmware configura el contexto de datos. Para ello utiliza el APN definido para la tarjeta SIM, en este caso \texttt{internet}. Después activa el adjunto a red y el contexto de datos. Si esta fase falla, la variable interna que indica disponibilidad de datos móviles se marca como no preparada y el sistema reintenta la conexión en ciclos posteriores.
+
+La publicación de datos en ThingSpeak se realiza mediante HTTP. La estación construye una URL con la clave de escritura del canal y los campos de telemetría, siguiendo el formato de actualización de canal definido por ThingSpeak \cite{thingspeak_write_data}. A continuación, el A7670E ejecuta la secuencia de comandos HTTP proporcionada por el manual AT de la serie A76XX: inicialización del servicio, configuración del contexto, asignación de URL, ejecución de la petición y lectura de la respuesta \cite{simcom_a76xx_at_manual}. En las pruebas previas del módulo ya se había validado la ejecución de \texttt{HTTP GET} y la lectura de la respuesta, por lo que la integración con ThingSpeak se apoyó en un comportamiento ya comprobado.
+
+La secuencia HTTP utilizada en el firmware se resume en la Tabla~\ref{cuadro:secuencia_http_a7670e}.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
+\hline
+\textbf{Paso} & \textbf{Comando AT} & \textbf{Función} \\
+\hline
+Finalización previa & \texttt{AT+HTTPTERM} & Cerrar posibles sesiones HTTP anteriores. \\
+\hline
+Inicialización HTTP & \texttt{AT+HTTPINIT} & Iniciar el servicio HTTP del módem. \\
+\hline
+Contexto de datos & \texttt{AT+HTTPPARA="CID",1} & Asociar la petición al contexto de datos activo. \\
+\hline
+URL & \texttt{AT+HTTPPARA="URL", "..."} & Configurar la URL de destino. \\
+\hline
+Acción HTTP & \texttt{AT+HTTPACTION=0} & Ejecutar una petición HTTP GET. \\
+\hline
+Lectura de respuesta & \texttt{AT+HTTPREAD} & Leer el cuerpo de la respuesta devuelta. \\
+\hline
+Cierre HTTP & \texttt{AT+HTTPTERM} & Liberar el servicio HTTP tras la operación. \\
+\hline
+\end{tabular}
+\caption{Secuencia HTTP utilizada con el módulo A7670E}
+\label{cuadro:secuencia_http_a7670e}
+\end{center}
+\end{table}
+
+El Código~\ref{cod:http_get_a7670e} muestra una versión simplificada de la función empleada para realizar una petición HTTP GET a través del módem. Se ha omitido parte del tratamiento de errores para centrar el fragmento en la secuencia principal.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+bool httpGETUrl(const char *url, String &bodyOut) {
+  char urlCmd[300];
+
+  sendATAny("AT+HTTPTERM", 1500);
+  if (!sendAT("AT+HTTPINIT", 2500)) return false;
+  if (!sendAT("AT+HTTPPARA=\"CID\",1", 1500)) return false;
+
+  snprintf(urlCmd, sizeof(urlCmd), 
+           "AT+HTTPPARA=\"URL\",\"%s\"", url);
+
+  if (!sendAT(urlCmd, 4000)) return false;
+
+  modem.println("AT+HTTPACTION=0");
+  String actionResp = readATResponse(12000);
+
+  if (actionResp.indexOf("+HTTPACTION: 0,200") < 0 &&
+      actionResp.indexOf(",200,") < 0) {
+    sendATAny("AT+HTTPTERM", 1500);
+    return false;
+  }
+
+  modem.println("AT+HTTPREAD");
+  String readResp = readATResponse(8000);
+
+  sendATAny("AT+HTTPTERM", 1500);
+  bodyOut = extractHttpBody(readResp);
+  return bodyOut.length() > 0;
+}
+\end{lstlisting}
+\caption[Petición HTTP GET mediante el A7670E]{Petición HTTP GET mediante el A7670E}
+\label{cod:http_get_a7670e}
+\end{code}
+
+La gestión de errores es una parte importante de la integración. El firmware no asume que la red móvil esté siempre disponible. Si el módem no responde, si el registro LTE no se completa, si falla la activación de datos o si la respuesta HTTP no es válida, la estación marca la conectividad como no preparada y vuelve a intentarlo posteriormente. Esta decisión evita bloquear el programa completo ante un fallo temporal de red.
+
+También se tuvo en cuenta que la comunicación HTTP puede tardar varios segundos. Por ello, las funciones de lectura de respuesta incorporan tiempos máximos de espera. Si se supera el tiempo previsto sin recibir una respuesta válida, la operación se considera fallida. Este comportamiento permite que la estación continúe ejecutando su ciclo principal en lugar de quedar detenida indefinidamente esperando al módem.
+
+Desde el punto de vista de la implementación, uno de los criterios más importantes fue no modificar simultáneamente demasiadas variables. Una vez que se consiguió una combinación estable de pines, divisor resistivo, velocidad de \texttt{9600} baudios, secuencia AT y envío HTTP, esa configuración se mantuvo como base del firmware final. Cambiar pines, librerías, velocidad de serie o secuencia de inicialización al mismo tiempo habría dificultado la depuración y aumentado el riesgo de perder una integración ya validada.
+
+El resultado de esta fase fue la integración estable del A7670E-LASA dentro de la estación de campo. El módulo quedó conectado al Arduino mediante UART software, con adaptación de nivel en la línea hacia \texttt{RXD}, alimentación estabilizada y una secuencia de comandos capaz de registrar el módem en red, activar datos móviles y realizar peticiones HTTP. Con ello, la estación quedó preparada para publicar telemetría real en ThingSpeak utilizando únicamente conectividad LTE.
+
+Durante la depuración del envío HTTP se tuvo en cuenta una limitación propia del Arduino UNO: la memoria SRAM disponible es reducida. La construcción de URLs largas, el uso de buffers locales grandes y la impresión completa de cadenas por el monitor serie pueden provocar reinicios o comportamientos inestables. Por este motivo, el firmware evita imprimir la URL completa durante el funcionamiento normal, utiliza textos constantes con \texttt{F()} cuando procede y mantiene buffers de tamaño controlado para la respuesta HTTP.
+
+\section{Envío de datos a ThingSpeak}
+\label{sec:envio_datos_thingspeak}
+
+Una vez integrados los sensores y validado el módulo LTE, la siguiente fase consistió en publicar la telemetría de la estación en ThingSpeak. Este paso conecta el firmware de adquisición con la plataforma cloud utilizada para almacenar y visualizar los datos. En TierraViva, ThingSpeak actúa como destino de telemetría: cada estación publica periódicamente sus medidas y su estado operativo en el canal correspondiente.
+
+El envío de datos se realiza mediante una petición HTTP de actualización de canal. ThingSpeak permite escribir datos en un canal mediante una URL que incluye la clave de escritura y los campos que se desean actualizar \cite{thingspeak_write_data}. En el caso de TierraViva, la estación construye esa URL a partir de las variables medidas por los sensores y de varios campos internos de estado.
+
+La asociación entre variables y campos no se deja implícita en el código, sino que se mantiene fija para facilitar la lectura posterior desde la plataforma y desde la Raspberry Pi. La Tabla~\ref{cuadro:mapeo_thingspeak_firmware} recoge el mapeo utilizado por el firmware de estación.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.30\textwidth}|p{0.42\textwidth}|}
+\hline
+\textbf{Campo} & \textbf{Variable enviada} & \textbf{Descripción} \\
+\hline
+\texttt{field1} & \texttt{soilPercent} & Humedad de suelo expresada en porcentaje. \\
+\hline
+\texttt{field2} & \texttt{temperatureC} & Temperatura ambiente medida por el BME280. \\
+\hline
+\texttt{field3} & \texttt{humidityPct} & Humedad relativa ambiental medida por el BME280. \\
+\hline
+\texttt{field4} & \texttt{luxValue} & Luminosidad ambiente medida por el BH1750. \\
+\hline
+\texttt{field5} & \texttt{pressureHpa} & Presión atmosférica medida por el BME280. \\
+\hline
+\texttt{field6} & \texttt{relayActive} & Estado del relé de actuación. \\
+\hline
+\texttt{field7} & \texttt{safeMode} & Estado del modo seguro local. \\
+\hline
+\texttt{field8} & \texttt{statusCode} & Código de estado o error de la estación. \\
+\hline
+\end{tabular}
+\caption{Mapeo de variables del firmware a campos de ThingSpeak}
+\label{cuadro:mapeo_thingspeak_firmware}
+\end{center}
+\end{table}
+
+Los cinco primeros campos corresponden a variables físicas medidas por los sensores. Los tres últimos no son medidas ambientales, sino información operativa. Esta separación permite que una entrada de ThingSpeak represente no solo el estado del entorno, sino también el estado de la estación en el momento del envío. Por ejemplo, el campo \texttt{field6} permite saber si el relé estaba activo, \texttt{field7} indica si la estación se encontraba en modo seguro y \texttt{field8} resume el estado del firmware mediante un código numérico.
+
+La construcción de la petición se realiza en el firmware mediante una cadena de texto. En ella se incorpora la clave de escritura del canal y los ocho campos definidos. El Código~\ref{cod:construccion_url_thingspeak} muestra de forma simplificada esta construcción. La clave real de escritura no debe aparecer en la memoria ni en el repositorio, por lo que se representa mediante una constante.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+snprintf(url, sizeof(url),
+  "http://api.thingspeak.com/update?api_key=%s"
+  "&field1=%d"
+  "&field2=%.2f"
+  "&field3=%.2f"
+  "&field4=%d"
+  "&field5=%d"
+  "&field6=%d"
+  "&field7=%d"
+  "&field8=%d",
+  THINGSPEAK_WRITE_KEY,
+  soilPercent,
+  temperatureC,
+  humidityPct,
+  luxValue,
+  pressureHpa,
+  relayActive ? 1 : 0,
+  safeMode ? 1 : 0,
+  statusCode);
+\end{lstlisting}
+\caption[Construcción de la URL de actualización de ThingSpeak]{Construcción de la URL de actualización de ThingSpeak}
+\label{cod:construccion_url_thingspeak}
+\end{code}
+
+El formato elegido mantiene la petición simple y compatible con el servicio HTTP del A7670E. La estación no necesita generar un cuerpo JSON ni establecer una sesión persistente: basta con construir una URL de actualización y solicitarla mediante una petición HTTP GET. Esta decisión reduce la complejidad del firmware y encaja con las limitaciones de memoria y procesamiento del Arduino UNO.
+
+El envío propiamente dicho se delega en la función de comunicación HTTP implementada sobre el A7670E. Desde el punto de vista del firmware principal, el flujo consiste en preparar la URL, comprobar que el módem se encuentra listo, realizar la petición y analizar el resultado. El Código~\ref{cod:envio_thingspeak} muestra una versión simplificada de este proceso.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+bool sendTelemetryToThingSpeak() {
+  char url[350];
+  String body;
+
+  buildThingSpeakUrl(url, sizeof(url));
+
+  if (!modemReady) {
+    statusCode = 502;
+    return false;
+  }
+
+  bool ok = httpGETUrl(url, body);
+
+  if (!ok) {
+    statusCode = 503;
+    return false;
+  }
+
+  statusCode = 201;
+  return true;
+}
+\end{lstlisting}
+\caption[Envío de telemetría a ThingSpeak]{Envío de telemetría a ThingSpeak desde la estación}
+\label{cod:envio_thingspeak}
+\end{code}
+
+La gestión de respuesta es importante porque el hecho de enviar una petición al módem no garantiza por sí solo que ThingSpeak haya registrado una nueva entrada. La función HTTP debe comprobar que la acción devuelve una respuesta correcta y que el cuerpo recibido es coherente. En ThingSpeak, una escritura correcta suele devolver el identificador de la entrada creada en el canal. En cambio, una respuesta vacía, un código HTTP incorrecto o un fallo de lectura deben tratarse como envío fallido.
+
+En el firmware, este resultado se utiliza para actualizar el estado interno de la estación. Si el envío se realiza correctamente, se considera que la telemetría ha quedado publicada. Si falla, la estación no debe bloquearse indefinidamente ni asumir que el dato está disponible en la nube. En su lugar, marca el fallo mediante un código de estado y continúa con el ciclo de funcionamiento.
+
+La Tabla~\ref{cuadro:errores_envio_thingspeak} resume los principales errores considerados durante el envío.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.32\textwidth}|p{0.28\textwidth}|}
+\hline
+\textbf{Situación} & \textbf{Efecto} & \textbf{Tratamiento} \\
+\hline
+Módem no preparado & No se puede iniciar la petición HTTP. & Marcar error y reintentar más adelante. \\
+\hline
+Sin registro LTE & No existe conectividad móvil válida. & Evitar el envío y mantener operación local. \\
+\hline
+Error al abrir HTTP & El servicio HTTP del módem no queda inicializado. & Cerrar sesión HTTP y reintentar en el siguiente ciclo. \\
+\hline
+Respuesta no válida & No se confirma la escritura en ThingSpeak. & Registrar fallo de envío. \\
+\hline
+Tiempo de espera agotado & La estación no recibe respuesta dentro del intervalo previsto. & Cancelar operación y continuar ciclo. \\
+\hline
+\end{tabular}
+\caption{Errores considerados durante el envío de telemetría a ThingSpeak}
+\label{cuadro:errores_envio_thingspeak}
+\end{center}
+\end{table}
+
+Los reintentos se plantean de forma controlada. No resulta conveniente realizar bucles indefinidos de envío, ya que podrían bloquear el firmware, aumentar el consumo y dificultar la actuación local. Por ello, si una publicación falla, la estación puede marcar el error y volver a intentarlo en el siguiente ciclo de telemetría. Este enfoque mantiene la estación operativa incluso cuando la conectividad móvil o la plataforma cloud no están disponibles temporalmente.
+
+También se evita que un fallo de publicación afecte directamente a la seguridad del riego. La estación toma la decisión de actuación de forma local, por lo que una pérdida temporal de conectividad con ThingSpeak no impide aplicar las reglas básicas de riego y seguridad. La consecuencia principal de un fallo de envío es la pérdida de una muestra en la nube, no la pérdida completa del control de la bomba.
+
+El tratamiento de errores se apoya en el campo \texttt{statusCode}. Este campo permite que la estación informe posteriormente de situaciones relevantes, como fallo de comunicación, módem no preparado, cooldown activo, error de sensores o publicación correcta. Aunque el sistema no pretende implementar un protocolo complejo de diagnóstico, estos códigos ayudan a interpretar el comportamiento observado en ThingSpeak y en el dashboard.
+
+Desde el punto de vista de privacidad y seguridad práctica, la clave de escritura del canal debe tratarse como información sensible. En el código del repositorio no debería aparecer la clave real utilizada durante las pruebas. Para la memoria y los anexos, las claves deben ocultarse o sustituirse por valores genéricos. Este criterio evita que un tercero pueda escribir datos en los canales del proyecto.
+
+El resultado de esta fase fue la publicación de una muestra completa de estación en ThingSpeak. Cada envío incluye las variables de suelo y ambiente, junto con el estado del relé, el modo seguro y el código de estado. Con ello, la estación queda conectada a la plataforma cloud y puede ser supervisada de forma remota sin depender de una conexión local con la Raspberry Pi.
+
+\section{Control de relé, LED y bomba de agua}
+\label{sec:control_rele_led_bomba}
+
+La actuación física sobre el riego se realiza mediante un módulo relé controlado desde el Arduino UNO. La estación no envía únicamente datos a la nube, sino que también puede activar localmente el sistema de riego cuando se cumplen las condiciones definidas en el firmware. Para ello, el Arduino gobierna una salida digital conectada al módulo relé, y este conmuta la alimentación de la bomba de agua de 12 V.
+
+Durante las primeras pruebas de actuación se puede utilizar un LED o una carga de baja potencia como indicador visual del estado del relé. Esta prueba permite comprobar la lógica de activación sin accionar todavía la bomba real. Una vez validado el comportamiento del firmware, la carga de prueba se sustituye por la bomba de agua, manteniendo el mismo principio de control: el Arduino no alimenta directamente la carga de potencia, sino que controla el relé que abre o cierra el circuito de 12 V.
+
+El pin utilizado para el control del relé es el pin digital \texttt{D7} del Arduino UNO. Este pin se configura como salida en la inicialización del firmware y se deja en estado desactivado desde el arranque. Así se evita que un reinicio de la placa active accidentalmente la bomba. El estado seguro por defecto de la estación es, por tanto, relé desactivado y bomba apagada.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.38\textwidth}|}
+\hline
+\textbf{Elemento} & \textbf{Conexión} & \textbf{Función} \\
+\hline
+Pin de control & \texttt{D7} del Arduino UNO & Señal digital que activa o desactiva el módulo relé. \\
+\hline
+Relé \texttt{VCC} & 5 V & Alimentación lógica del módulo relé. \\
+\hline
+Relé \texttt{GND} & GND común & Referencia común con Arduino y alimentación del sistema. \\
+\hline
+Relé \texttt{IN} & \texttt{D7} & Entrada de control procedente del Arduino. \\
+\hline
+Contacto \texttt{COM} & Línea positiva de 12 V & Entrada de potencia hacia el contacto del relé. \\
+\hline
+Contacto \texttt{NO} & Positivo de la bomba & Salida hacia la bomba cuando el relé se activa. \\
+\hline
+Negativo de la bomba & GND de la fuente de 12 V & Retorno de alimentación de la bomba. \\
+\hline
+\end{tabular}
+\caption{Conexiones principales del bloque de actuación mediante relé}
+\label{cuadro:conexion_rele_bomba}
+\end{center}
+\end{table}
+
+La conexión de potencia se realiza utilizando los contactos \texttt{COM} y \texttt{NO} del relé. El contacto \texttt{NO}, abreviatura de \textit{Normally Open}, permanece abierto mientras el relé no está activado. De esta forma, aunque exista alimentación de 12 V disponible, la bomba permanece apagada hasta que el Arduino active expresamente el relé.
+
+Cuando el firmware activa el relé, el contacto \texttt{COM} queda unido al contacto \texttt{NO}, cerrando el circuito de alimentación de la bomba. La bomba recibe entonces 12 V y comienza el riego. Al finalizar el tiempo de actuación, el firmware desactiva el pin de control, el relé vuelve a abrir el circuito y la bomba queda apagada.
+
+Un aspecto práctico que debe comprobarse durante las pruebas es si el módulo relé es activo alto o activo bajo. Algunos módulos se activan cuando la entrada \texttt{IN} recibe un nivel alto, mientras que otros lo hacen con nivel bajo. Por ello, en el firmware se definen constantes específicas para representar el estado de activación y desactivación del relé, evitando escribir directamente \texttt{HIGH} o \texttt{LOW} en toda la lógica del programa.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+const int RELAY_PIN = 7;
+
+const byte RELAY_ON = HIGH;
+const byte RELAY_OFF = LOW;
+\end{lstlisting}
+\caption[Definición del pin y estados del relé]{Definición del pin y estados del relé}
+\label{cod:definicion_rele}
+\end{code}
+
+La inicialización del relé se realiza al comienzo del firmware. Primero se configura el pin como salida y después se fuerza el estado apagado. Esta secuencia evita que el pin quede flotante durante el arranque y reduce el riesgo de una activación no deseada.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+pinMode(RELAY_PIN, OUTPUT);
+digitalWrite(RELAY_PIN, RELAY_OFF);
+relayActive = false;
+\end{lstlisting}
+\caption[Inicialización segura del relé]{Inicialización segura del relé durante el arranque}
+\label{cod:inicializacion_segura_rele}
+\end{code}
+
+El control de la bomba no se implementa como una activación indefinida, sino como una actuación temporizada. Cuando el firmware decide regar, activa el relé, registra el instante de inicio y guarda la duración prevista. A partir de ese momento, el propio firmware debe encargarse de apagar la bomba al finalizar el intervalo configurado.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+void startRelay(int durationSec) {
+  unsigned long now = millis();
+
+  digitalWrite(RELAY_PIN, RELAY_ON);
+  relayActive = true;
+  relayStartMs = now;
+  relayDurationMs = (unsigned long)durationSec * 1000UL;
+
+  statusCode = 200;
+  forceTelemetry = true;
+}
+\end{lstlisting}
+\caption[Activación temporizada del relé]{Activación temporizada del relé de riego}
+\label{cod:start_relay}
+\end{code}
+
+La desactivación del relé se centraliza en una función específica. Esto evita que existan varios puntos del programa apagando la bomba de forma distinta. Siempre que se finaliza una actuación, ya sea por duración completada, por timeout de seguridad o por error, se utiliza la misma lógica de apagado.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+void stopRelay(const char *reason, bool emergencyTimeout) {
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+  relayActive = false;
+  lastIrrigationEndMs = millis();
+
+  if (emergencyTimeout) {
+    statusCode = 408;
+  }
+
+  forceTelemetry = true;
+}
+\end{lstlisting}
+\caption[Desactivación segura del relé]{Desactivación segura del relé}
+\label{cod:stop_relay}
+\end{code}
+
+La función de servicio del relé comprueba periódicamente si existe una actuación en curso. Si el tiempo transcurrido supera la duración prevista, se apaga la bomba. Además, se incorpora un tiempo máximo de seguridad para evitar que un fallo de lógica deje el relé activado durante más tiempo del permitido.
+
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+void serviceRelayState() {
+  if (!relayActive) return;
+
+  unsigned long elapsed = millis() - relayStartMs;
+
+  if (elapsed >= relayDurationMs) {
+    stopRelay("duration_completed", false);
+  } else if (elapsed >= FAILSAFE_TIMEOUT_MS) {
+    stopRelay("failsafe_timeout", true);
+  }
+}
+\end{lstlisting}
+\caption[Supervisión del estado del relé]{Supervisión del estado del relé durante el riego}
+\label{cod:service_relay_state}
+\end{code}
+
+Esta lógica permite separar la decisión de riego de la seguridad de actuación. La estación puede decidir activar la bomba cuando la humedad del suelo se encuentra por debajo del umbral definido, pero la duración real de esa activación queda limitada por el firmware. La bomba no depende de una orden externa de apagado ni de la Raspberry Pi; el apagado se realiza localmente en la propia estación.
+
+Además del tiempo máximo de actuación, se aplica un periodo mínimo entre riegos o \textit{cooldown}. Este intervalo evita que la bomba se active repetidamente si las lecturas de humedad oscilan alrededor del umbral. Si el firmware detecta que no ha transcurrido suficiente tiempo desde el último riego, no inicia una nueva actuación y actualiza el código de estado para dejar constancia de la condición.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.32\textwidth}|p{0.30\textwidth}|}
+\hline
+\textbf{Condición} & \textbf{Comportamiento del firmware} & \textbf{Estado resultante} \\
+\hline
+Arranque de la estación & Configurar \texttt{D7} como salida y escribir \texttt{RELAY\_OFF}. & Bomba apagada. \\
+\hline
+Suelo seco y condiciones válidas & Activar relé durante el tiempo configurado. & Bomba activa temporalmente. \\
+\hline
+Duración completada & Desactivar relé mediante \texttt{stopRelay()}. & Bomba apagada. \\
+\hline
+Cooldown activo & No iniciar nuevo riego. & Bomba apagada. \\
+\hline
+Duración superior al máximo & Limitar o rechazar la actuación según configuración. & Actuación controlada o no ejecutada. \\
+\hline
+Timeout de seguridad & Forzar apagado del relé. & Bomba apagada y estado de error. \\
+\hline
+Error interno o lectura no válida & No activar relé o forzar apagado si estaba activo. & Bomba apagada. \\
+\hline
+\end{tabular}
+\caption{Comportamiento del bloque de actuación ante distintas condiciones}
+\label{cuadro:comportamiento_actuacion}
+\end{center}
+\end{table}
+
+El LED de prueba resulta útil durante la validación porque permite observar visualmente el estado de activación sin conectar todavía una carga hidráulica. En esta fase, el LED puede conectarse como carga de prueba o utilizarse el propio indicador del módulo relé si el módulo lo incorpora. Una vez comprobado que la lógica de activación y apagado funciona correctamente, la prueba debe repetirse con la bomba real durante tiempos cortos y en condiciones controladas.
+
+Eléctricamente, la bomba de agua se comporta como una carga de potencia y puede introducir perturbaciones al conectarse o desconectarse. Por ello, el bloque de actuación no debe alimentarse desde el Arduino, sino desde la línea de 12 V prevista para la carga. El Arduino únicamente entrega la señal de control al módulo relé. Además, todos los bloques deben compartir masa común para que la señal de control sea interpretada correctamente.
+
+Si la bomba utilizada es de corriente continua, es recomendable incorporar protección frente a transitorios, especialmente al tratarse de una carga inductiva. Esta protección puede realizarse mediante un diodo de rueda libre o \textit{flyback} colocado en paralelo con la bomba, con la polaridad adecuada, o mediante un módulo de actuación que ya incorpore protección equivalente.
+
+La actuación ante emergencia o condición no verificable sigue el mismo principio que el modo seguro general del sistema: apagar la bomba. Una emergencia puede corresponder a un timeout de actuación, una lectura inválida, una condición interna incoherente o un fallo detectado durante el ciclo de control. En todos estos casos, el firmware debe desactivar el relé y publicar, cuando la comunicación esté disponible, un código de estado que permita identificar el motivo de la parada.
+
+El resultado de esta fase es un bloque de actuación local, temporizado y verificable. La estación no se limita a encender o apagar una salida digital, sino que controla el relé con criterios de seguridad: arranque apagado, activación limitada, apagado centralizado, cooldown entre riegos, timeout de seguridad y publicación de estado.
+
+\section{Alimentación de estación}
+\label{sec:alimentacion_estacion}
+
+La estación de campo de TierraViva se alimenta a partir de una línea principal de 12 V. Esta tensión permite alimentar el bloque de actuación, formado por el relé y la bomba de agua, y sirve como entrada para obtener la tensión de 5 V necesaria para la electrónica de control. La alimentación se ha considerado un bloque crítico del montaje, especialmente por la presencia del módulo LTE A7670E-LASA y de una carga de potencia como la bomba.
+
+El esquema de alimentación se basa en baterías de moto de 12 V y un conversor reductor LM2596 ajustado a 5 V. El LM2596S es un convertidor DC-DC de tipo \textit{step-down}, por lo que permite obtener una tensión de salida inferior y regulada a partir de una tensión de entrada mayor \cite{azdelivery_lm2596s_manual}. La línea de 12 V se utiliza para la bomba de agua, conmutada mediante los contactos del relé. La salida de 5 V del LM2596 alimenta los elementos de electrónica de baja tensión: Arduino UNO, sensores, módulo relé y módulo A7670E-LASA, siempre que la placa concreta del módem admita entrada de 5 V según su documentación.
+
+Antes de conectar los módulos electrónicos, el LM2596 debe ajustarse y verificarse con un multímetro. Esta comprobación evita aplicar una tensión incorrecta al Arduino, sensores o módem. En el prototipo se trabaja con una salida regulada de 5 V, pero la entrada procede de una tensión superior, por lo que un ajuste incorrecto del conversor podría dañar componentes sensibles.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.30\textwidth}|p{0.35\textwidth}|}
+\hline
+\textbf{Elemento} & \textbf{Alimentación} & \textbf{Observación} \\
+\hline
+Bomba de agua & 12 V & Alimentada desde la línea principal a través del relé. \\
+\hline
+Arduino UNO & 5 V regulados & Alimentación procedente del LM2596. \\
+\hline
+A7670E-LASA & 5 V regulados & Debe alimentarse desde una línea estable y con corriente suficiente. \\
+\hline
+BME280 & 5 V regulados & Siempre que el módulo utilizado admita 5 V. \\
+\hline
+BH1750 & 5 V regulados & Alimentación del módulo de luminosidad. \\
+\hline
+Sensor de humedad de suelo & 5 V regulados & Alimentación del sensor capacitivo. \\
+\hline
+Módulo relé & 5 V regulados & Alimentación de la lógica del relé. \\
+\hline
+\end{tabular}
+\caption{Distribución de alimentación en la estación de campo}
+\label{cuadro:distribucion_alimentacion_estacion}
+\end{center}
+\end{table}
+
+Un requisito importante del montaje es que todos los bloques compartan una masa común. El Arduino, el A7670E, los sensores, el relé, el LM2596 y la fuente de 12 V deben tener una referencia común de GND. Sin esta referencia compartida, las señales de control y comunicación podrían no interpretarse correctamente. Esto afecta tanto a la señal digital que activa el relé como a la comunicación serie con el módem LTE y a las lecturas de sensores.
+
+El módulo A7670E-LASA merece una atención especial. Los módulos de comunicación celular pueden presentar consumos variables durante el registro en red y la transmisión de datos, por lo que la alimentación debe ser más robusta que en un montaje formado únicamente por sensores. Para reducir inestabilidades, se incorporan condensadores de estabilización cerca de la entrada de alimentación del módem.
+
+En concreto, se utiliza un condensador electrolítico de entre 470 $\mu$F y 1000 $\mu$F entre VCC y GND del A7670E, acompañado de un condensador cerámico de 100 nF en paralelo. El condensador electrolítico ayuda a absorber caídas momentáneas de tensión asociadas a picos de consumo, mientras que el condensador cerámico contribuye al filtrado de ruido de alta frecuencia. Ambos deben colocarse físicamente lo más cerca posible del módulo LTE.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.25\textwidth}|p{0.40\textwidth}|}
+\hline
+\textbf{Condensador} & \textbf{Valor utilizado} & \textbf{Función} \\
+\hline
+Electrolítico & 470 $\mu$F -- 1000 $\mu$F & Reserva de energía ante picos de corriente del módem LTE. \\
+\hline
+Cerámico & 100 nF & Filtrado de ruido rápido y alta frecuencia. \\
+\hline
+\end{tabular}
+\caption{Condensadores de estabilización en la alimentación del A7670E}
+\label{cuadro:condensadores_alimentacion_a7670e}
+\end{center}
+\end{table}
+
+La conexión recomendada sitúa ambos condensadores entre la salida positiva de 5 V del LM2596 y la masa común, en paralelo con la alimentación del A7670E. En el caso del condensador electrolítico debe respetarse la polaridad: el terminal positivo se conecta a VCC y el terminal negativo a GND. También se debe utilizar una tensión nominal superior a la tensión de trabajo; por ejemplo, para una línea de 5 V resulta adecuado emplear condensadores de 10 V o 16 V.
+
+La bomba de agua se mantiene separada de la electrónica de control desde el punto de vista de potencia. El Arduino no alimenta la bomba, sino que únicamente activa el módulo relé. La corriente de la bomba circula por la línea de 12 V y por los contactos del relé. Esta separación reduce el riesgo de sobrecargar el microcontrolador y permite que la actuación tenga una alimentación adecuada.
+
+Aunque el sistema se valida inicialmente con una fuente o batería de 12 V, la arquitectura deja preparada una evolución hacia alimentación autónoma mediante panel solar. En una versión futura, el panel no alimentaría directamente la estación, sino que cargaría una batería mediante un regulador de carga adecuado. La estación seguiría tomando energía de la batería, manteniendo el LM2596 como etapa de adaptación a 5 V para la electrónica.
+
+Esta futura alimentación solar requeriría dimensionar la batería, el panel y el regulador de carga a partir del consumo real de la estación. En ese cálculo habría que considerar el consumo del Arduino, sensores, módulo LTE, relé y bomba, así como la frecuencia de envío de telemetría y los tiempos de actuación. Por tanto, la integración solar se plantea como una línea de mejora, no como una funcionalidad completamente validada en esta fase del prototipo.
+
+El resultado de esta etapa es un esquema de alimentación coherente con las necesidades de la estación: entrada principal de 12 V, conversión regulada a 5 V, masas comunes, estabilización próxima al módem LTE y separación entre electrónica de control y carga de potencia. Esta organización permite alimentar sensores, comunicación y actuación manteniendo un criterio de seguridad y reproducibilidad adecuado para el prototipo.

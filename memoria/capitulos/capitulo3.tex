@@ -40,7 +40,7 @@ RF-08 & Decisión local de riego & Cada estación debe evaluar localmente si las
 \hline
 RF-09 & Actuación local sobre el riego & La estación debe accionar físicamente el sistema de riego mediante relé y bomba de agua durante un tiempo limitado por firmware. & Prueba controlada con relé y bomba/carga de prueba. \\
 \hline
-RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé y un código de estado o evento que permita conocer si se ha producido una actuación, una situación de reposo o una incidencia. & Verificación de relay\_state y status/event code en ThingSpeak. \\
+RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé, el indicador de modo seguro y un código de estado que permita conocer si se ha producido una actuación, una situación de reposo o una incidencia. & Verificación de relay\_state, safe\_mode y statusCode en ThingSpeak. \\
 \hline
 RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, cooldown activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
 \hline
@@ -56,7 +56,7 @@ Los requisitos RF-04, RF-05 y RF-06 cubren el flujo de datos desde la estación 
 
 El requisito RF-07 se centra en la interacción con el usuario. Aunque el sistema pueda funcionar internamente, su utilidad queda limitada si no existe una forma clara de consultar el estado de las estaciones. Por ello, el dashboard debe permitir revisar las medidas recientes, detectar si los datos llegan correctamente y comprobar el estado general del sistema sin recurrir a mensajes de consola o consultas manuales a la base de datos.
 
-Los requisitos RF-08, RF-09 y RF-10 introducen la parte de control. En la arquitectura final, la decisión de riego se ejecuta localmente en cada estación mediante reglas verificables, especialmente durante esta primera versión del prototipo. La estación no depende de una decisión externa para actuar: evalúa sus sensores, comprueba las condiciones de seguridad, activa la bomba si corresponde y publica después su estado. Esta publicación permite que la Raspberry Pi supervise lo ocurrido y conserve un histórico, sin convertirse en un punto único de decisión para el riego.
+Los requisitos RF-08, RF-09 y RF-10 introducen la parte de control. En la arquitectura final, la decisión de riego se ejecuta localmente en cada estación mediante reglas verificables, especialmente durante esta primera versión del prototipo. La estación no depende de una decisión externa para actuar: evalúa sus sensores, comprueba las condiciones de seguridad, activa la bomba si corresponde y publica después su estado. Esta publicación incluye las medidas ambientales, el estado del relé, el indicador de modo seguro y un código de estado. Con esa información, la Raspberry Pi puede supervisar lo ocurrido y conservar un histórico sin convertirse en un punto único de decisión para el riego.
 
 El requisito RF-11 se ha definido de forma explícita porque la actuación sobre riego implica un riesgo mayor que la simple monitorización. Un fallo de software, una lectura inválida, un reinicio inesperado o una comunicación incompleta no deben provocar una activación indefinida de la bomba. Por ese motivo, el sistema debe adoptar un comportamiento conservador: ante una situación no válida o no verificable, el estado seguro será mantener la bomba apagada.
 
@@ -488,7 +488,7 @@ Canal TierraViva\_A & Registro de telemetría y estado de la estación A. & Perm
 \hline
 Canal TierraViva\_B & Registro de telemetría y estado de la estación B. & Permite separar los datos de la estación B y facilita el crecimiento a varias zonas monitorizadas. \\
 \hline
-Field 1 & Humedad del suelo (raw). & Valor bruto utilizado como variable principal para la decisión local de riego. \\
+Field 1 & Humedad del suelo normalizada (\%). & Valor calculado por el firmware a partir de la lectura bruta del sensor capacitivo y utilizado como variable principal para la decisión local de riego. \\
 \hline
 Field 2 & Temperatura ambiente. & Variable de contexto para interpretar las condiciones del entorno. \\
 \hline
@@ -500,9 +500,9 @@ Field 5 & Presión atmosférica. & Dato ambiental adicional proporcionado por el
 \hline
 Field 6 & Estado del relé, 0 apagado y 1 activo. & Permite supervisar si la estación está actuando sobre el riego. \\
 \hline
-Field 7 & Código de estado o evento. & Permite distinguir funcionamiento normal, riego ejecutado, cooldown, error de sensor o modo seguro. \\
+Field 7 & Modo seguro. & Indica si la estación se encuentra en modo seguro: \texttt{0} para funcionamiento normal y \texttt{1} para modo seguro activo. \\
 \hline
-Field 8 & Campo auxiliar o código de depuración. & Queda disponible para diagnóstico o ampliaciones sin modificar la estructura principal. \\
+Field 8 & Código de estado. & Código numérico publicado por la estación para indicar el resultado del ciclo de funcionamiento o una incidencia detectada. \\
 \hline
 API HTTP & Escritura de telemetría desde las estaciones y lectura desde Raspberry Pi. & Reduce la complejidad de integración frente a soluciones que requieren infraestructura propia. \\
 \hline
