@@ -13,6 +13,13 @@ La definición de estos requisitos permite separar con claridad qué debe hacer 
 
 El sistema se plantea a partir de estaciones de campo capaces de obtener medidas del entorno, evaluar localmente reglas sencillas de riego y enviar la información a una plataforma intermedia. A partir de esos datos, el sistema de supervisión debe poder registrar el histórico, visualizar el estado del prototipo y mostrar las actuaciones realizadas por cada estación. La estación de campo debe ejecutar la actuación de forma autónoma y segura, evitando activaciones indefinidas, riegos repetidos o estados peligrosos ante lecturas inválidas, errores de comunicación o fallos eléctricos.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_3_1_requisitos_funcionales.png}
+    \caption{Relación entre los requisitos funcionales y el ciclo completo de funcionamiento del sistema. TierraViva debe medir, publicar telemetría, registrar histórico, visualizar el estado, decidir localmente y actuar sobre el riego de forma segura.}
+    \label{fig:cap3_requisitos_funcionales}
+\end{figure}
+
 En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requisitos funcionales considerados para el diseño del prototipo.
 
 \begin{table}[H]
@@ -67,7 +74,14 @@ Estos requisitos funcionales servirán como base para las decisiones de diseño 
 
 Los requisitos no funcionales describen las condiciones de calidad que debe cumplir el sistema, más allá de las funciones concretas indicadas en el apartado anterior. En TierraViva estos requisitos son especialmente importantes porque el proyecto no consiste únicamente en que cada bloque funcione de forma aislada, sino en que el conjunto pueda integrarse, probarse, ampliarse y defenderse como un prototipo de ingeniería.
 
-Al tratarse de un Trabajo Fin de Grado, el sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No se pretende desarrollar un producto industrial cerrado, pero sí una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta. La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
+El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No se pretende desarrollar un producto industrial cerrado, pero sí una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta. La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_3_2_requisitos_no_funcionales.png}
+    \caption{Requisitos no funcionales considerados en el diseño del prototipo. Estos criterios permiten evaluar la calidad técnica del sistema más allá de las funciones implementadas.}
+    \label{fig:cap3_requisitos_no_funcionales}
+\end{figure}
 
 \begin{table}[H]
 \begin{center}
@@ -123,12 +137,19 @@ Además de los requisitos funcionales y no funcionales, el sistema necesita defi
 
 Las especificaciones temporales no se plantean como valores rígidos e inmodificables, sino como parámetros iniciales de diseño. Durante el desarrollo y la validación del prototipo pueden ajustarse en función de los resultados obtenidos, siempre manteniendo dos criterios principales: evitar comunicaciones innecesarias y garantizar que cualquier actuación sobre el riego quede limitada en el tiempo.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figs/figura_3_3_especificaciones_temporales.png}
+    \caption{Especificaciones temporales y operativas iniciales del sistema.}
+    \label{fig:cap3_especificaciones_temporales}
+\end{figure}
+
 En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales especificaciones temporales y operativas consideradas para TierraViva.
 
 \begin{table}[H]
 \begin{center}
 \small
-\begin{tabular}{|p{0.13\textwidth}|p{0.30\textwidth}|p{0.18\textwidth}|p{0.29\textwidth}|}
+\begin{tabular}{|p{0.10\textwidth}|p{0.30\textwidth}|p{0.18\textwidth}|p{0.29\textwidth}|}
 \hline
 \textbf{Código} & \textbf{Parámetro} & \textbf{Valor inicial} & \textbf{Criterio operativo} \\
 \hline
@@ -261,7 +282,7 @@ En términos generales, el sistema se divide en cuatro bloques principales:
 La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general de la arquitectura planteada.
 
 \begin{figure}[H]
-  \hspace{-0.5cm}\centerline{\resizebox{.92\textwidth}{!}{\includegraphics{figs/arquitecturaTierraViva.png}}}
+  \hspace{-0.5cm}\centerline{\resizebox{1.2\textwidth}{!}{\includegraphics{figs/arquitecturaTierraViva.png}}}
   \caption{Arquitectura general planteada para TierraViva.}
 \label{fig:arquitectura_general_tierraviva}
 \end{figure}
@@ -276,6 +297,13 @@ Esta división condiciona el resto de decisiones del proyecto. La actuación sob
 La selección de variables medidas se ha realizado teniendo en cuenta el papel que deben cumplir dentro del prototipo: monitorizar el estado de una zona de cultivo y aportar información suficiente para alimentar la decisión local de riego en cada estación. No se pretende medir todos los parámetros agronómicos posibles, sino elegir un conjunto reducido de variables que permita validar el comportamiento del prototipo de forma razonable, reproducible y coherente con el alcance del TFG.
 
 En TierraViva se combinan variables del suelo y variables ambientales. La humedad del suelo se considera la variable principal para la decisión local de riego, ya que aporta información directa sobre la disponibilidad de agua en el sustrato. Las variables ambientales, como temperatura, humedad relativa, presión atmosférica y luminosidad, no sustituyen a la humedad del suelo, pero ayudan a interpretar el contexto en el que evoluciona la zona monitorizada. Esta combinación es habitual en sistemas de agricultura de precisión basados en sensores, donde el interés no está solo en una lectura aislada, sino en la observación conjunta del entorno \cite{soussi2024smart}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_3_6_variables_sensores.png}
+    \caption{Variables seleccionadas para la monitorización de TierraViva. La humedad del suelo se utiliza como variable principal para la decisión local de riego, mientras que temperatura, humedad relativa, presión y luminosidad aportan contexto ambiental.}
+    \label{fig:cap3_variables_sensores}
+\end{figure}
 
 \begin{table}[H]
 \begin{center}
@@ -348,6 +376,13 @@ En conjunto, la combinación seleccionada cubre las variables mínimas necesaria
 \label{sec:eleccion_plataformas_control}
 
 La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un lado, las estaciones de campo necesitan una plataforma sencilla y cercana al hardware, capaz de leer sensores, comunicarse con el módulo LTE, aplicar reglas locales de riego y controlar el relé de la bomba. Por otro lado, el sistema necesita una plataforma con mayor capacidad software para consultar datos, almacenarlos, exponer una API y servir el dashboard web. Esta segunda plataforma no actúa como cerebro del riego, sino como sistema de supervisión e histórico. Esta diferencia de funciones justifica el uso combinado de Arduino UNO y Raspberry Pi 5, en lugar de concentrar todo el sistema en una única plataforma.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_3_7_plataformas_control_supervision.png}
+    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5. Arduino se emplea como controlador local de estación, mientras que Raspberry Pi se reserva para supervisión, almacenamiento, API y visualización.}
+    \label{fig:cap3_plataformas_control_supervision}
+\end{figure}
 
 Arduino UNO se ha seleccionado como plataforma principal de las estaciones de campo. Se trata de una placa basada en el microcontrolador ATmega328P, con funcionamiento a 5 V, 14 pines digitales, 6 entradas analógicas, 32 KB de memoria flash, 2 KB de SRAM y frecuencia de reloj de 16 MHz \cite{arduino_uno_rev3_specs}. Aunque sus prestaciones son limitadas frente a plataformas más modernas, resultan suficientes para las tareas previstas en la estación: lectura de sensores, gestión de tiempos, comunicación serie con el módulo A7670E-LASA y control de una salida digital asociada al relé.
 
@@ -475,6 +510,13 @@ También se consideraron plataformas más completas, como ThingsBoard, que ofrec
 
 ThingSpeak se ha seleccionado porque proporciona una estructura sencilla basada en canales y campos, una API HTTP fácil de utilizar desde dispositivos embebidos y herramientas básicas de visualización. Según la documentación de MathWorks, ThingSpeak permite escribir datos en canales mediante llamadas HTTP de la API REST, además de otros métodos como MQTT o funciones de MATLAB \cite{thingspeak_docs,thingspeak_write_data}. Esta característica encaja especialmente bien con el módulo A7670E-LASA, ya que el envío de datos puede implementarse mediante comandos AT y peticiones HTTP, sin necesidad de incorporar una pila de comunicación más compleja en el firmware de Arduino.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.87\textwidth]{figs/figura_3_9_thingspeak_capa_intermedia.png}
+    \caption{Uso de ThingSpeak como capa intermedia entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi.}
+    \label{fig:cap3_thingspeak_capa_intermedia}
+\end{figure}
+
 El concepto de canal resulta especialmente útil para organizar la información del sistema. Cada canal puede agrupar varias variables relacionadas mediante campos numerados. En TierraViva, este modelo permite representar de forma clara las medidas y estados de una estación: humedad del suelo, temperatura, humedad relativa, luminosidad, presión atmosférica, estado del relé, código de estado o evento y un campo auxiliar reservado para depuración o ampliaciones. De esta forma, cada publicación de telemetría queda almacenada como una entrada temporal asociada a un conjunto de campos.
 
 \begin{table}[H]
@@ -535,6 +577,13 @@ La estructura concreta de canales utilizada en TierraViva se desarrolla con mayo
 
 La Raspberry Pi se ha seleccionado como sistema de supervisión software de TierraViva. Su función no es sustituir a las estaciones de campo, leer directamente los sensores ni decidir la activación de la bomba, sino consultar la información publicada por las estaciones, registrar un histórico local y ofrecer una interfaz de consulta. Esta separación resulta importante porque las estaciones se encuentran en campo y se comunican de forma remota, mientras que la Raspberry actúa como nodo de supervisión e histórico.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_3_10_arquitectura_software_raspberry.png}
+    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el dashboard web.}
+    \label{fig:cap3_arquitectura_software_raspberry}
+\end{figure}
+
 Durante el desarrollo se implementó primero un prototipo local basado en MQTT, SQLite, FastAPI y un dashboard web. Esta fase previa permitió validar la cadena software sin depender todavía de la comunicación LTE ni de la plataforma cloud final. En ese prototipo, los datos llegaban a la Raspberry, se publicaban en un broker MQTT local, eran procesados por un backend en Python, se almacenaban en SQLite y se exponían mediante una API para que el dashboard pudiera consultarlos.
 
 Este prototipo local no representa la arquitectura final de comunicación con las estaciones remotas, pero sí tuvo un papel importante dentro del proceso de desarrollo. Permitió comprobar ante el tutor que la Raspberry Pi podía recibir telemetría, almacenarla, servirla mediante una API y mostrarla en una interfaz web. El código de esta fase se conserva en el repositorio del proyecto dentro del directorio de prototipos, dejando explícito que se trata de una validación previa y no del sistema final basado en LTE y ThingSpeak \cite{tierraviva_github_mqtt}.
@@ -591,8 +640,7 @@ La selección de materiales se ha realizado buscando un equilibrio entre funcion
 
 Los materiales empleados no deben entenderse como una simple lista de compra, sino como el conjunto de bloques físicos necesarios para que TierraViva pueda medir, comunicar, almacenar, visualizar y actuar sobre el riego. Cada componente cumple una función concreta dentro de la arquitectura y se ha seleccionado en coherencia con los requisitos definidos anteriormente.
 
-En la Tabla~\ref{cuadro:materiales_cap3} se resumen los principales materiales utilizados o previstos en el prototipo.
-
+La Tabla~\ref{cuadro:materiales_cap3} resume los componentes principales utilizados en TierraViva desde un punto de vista funcional. Con el fin de mantener la legibilidad del capítulo y separar la justificación técnica de la documentación auxiliar, las imágenes identificativas de los componentes y sus referencias correspondientes se recogen en el Anexo~\ref{anexo:materiales}.
 \begin{table}[H]
 \begin{center}
 \small
@@ -656,7 +704,7 @@ La alimentación se plantea a partir de una fuente o batería de 12 V, ya que la
 
 También se consideran materiales auxiliares como cableado Dupont (sin soldadura), protoboard, conectores, resistencias y condensadores. Aunque puedan parecer componentes secundarios, son relevantes durante la fase de prototipado porque permiten modificar conexiones, aislar fallos, adaptar niveles eléctricos y estabilizar la alimentación de los módulos. En particular, la adaptación de nivel entre Arduino y el módulo LTE debe cuidarse para evitar aplicar señales de 5 V a entradas que trabajen a niveles inferiores. Del mismo modo, el uso de condensadores de desacoplo y estabilización ayuda a reducir caídas puntuales de tensión y comportamientos erráticos asociados a módulos con consumo variable, como el A7670E-LASA o el bloque de actuación.
 
-Con estos materiales se puede construir una arquitectura completa sin recurrir a equipos industriales de alto coste. El detalle completo de componentes, referencias comerciales, conexiones eléctricas y estado de validación se recoge en los Anexos~\ref{anexo:materiales} y \ref{anexo:esquemas_conexion}.
+Con estos materiales se puede construir una arquitectura completa sin recurrir a equipos industriales de alto coste.
 
 \section{Riesgos técnicos y medidas de mitigación}
 \label{sec:riesgos_tecnicos_mitigacion}

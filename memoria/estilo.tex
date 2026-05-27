@@ -22,8 +22,17 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{tikz}
+\usepackage{array}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit}
+\usepackage{xcolor}
 
+\newcommand{\imgmaterial}[2]{%
+    \IfFileExists{#1}{%
+        \includegraphics[width=#2,keepaspectratio]{#1}%
+    }{%
+        \fbox{\parbox[c][1.4cm][c]{#2}{\centering\scriptsize Imagen\\no encontrada}}%
+    }%
+}
 % Para que no parta las palabras
 \pretolerance=10000
 
