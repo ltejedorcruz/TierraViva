@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TierraViva Dashboard</title>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/tierraviva.css">
+
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <img class="brand-logo" src="images/TierraViva_Logo.png" alt="Logo TierraViva" />
+        <div class="title">
+          <div class="eyebrow">Agrotech · Riego inteligente y sostenible</div>
+          <h1>TierraViva Dashboard</h1>
+          <p>Centro de control local para estaciones IoT, sensórica ambiental, ThingSpeak, Raspberry Pi y SQLite.</p>
+        </div>
+      </div>
+
+      <div class="header-side">
+        <div class="university-slot">
+          <img class="university-logo" src="images/logo_urjc.png" alt="Logo URJC">
+        </div>
+
+        <div class="top-controls">
+          <select id="stationSelect" class="select" aria-label="Seleccionar estación"></select>
+          <div class="pill" id="connectionPill">
+            <span class="dot" id="connectionDot"></span>
+            <span id="connectionText">Cargando...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid cards">
+      <div class="card">
+        <div class="metric-title"><span>Humedad suelo</span><span id="soilStateLabel" class="badge ok">—</span></div>
+        <div class="metric-value soil" id="soilValue">—</div>
+        <div class="metric-sub">Umbrales: <span id="soilThresholds">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Temperatura</span><span class="muted">°C</span></div>
+        <div class="metric-value temp" id="tempValue">—</div>
+        <div class="metric-sub">Lectura actual</div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Humedad ambiental</span><span class="muted">%</span></div>
+        <div class="metric-value hum" id="humValue">—</div>
+        <div class="metric-sub">Lectura actual</div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Luminosidad</span><span class="muted">lux</span></div>
+        <div class="metric-value light" id="lightValue">—</div>
+        <div class="metric-sub">Lectura actual</div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Presión</span><span class="muted">hPa</span></div>
+        <div class="metric-value pressure" id="pressureValue">—</div>
+        <div class="metric-sub">Lectura actual</div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Última lectura</span><span class="muted">estado</span></div>
+        <div class="metric-value" id="lastUpdateValue">—</div>
+        <div class="metric-sub" id="lastSeenValue">Esperando datos...</div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Estado / evento</span></div>
+        <div class="metric-value event" id="eventValue">—</div>
+        <div class="metric-sub">Evento o mensaje de sistema</div>
+      </div>
+
+      <div class="card">
+        <div class="metric-title"><span>Debug / código</span></div>
+        <div class="metric-value debug" id="debugValue">—</div>
+        <div class="metric-sub">Código auxiliar / diagnóstico</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>Gráficas</h2>
+      <small>Últimas lecturas almacenadas</small>
+    </div>
+
+    <div class="grid chart-grid">
+      <div class="card chart-card">
+        <h3>Humedad del suelo</h3>
+        <div class="chart-wrap">
+          <svg id="chartSoil" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h3>Temperatura</h3>
+        <div class="chart-wrap">
+          <svg id="chartTemp" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h3>Humedad ambiental</h3>
+        <div class="chart-wrap">
+          <svg id="chartHum" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h3>Luminosidad</h3>
+        <div class="chart-wrap">
+          <svg id="chartLight" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h3>Estado del sistema / evento</h3>
+        <div class="chart-wrap">
+          <svg id="chartEvent" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h3>Debug / código de estado</h3>
+        <div class="chart-wrap">
+          <svg id="chartDebug" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="section-title">
+      <h2>Resumen histórico</h2>
+      <small id="statsWindow">Últimas 24 horas</small>
+    </div>
+
+    <div class="grid stats-grid" id="statsGrid"></div>
+    
+    <div class="section-title">
+      <h2>Últimas lecturas</h2>
+      <small>Tabla de datos en vivo</small>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Suelo %</th>
+            <th>Temp °C</th>
+            <th>HR %</th>
+            <th>Luz lx</th>
+            <th>Presión hPa</th>
+          </tr>
+        </thead>
+        <tbody id="readingsBody">
+          <tr><td colspan="6" class="muted">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-note" id="footerNote">
+      Auto-refresco cada 3 segundos.
+    </div>
+    <div class="copyright-note">
+        &copy; 2026 <strong>TierraViva</strong> · Trabajo Fin de Grado · Lucía Tejedor de la Cruz
+    </div>
+  </div>
+
+  <script src="./js/tierraviva.js"></script>
+</body>
+</html>
