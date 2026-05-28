@@ -69,32 +69,16 @@ Alimentación & 12 V con regulación a 5 V & 12 V con regulación a 5 V \\
 \end{center}
 \end{table}
 
-La Tabla~\ref{cuadro:configuracion_estaciones} resume esta configuración. El objetivo de mantener estaciones equivalentes es facilitar la reproducción del sistema: una vez validada la estación A, la estación B puede construirse replicando el mismo montaje y modificando únicamente los parámetros de identificación y comunicación. Esta decisión también simplifica la depuración, ya que cualquier diferencia de comportamiento entre estaciones puede analizarse a partir de una base hardware común.
+La Figura~\ref{fig:cap4_bloques_estacion_campo} resume esta configuración. El objetivo de mantener estaciones equivalentes es facilitar la reproducción del sistema: una vez validada la estación A, la estación B puede construirse replicando el mismo montaje y modificando únicamente los parámetros de identificación y comunicación. Esta decisión también simplifica la depuración, ya que cualquier diferencia de comportamiento entre estaciones puede analizarse a partir de una base hardware común.
 
 Desde el punto de vista interno, cada estación se organiza en cuatro bloques funcionales. El primero es el bloque de adquisición, formado por el sensor capacitivo de humedad del suelo, el BME280 y el BH1750. El segundo es el bloque de decisión local, ejecutado en el firmware del Arduino. El tercero es el bloque de comunicación, formado por el A7670E-LASA y la lógica de publicación mediante HTTP. El cuarto es el bloque de actuación, formado por la salida digital del Arduino, el módulo relé y la bomba de agua de 12 V.
 
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.25\textwidth}|p{0.32\textwidth}|p{0.33\textwidth}|}
-\hline
-\textbf{Bloque interno} & \textbf{Elementos implicados} & \textbf{Responsabilidad} \\
-\hline
-Adquisición & Sensores y Arduino UNO & Obtener lecturas periódicas del suelo y del entorno. \\
-\hline
-Decisión local & Arduino UNO & Evaluar humedad del suelo, cooldown, errores y condiciones de seguridad. \\
-\hline
-Comunicación & Arduino UNO y A7670E-LASA & Publicar telemetría, estado y eventos en ThingSpeak. \\
-\hline
-Actuación & Arduino UNO, relé y bomba & Ejecutar el riego localmente durante un tiempo limitado. \\
-\hline
-Alimentación & Fuente 12 V, LM2596 y condensadores & Proporcionar tensión adecuada y estabilidad eléctrica al montaje. \\
-\hline
-\end{tabular}
-\caption{Bloques internos de una estación de campo}
-\label{cuadro:bloques_internos_estacion}
-\end{center}
-\end{table}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs_png/figura_4_2_bloques_estacion_campo.png}
+    \caption{Bloques funcionales internos de una estación de campo. Cada estación integra adquisición de datos, decisión local, comunicación LTE/HTTP, actuación mediante relé y bomba de agua, y alimentación regulada.}
+    \label{fig:cap4_bloques_estacion_campo}
+\end{figure}
 
 El firmware de estación debe mantener esta separación de responsabilidades. En primer lugar, realiza la lectura de sensores y genera una estructura de datos con las variables medidas. Después, comprueba si las lecturas son válidas y evalúa la regla local de riego. Si la humedad del suelo indica sequedad, no existe cooldown activo y no se detecta una condición de error, la estación puede activar el relé durante el tiempo máximo configurado.
 
@@ -119,32 +103,13 @@ A continuación, se configura el contexto de datos. Para ello, el módulo debe d
 
 La fase de envío consiste en construir una URL de actualización de ThingSpeak con los campos de telemetría correspondientes. Cada estación incluye sus medidas y estados en los campos definidos para su canal: humedad de suelo, temperatura, humedad relativa, luminosidad, presión, estado del relé, código de estado o evento y un campo auxiliar de diagnóstico. El A7670E-LASA realiza entonces una petición HTTP hacia la API de ThingSpeak.
 
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.22\textwidth}|p{0.31\textwidth}|p{0.35\textwidth}|}
-\hline
-\textbf{Fase} & \textbf{Acción principal} & \textbf{Resultado esperado} \\
-\hline
-Inicialización & Comprobar comunicación con el módulo mediante comandos AT. & El módulo responde correctamente y queda listo para continuar. \\
-\hline
-SIM & Verificar que la tarjeta SIM está disponible y sin PIN pendiente. & La SIM se encuentra preparada para registrarse en red. \\
-\hline
-Registro en red & Comprobar el registro LTE y la calidad de señal. & La estación confirma que existe cobertura móvil suficiente. \\
-\hline
-Contexto de datos & Configurar APN y comprobar dirección IP. & El módulo dispone de conectividad IP para realizar peticiones. \\
-\hline
-Envío HTTP & Construir la petición de actualización y enviarla a ThingSpeak. & La plataforma recibe una nueva entrada de telemetría y estado. \\
-\hline
-Gestión de respuesta & Analizar el código de respuesta y cerrar la sesión HTTP. & La estación confirma si el envío ha sido correcto o registra un error. \\
-\hline
-\end{tabular}
-\caption{Fases de comunicación LTE/HTTP en una estación de campo}
-\label{cuadro:fases_lte_http}
-\end{center}
-\end{table}
-
-La Tabla~\ref{cuadro:fases_lte_http} resume el flujo seguido por la estación. Esta secuencia no se ejecuta únicamente como una lista fija de comandos AT, sino como una lógica de comunicación con comprobaciones intermedias. Si una fase falla, el firmware debe evitar continuar como si el envío hubiera sido correcto. Por ejemplo, no tiene sentido construir una petición HTTP si el módulo no está registrado en red o si no dispone de dirección IP.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs_png/figura_4_3_secuencia_lte_http.png}
+    \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA. La estación verifica el módem, la SIM, el registro en red, el contexto de datos, la petición HTTP y la respuesta antes de considerar válida la publicación.}
+    \label{fig:cap4_secuencia_lte_http}
+\end{figure}
+La Figura~\ref{fig:cap4_secuencia_lte_http} resume el flujo seguido por la estación. Esta secuencia no se ejecuta únicamente como una lista fija de comandos AT, sino como una lógica de comunicación con comprobaciones intermedias. Si una fase falla, el firmware debe evitar continuar como si el envío hubiera sido correcto. Por ejemplo, no tiene sentido construir una petición HTTP si el módulo no está registrado en red o si no dispone de dirección IP.
 
 En la comunicación con ThingSpeak se utiliza el modelo HTTP de petición-respuesta. La estación envía una petición de escritura al canal correspondiente y espera una respuesta de la plataforma. En un envío correcto, ThingSpeak devuelve una confirmación que permite interpretar que la entrada ha sido registrada. Si la respuesta indica error, si no llega respuesta o si se agota el tiempo de espera, la estación debe tratar el envío como fallido.
 
@@ -236,29 +201,12 @@ Una vez recuperados los datos, la Raspberry debe validarlos antes de almacenarlo
 
 El segundo bloque funcional es el almacenamiento local en SQLite. Aunque ThingSpeak conserva las entradas publicadas en sus canales, TierraViva mantiene un histórico propio en la Raspberry Pi. Este histórico permite registrar las lecturas recibidas, los estados de relé, los eventos de riego publicados por las estaciones y las incidencias detectadas por el sistema de supervisión. De esta manera, la Raspberry no actúa únicamente como un visor de la nube, sino como un sistema con memoria propia del comportamiento del prototipo.
 
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.25\textwidth}|p{0.36\textwidth}|p{0.29\textwidth}|}
-\hline
-\textbf{Bloque} & \textbf{Función} & \textbf{Resultado esperado} \\
-\hline
-Lectura de ThingSpeak & Consulta periódica de los canales de las estaciones. & Últimas lecturas y estados disponibles. \\
-\hline
-Validación de datos & Comprobación de campos, rangos y antigüedad de las lecturas. & Detección de datos inválidos, ausentes u obsoletos. \\
-\hline
-SQLite & Almacenamiento local de lecturas, estados y eventos. & Histórico propio del sistema. \\
-\hline
-FastAPI & Exposición de datos mediante endpoints HTTP. & Respuestas estructuradas para el dashboard. \\
-\hline
-Dashboard web & Visualización del estado del sistema. & Interfaz de supervisión para el usuario. \\
-\hline
-\end{tabular}
-\caption{Funciones principales de la Raspberry Pi dentro de TierraViva}
-\label{cuadro:funciones_raspberry}
-\end{center}
-\end{table}
-
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs_png/figura_4_5_pipeline_raspberry_supervision.png}
+    \caption{Pipeline software de supervisión en Raspberry Pi. El sistema consulta ThingSpeak, valida los datos, almacena histórico en SQLite, expone la información mediante FastAPI y actualiza el dashboard web.}
+    \label{fig:cap4_pipeline_raspberry_supervision}
+\end{figure}
 La API se desarrolla con FastAPI y actúa como capa intermedia entre la base de datos y el dashboard web. En lugar de que la interfaz consulte directamente SQLite o ThingSpeak, realiza peticiones a la API para obtener las últimas lecturas, el estado de las estaciones o el histórico necesario. Esta separación facilita la evolución del dashboard sin modificar la lógica de almacenamiento o consulta.
 
 El dashboard web constituye la parte visible del sistema de supervisión. A través de él se pueden consultar las últimas medidas recibidas, comprobar el estado de cada estación, observar si existe comunicación reciente y revisar el estado del relé o los eventos de riego publicados por las estaciones. Su función no es ejecutar directamente acciones sobre el hardware, sino permitir la supervisión del sistema de forma clara. Esto resulta útil tanto durante las pruebas como en una posible utilización real del prototipo.
@@ -285,6 +233,13 @@ De forma conceptual, la decisión local puede resumirse así:
     \item si no se ha detectado un error crítico que afecte a los sensores, la alimentación o el estado seguro del relé;
     \item entonces la estación activa el relé durante un tiempo limitado y registra o publica el evento cuando la comunicación está disponible.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs_png/figura_4_6_decision_local_riego.png}
+    \caption{Lógica conceptual de decisión local de riego en cada estación. La bomba solo se activa si la lectura es válida, se cumple la condición de sequedad, no existe cooldown activo y no se detecta ningún error crítico.}
+    \label{fig:cap4_decision_local_riego}
+\end{figure}
 
 El uso de un \textit{cooldown} evita activaciones repetidas en poco tiempo. Esta medida es necesaria porque las lecturas de humedad pueden oscilar alrededor del umbral o variar lentamente tras una actuación. Sin un periodo mínimo entre riegos, la estación podría activar la bomba varias veces de forma consecutiva. Por tanto, el firmware debe registrar el instante de la última actuación y bloquear nuevos riegos hasta que se supere el tiempo mínimo configurado.
 
@@ -334,34 +289,14 @@ El criterio general adoptado es conservador: ante una situación no verificable,
 
 El modo seguro se aplica tanto en el arranque de la estación como durante el funcionamiento normal. Al iniciar el firmware, el pin de control del relé debe configurarse en estado desactivado antes de procesar sensores o comunicaciones. De esta forma, un reinicio de la placa no provoca una activación accidental de la bomba. El estado inicial del sistema es, por tanto, relé desactivado y bomba apagada.
 
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.30\textwidth}|p{0.33\textwidth}|p{0.27\textwidth}|}
-\hline
-\textbf{Situación detectada} & \textbf{Riesgo asociado} & \textbf{Respuesta segura} \\
-\hline
-Arranque o reinicio de la estación & Activación accidental del relé durante la inicialización. & Relé desactivado y bomba apagada. \\
-\hline
-Lectura de sensor inválida & Decisión de riego basada en un dato no fiable. & No iniciar riego y publicar estado de error si la comunicación está disponible. \\
-\hline
-Lectura fuera de rango & Interpretación incorrecta del estado del suelo. & Ignorar lectura y mantener bomba apagada. \\
-\hline
-Cooldown activo & Activaciones repetidas por oscilación de la medida. & No iniciar nuevo riego. \\
-\hline
-Tiempo máximo alcanzado & Riego indefinido por fallo de control o bloqueo del programa. & Desactivar relé al superar el límite. \\
-\hline
-Pérdida de comunicación & Falta de supervisión remota o publicación fallida. & Mantener comportamiento local seguro y registrar incidencia cuando sea posible. \\
-\hline
-Error interno & Estado no fiable de sensores, comunicación o lógica local. & Forzar relé a apagado y publicar código de seguridad si es posible. \\
-\hline
-\end{tabular}
-\caption{Situaciones contempladas por el modo seguro de la estación}
-\label{cuadro:modo_seguro}
-\end{center}
-\end{table}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs_png/figura_4_7_modo_seguro_estacion.png}
+    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, pérdida de comunicación, cooldown o tiempo máximo alcanzado, el sistema prioriza mantener el relé desactivado y la bomba apagada.}
+    \label{fig:cap4_modo_seguro_estacion}
+\end{figure}
 
-La Tabla~\ref{cuadro:modo_seguro} resume las situaciones principales contempladas. Todas las respuestas siguen el mismo criterio: si el sistema no puede verificar que la actuación sea correcta, no debe activar la bomba.
+La Figura~\ref{fig:cap4_modo_seguro_estacion} resume las situaciones principales contempladas. Todas las respuestas siguen el mismo criterio: si el sistema no puede verificar que la actuación sea correcta, no debe activar la bomba.
 
 La pérdida de comunicación se interpreta de forma distinta a como ocurriría en una arquitectura centralizada. En TierraViva, la estación no necesita recibir una orden externa para decidir el riego, por lo que una caída temporal de la Raspberry o de la supervisión remota no bloquea necesariamente la lógica local. Sin embargo, si el módulo LTE no puede publicar datos durante un periodo prolongado, el firmware debe registrar la incidencia cuando la comunicación vuelva a estar disponible y mantener siempre el relé bajo control local. La pérdida de supervisión remota no debe dejar la bomba activa ni provocar una actuación no controlada; en caso de duda sobre el estado interno de la estación, se mantiene la bomba apagada.
 

@@ -23,9 +23,18 @@ El sistema se plantea a partir de estaciones de campo capaces de obtener medidas
 En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requisitos funcionales considerados para el diseño del prototipo.
 
 \begin{table}[H]
-\begin{center}
+\centering
 \small
-\begin{tabular}{|p{0.05\textwidth}|p{0.22\textwidth}|p{0.52\textwidth}|p{0.22\textwidth}|}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+
+\makebox[\textwidth][c]{%
+\hspace*{-0.7cm}%
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{0.06\textwidth}|
+>{\raggedright\arraybackslash}p{0.22\textwidth}|
+>{\raggedright\arraybackslash}p{0.52\textwidth}|
+>{\raggedright\arraybackslash}p{0.24\textwidth}|}
 \hline
 \textbf{Código} & \textbf{Requisito} & \textbf{Descripción} & \textbf{Validación prevista} \\
 \hline
@@ -51,10 +60,11 @@ RF-10 & Publicación de estado de actuación & La estación debe publicar el est
 \hline
 RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, cooldown activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
+
 \caption{Requisitos funcionales del sistema TierraViva}
 \label{cuadro:requisitos_funcionales}
-\end{center}
 \end{table}
 
 Los tres primeros requisitos se relacionan con la adquisición de información en campo. La humedad del suelo es la variable más directamente vinculada con la decisión de riego, mientras que las variables ambientales permiten interpretar mejor las condiciones en las que se encuentra la zona monitorizada. En esta fase no se busca realizar un análisis agronómico completo, sino obtener un conjunto de medidas suficiente para validar el comportamiento del prototipo.
@@ -147,9 +157,18 @@ Las especificaciones temporales no se plantean como valores rígidos e inmodific
 En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales especificaciones temporales y operativas consideradas para TierraViva.
 
 \begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.10\textwidth}|p{0.30\textwidth}|p{0.18\textwidth}|p{0.29\textwidth}|}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.02}
+
+\makebox[\textwidth][c]{%
+\hspace*{-0.7cm}%
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{0.09\textwidth}|
+>{\raggedright\arraybackslash}p{0.28\textwidth}|
+>{\raggedright\arraybackslash}p{0.17\textwidth}|
+>{\raggedright\arraybackslash}p{0.38\textwidth}|}
 \hline
 \textbf{Código} & \textbf{Parámetro} & \textbf{Valor inicial} & \textbf{Criterio operativo} \\
 \hline
@@ -173,10 +192,11 @@ ET-09 & Comportamiento ante dato inválido & Ignorar y registrar & Las lecturas 
 \hline
 ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actuación & La pérdida de comunicación no debe dejar la bomba activa. \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
+
 \caption{Especificaciones temporales y operativas iniciales del sistema}
 \label{cuadro:especificaciones_temporales}
-\end{center}
 \end{table}
 
 El periodo de lectura y envío de telemetría se fija inicialmente en 30 segundos. Este valor permite observar la evolución de las variables medidas sin generar un volumen excesivo de comunicaciones. En un sistema de riego no resulta necesario enviar datos cada segundo, ya que la humedad del suelo y las condiciones ambientales no cambian con tanta rapidez como para justificar una frecuencia tan elevada. Para demostraciones o pruebas concretas, este intervalo podría reducirse temporalmente, pero no se considera necesario para el funcionamiento normal del prototipo.
@@ -205,9 +225,17 @@ Esta forma de trabajo también ha permitido documentar decisiones y cambios de e
 En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales seguidas durante el proyecto.
 
 \begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.10\textwidth}|p{0.28\textwidth}|p{0.48\textwidth}|}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.95}
+
+\makebox[\textwidth][c]{%
+\hspace*{-0.7cm}%
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{0.07\textwidth}|
+>{\raggedright\arraybackslash}p{0.24\textwidth}|
+>{\raggedright\arraybackslash}p{0.68\textwidth}|}
 \hline
 \textbf{Fase} & \textbf{Nombre} & \textbf{Objetivo principal} \\
 \hline
@@ -233,10 +261,11 @@ En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales segu
 \hline
 11 & Documentación de incidencias y decisiones & Registrar problemas encontrados, alternativas descartadas, cambios de enfoque y criterios técnicos adoptados. \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
+
 \caption{Fases principales de la metodología de trabajo}
 \label{cuadro:metodologia_fases}
-\end{center}
 \end{table}
 
 La primera fase consistió en analizar el problema desde el punto de vista funcional. No se trataba únicamente de medir humedad o mostrar datos, sino de diseñar un sistema capaz de observar el entorno, transmitir información, registrar un histórico, visualizar el estado y actuar sobre el riego de forma controlada. Esta fase permitió transformar una necesidad práctica en un conjunto de requisitos técnicos, descritos en los apartados anteriores.
@@ -380,7 +409,7 @@ La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_7_plataformas_control_supervision.png}
-    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5. Arduino se emplea como controlador local de estación, mientras que Raspberry Pi se reserva para supervisión, almacenamiento, API y visualización.}
+    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5.}
     \label{fig:cap3_plataformas_control_supervision}
 \end{figure}
 
@@ -512,7 +541,7 @@ ThingSpeak se ha seleccionado porque proporciona una estructura sencilla basada 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.87\textwidth]{figs/figura_3_9_thingspeak_capa_intermedia.png}
+    \includegraphics[width=0.78\textwidth]{figs/figura_3_9_thingspeak_capa_intermedia.png}
     \caption{Uso de ThingSpeak como capa intermedia entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi.}
     \label{fig:cap3_thingspeak_capa_intermedia}
 \end{figure}
@@ -520,9 +549,17 @@ ThingSpeak se ha seleccionado porque proporciona una estructura sencilla basada 
 El concepto de canal resulta especialmente útil para organizar la información del sistema. Cada canal puede agrupar varias variables relacionadas mediante campos numerados. En TierraViva, este modelo permite representar de forma clara las medidas y estados de una estación: humedad del suelo, temperatura, humedad relativa, luminosidad, presión atmosférica, estado del relé, código de estado o evento y un campo auxiliar reservado para depuración o ampliaciones. De esta forma, cada publicación de telemetría queda almacenada como una entrada temporal asociada a un conjunto de campos.
 
 \begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.28\textwidth}|p{0.30\textwidth}|p{0.32\textwidth}|}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.93}
+
+\makebox[\textwidth][c]{%
+\hspace*{-0.7cm}%
+\begin{tabular}{|
+>{\raggedright\arraybackslash}p{0.23\textwidth}|
+>{\raggedright\arraybackslash}p{0.31\textwidth}|
+>{\raggedright\arraybackslash}p{0.52\textwidth}|}
 \hline
 \textbf{Elemento en ThingSpeak} & \textbf{Uso en TierraViva} & \textbf{Motivo de utilización} \\
 \hline
@@ -548,10 +585,11 @@ Field 8 & Código de estado. & Código numérico publicado por la estación para
 \hline
 API HTTP & Escritura de telemetría desde las estaciones y lectura desde Raspberry Pi. & Reduce la complejidad de integración frente a soluciones que requieren infraestructura propia. \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
+
 \caption{Uso previsto de ThingSpeak dentro de TierraViva}
 \label{cuadro:uso_thingspeak_tierraviva}
-\end{center}
 \end{table}
 
 La Tabla~\ref{cuadro:uso_thingspeak_tierraviva} resume el papel de ThingSpeak en la arquitectura. La separación por canales de estación evita mezclar los datos de distintas zonas monitorizadas y permite que la Raspberry Pi consulte de forma independiente la telemetría y el estado de cada nodo. Esta decisión mejora la trazabilidad del sistema y facilita la depuración, ya que se puede comprobar por separado si cada estación está enviando medidas correctamente, si publica su estado operativo y si se han registrado eventos de riego o incidencias.
@@ -642,9 +680,17 @@ Los materiales empleados no deben entenderse como una simple lista de compra, si
 
 La Tabla~\ref{cuadro:materiales_cap3} resume los componentes principales utilizados en TierraViva desde un punto de vista funcional. Con el fin de mantener la legibilidad del capítulo y separar la justificación técnica de la documentación auxiliar, las imágenes identificativas de los componentes y sus referencias correspondientes se recogen en el Anexo~\ref{anexo:materiales}.
 \begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.28\textwidth}|p{0.32\textwidth}|p{0.30\textwidth}|}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.92}
+
+\makebox[\textwidth][c]{%
+\hspace*{-0.7cm}%
+\begin{tabular}{|
+>{\raggedright\arraybackslash}m{0.24\textwidth}|
+>{\raggedright\arraybackslash}m{0.34\textwidth}|
+>{\raggedright\arraybackslash}m{0.48\textwidth}|}
 \hline
 \textbf{Componente} & \textbf{Función} & \textbf{Justificación} \\
 \hline
@@ -684,10 +730,11 @@ Alimentación 12 V + LM2596 (regulador) & Alimentación principal y adaptación 
 Cableado, protoboard, conectores, resistencias y condensadores & Interconexión, adaptación eléctrica y estabilización del prototipo. & Facilitan pruebas, depuración, adaptación de niveles y reducción de inestabilidades en la alimentación. \\
 \hline
 
-\end{tabular}
+\end{tabular}%
+}
+
 \caption{Resumen de materiales principales empleados en TierraViva}
 \label{cuadro:materiales_cap3}
-\end{center}
 \end{table}
 
 El bloque de sensórica está formado por tres tipos de sensores. El sensor capacitivo de humedad de suelo se utiliza como entrada principal para la decisión de riego, ya que proporciona información directa sobre el estado del sustrato. El BME280 permite obtener temperatura, humedad relativa y presión atmosférica en un único módulo, aportando contexto ambiental sin aumentar demasiado la complejidad del montaje. Por último, el BH1750 mide la luminosidad ambiente en lux, lo que permite interpretar mejor la exposición solar de la zona monitorizada.
