@@ -75,7 +75,7 @@ Desde el punto de vista interno, cada estación se organiza en cuatro bloques fu
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs_png/figura_4_2_bloques_estacion_campo.png}
+    \includegraphics[width=\textwidth]{figs/figura_4_2_bloques_estacion_campo.jpeg}
     \caption{Bloques funcionales internos de una estación de campo. Cada estación integra adquisición de datos, decisión local, comunicación LTE/HTTP, actuación mediante relé y bomba de agua, y alimentación regulada.}
     \label{fig:cap4_bloques_estacion_campo}
 \end{figure}
@@ -105,7 +105,7 @@ La fase de envío consiste en construir una URL de actualización de ThingSpeak 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs_png/figura_4_3_secuencia_lte_http.png}
+    \includegraphics[width=\textwidth]{figs/figura_4_3_secuencia_lte_http.jpeg}
     \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA. La estación verifica el módem, la SIM, el registro en red, el contexto de datos, la petición HTTP y la respuesta antes de considerar válida la publicación.}
     \label{fig:cap4_secuencia_lte_http}
 \end{figure}
@@ -195,11 +195,11 @@ La Raspberry Pi 5 actúa como sistema de supervisión de TierraViva. Su papel de
 
 Esta separación es importante para mantener la coherencia del sistema distribuido. Las estaciones se encuentran en campo y se comunican mediante LTE/HTTP con ThingSpeak. La Raspberry, por tanto, no recibe datos por USB ni por puerto serie desde las estaciones, sino que consulta periódicamente los canales publicados en la plataforma cloud. A partir de esos datos, construye una visión actualizada del estado de cada estación.
 
-El primer bloque funcional de la Raspberry es la lectura de datos desde ThingSpeak. Para cada estación, el sistema de supervisión consulta su canal correspondiente y obtiene las últimas medidas disponibles: humedad de suelo, temperatura, humedad relativa, luminosidad, presión atmosférica, estado del relé, código de estado y campo auxiliar. Esta lectura permite conocer tanto el estado ambiental de la zona monitorizada como el estado operativo de la estación.
+El primer bloque funcional de la Raspberry es la lectura de datos desde ThingSpeak. Para cada estación, el sistema de supervisión consulta su canal correspondiente y obtiene la última publicación disponible. La implementación concreta de este proceso, incluyendo la normalización de campos, la detección de entradas nuevas y el tratamiento de errores de lectura, se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
 
 Una vez recuperados los datos, la Raspberry debe validarlos antes de almacenarlos o mostrarlos. No todas las respuestas recibidas tienen por qué ser válidas: puede haber campos vacíos, valores fuera de rango, lecturas antiguas o errores de comunicación. Por ello, el sistema de supervisión debe comprobar que los datos recibidos son coherentes y que la marca temporal de la última lectura se encuentra dentro de un intervalo razonable. Si una estación no actualiza datos durante demasiado tiempo, el dashboard puede mostrarla como no disponible u obsoleta.
 
-El segundo bloque funcional es el almacenamiento local en SQLite. Aunque ThingSpeak conserva las entradas publicadas en sus canales, TierraViva mantiene un histórico propio en la Raspberry Pi. Este histórico permite registrar las lecturas recibidas, los estados de relé, los eventos de riego publicados por las estaciones y las incidencias detectadas por el sistema de supervisión. De esta manera, la Raspberry no actúa únicamente como un visor de la nube, sino como un sistema con memoria propia del comportamiento del prototipo.
+El segundo bloque funcional es el almacenamiento local en SQLite. Aunque ThingSpeak conserva las entradas publicadas en sus canales, TierraViva mantiene un histórico propio en la Raspberry Pi. Este histórico permite registrar las lecturas recibidas, los estados de relé, los estados de funcionamiento publicados por las estaciones y las incidencias detectadas por el sistema de supervisión. De esta manera, la Raspberry no actúa únicamente como un visor de la nube, sino como un sistema con memoria propia del comportamiento del prototipo.
 
 \begin{figure}[H]
     \centering
@@ -207,9 +207,10 @@ El segundo bloque funcional es el almacenamiento local en SQLite. Aunque ThingSp
     \caption{Pipeline software de supervisión en Raspberry Pi. El sistema consulta ThingSpeak, valida los datos, almacena histórico en SQLite, expone la información mediante FastAPI y actualiza el dashboard web.}
     \label{fig:cap4_pipeline_raspberry_supervision}
 \end{figure}
-La API se desarrolla con FastAPI y actúa como capa intermedia entre la base de datos y el dashboard web. En lugar de que la interfaz consulte directamente SQLite o ThingSpeak, realiza peticiones a la API para obtener las últimas lecturas, el estado de las estaciones o el histórico necesario. Esta separación facilita la evolución del dashboard sin modificar la lógica de almacenamiento o consulta.
 
-El dashboard web constituye la parte visible del sistema de supervisión. A través de él se pueden consultar las últimas medidas recibidas, comprobar el estado de cada estación, observar si existe comunicación reciente y revisar el estado del relé o los eventos de riego publicados por las estaciones. Su función no es ejecutar directamente acciones sobre el hardware, sino permitir la supervisión del sistema de forma clara. Esto resulta útil tanto durante las pruebas como en una posible utilización real del prototipo.
+La API actúa como capa intermedia entre el histórico local y el dashboard web. En lugar de acoplar la interfaz a la base de datos o a ThingSpeak, la Raspberry ofrece una capa de consulta que separa la visualización de la lógica de almacenamiento. La implementación concreta de esta API y de los endpoints utilizados se describe en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
+
+El dashboard web constituye la parte visible del sistema de supervisión. A través de él se pueden consultar las últimas medidas recibidas, comprobar el estado de cada estación, observar si existe comunicación reciente y revisar el estado del relé o los estados de funcionamiento publicados por las estaciones. Su función no es ejecutar directamente acciones sobre el hardware, sino permitir la supervisión del sistema de forma clara. Esto resulta útil tanto durante las pruebas como en una posible utilización real del prototipo.
 
 Además de almacenar lecturas, la Raspberry puede registrar incidencias de supervisión. Por ejemplo, puede detectar que una estación lleva demasiado tiempo sin publicar datos, que un campo llega vacío, que una lectura está fuera de rango o que el estado del relé no cambia durante un periodo esperado. Estos eventos no sustituyen a la lógica de seguridad local, pero ayudan a documentar el comportamiento del sistema y facilitan la validación experimental.
 
@@ -236,7 +237,7 @@ De forma conceptual, la decisión local puede resumirse así:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs_png/figura_4_6_decision_local_riego.png}
+    \includegraphics[width=\textwidth]{figs/figura_4_6_decision_local_riego.jpeg}
     \caption{Lógica conceptual de decisión local de riego en cada estación. La bomba solo se activa si la lectura es válida, se cumple la condición de sequedad, no existe cooldown activo y no se detecta ningún error crítico.}
     \label{fig:cap4_decision_local_riego}
 \end{figure}
