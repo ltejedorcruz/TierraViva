@@ -3,6 +3,15 @@
 
 Una vez descrita la implementación hardware y firmware de las estaciones de campo, este capítulo se centra en la parte software que permite supervisar el sistema desde la Raspberry Pi y conservar un histórico de funcionamiento.  El papel de la Raspberry Pi consiste en consultar la información publicada por las estaciones en ThingSpeak, normalizar las lecturas recibidas, almacenarlas en una base de datos local y exponerlas mediante una API y un dashboard web. Esta separación permite mantener el comportamiento autónomo de las estaciones incluso si la Raspberry Pi está apagada, sin conexión o en mantenimiento.
 
+\begin{wrapfigure}{r}{0.22\textwidth}
+    \vspace{-12pt}
+    \centering
+    \includegraphics[width=0.20\textwidth]{figs/logo_raspberry.png}
+    \caption{Logo Raspberry Pi}
+    \label{fig:logo_raspberry}
+    \vspace{-8pt}
+\end{wrapfigure}
+
 El software desarrollado no apareció directamente en su forma final. Antes de cerrar la arquitectura remota basada en LTE y ThingSpeak, se implementó un prototipo local con MQTT para validar la cadena básica de adquisición, transporte, almacenamiento y visualización de datos. Dicho prototipo no forma parte de la arquitectura definitiva, pero resulta relevante porque permitió detectar necesidades reales del sistema, comprobar la utilidad de una arquitectura desacoplada y reducir el riesgo antes de trabajar con comunicaciones móviles y con ThingSpeak como plataforma intermedia.
 
 El código asociado al proyecto se conserva en el repositorio público TierraViva\footnote{\url{https://github.com/ltejedorcruz/TierraViva/tree/main}}, incluyendo tanto la versión final en desarrollo como los prototipos intermedios utilizados durante la evolución del TFG.
@@ -10,7 +19,18 @@ El código asociado al proyecto se conserva en el repositorio público TierraViv
 \section{Prototipo local previo con MQTT}
 \label{sec:prototipo_local_mqtt}
 
-Antes de implantar la solución final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna. El objetivo de esta fase no era resolver todavía el despliegue en campo, sino validar el comportamiento del bloque software en un entorno controlado: recepción de telemetría desde Arduino, publicación de mensajes, consumo por parte de un backend, almacenamiento en SQLite y visualización mediante una interfaz web sencilla.
+Antes de implantar la solución final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna.
+
+\begin{wrapfigure}{l}{0.32\textwidth}
+    \vspace{-12pt}
+    \centering
+    \includegraphics[width=0.30\textwidth]{figs/mosquitto-logo.png}
+    \caption{Logo MQTT Mosquitto}
+    \label{fig:logo_mqtt}
+    \vspace{-8pt}
+\end{wrapfigure}
+
+ El objetivo de esta fase no era resolver todavía el despliegue en campo, sino validar el comportamiento del bloque software en un entorno controlado: recepción de telemetría desde Arduino, publicación de mensajes, consumo por parte de un backend, almacenamiento en SQLite y visualización mediante una interfaz web sencilla.
 
 Este prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su importancia dentro del proyecto no reside en que represente la solución final, sino en que permitió comprobar de forma incremental una cadena de procesamiento completa antes de introducir la complejidad propia de la conectividad móvil. En esta primera versión, la estación se encontraba conectada localmente a la Raspberry Pi mediante puerto serie, por lo que no existía todavía la separación física propia de la arquitectura definitiva.
 
@@ -64,6 +84,15 @@ Esta evolución no supone descartar el trabajo previo, sino aprovecharlo de form
 Una vez validado el prototipo local con MQTT, la implementación final de la Raspberry Pi se adaptó al modelo de comunicación definido para TierraViva: las estaciones no envían datos directamente a la Raspberry, sino que publican su telemetría y estado en ThingSpeak mediante LTE/HTTP. Por tanto, el primer bloque software de la Raspberry consiste en consultar periódicamente la plataforma cloud, obtener la última publicación disponible de cada estación y convertirla a una estructura interna común.
 
 Este bloque se implementa en el módulo principal de ingesta, asociado al fichero \texttt{main.py}, disponible en el repositorio público del proyecto \cite{tierraviva_github}. Su responsabilidad no es decidir el riego ni enviar órdenes a las estaciones, sino mantener actualizada la copia local de los datos publicados en la nube. De esta forma, la Raspberry Pi actúa como sistema de supervisión: lee, normaliza, registra y sirve información al dashboard, mientras que la decisión de actuación permanece en el firmware de cada estación.
+
+\begin{wrapfigure}{r}{0.32\textwidth}
+    \vspace{-12pt}
+    \centering
+    \includegraphics[width=0.30\textwidth]{figs/thingspeak_logo.png}
+    \caption{Logo ThingSpeak}
+    \label{fig:logo_thingspeak}
+    \vspace{-8pt}
+\end{wrapfigure}
 
 La lectura desde ThingSpeak se organiza a partir de una configuración por estación. En lugar de duplicar código para la estación A y la estación B, el programa utiliza una estructura común que contiene el identificador lógico de la estación, el identificador del canal de ThingSpeak y la clave de lectura correspondiente. Estos valores se cargan desde variables de entorno, por ejemplo \texttt{THINGSPEAK\_CHANNEL\_A}, \texttt{THINGSPEAK\_READ\_KEY\_A}, \texttt{THINGSPEAK\_CHANNEL\_B} y \texttt{THINGSPEAK\_READ\_KEY\_B}. Esta solución evita introducir claves directamente en el código fuente y permite reutilizar la misma lógica para varias estaciones.
 
@@ -123,6 +152,15 @@ En resumen, la lectura de ThingSpeak transforma la nube en una fuente de datos e
 \label{sec:base_datos_sqlite}
 
 El bloque de almacenamiento local de TierraViva se implementa mediante SQLite. Su función es conservar en la Raspberry Pi una copia estructurada de la información recibida desde ThingSpeak, de forma que el dashboard y la API no dependan únicamente de consultar la plataforma cloud en tiempo real. Esta base de datos permite mantener un histórico de lecturas, registrar eventos de riego o actuación, conservar estados internos del sistema y facilitar tareas de depuración durante las pruebas.
+
+\begin{wrapfigure}{r}{0.32\textwidth}
+    \vspace{-12pt}
+    \centering
+    \includegraphics[width=0.30\textwidth]{figs/sqlite_logo.jpeg}
+    \caption{Logo SQLite}
+    \label{fig:logo_sqlite}
+    \vspace{-8pt}
+\end{wrapfigure}
 
 SQLite resulta adecuado para este prototipo porque funciona como una base de datos embebida, almacenada en un fichero local, sin necesidad de desplegar un servidor de base de datos adicional. En una Raspberry Pi esto simplifica la instalación y reduce el número de servicios que deben mantenerse activos. Para el alcance del TFG, donde el volumen de datos es moderado y la prioridad es validar el funcionamiento completo del sistema, esta solución ofrece un equilibrio razonable entre simplicidad, persistencia y capacidad de consulta \cite{sqlite_about}.
 
@@ -431,7 +469,16 @@ Este diseño hace que la lógica local sea simple, verificable y seguro. Simple,
 
 La API de TierraViva constituye la capa de servicio entre la base de datos local y el dashboard web. Su función no es comunicarse directamente con las estaciones ni decidir el riego, sino ofrecer una interfaz HTTP para consultar de forma estructurada la información ya almacenada en la Raspberry Pi. De este modo, el frontend no necesita acceder directamente a SQLite ni conocer los detalles internos del módulo de ingesta.
 
-La implementación se realiza con FastAPI, un framework Python orientado a la creación de APIs web. En el contexto de TierraViva, FastAPI permite definir endpoints claros, validar parámetros de consulta y devolver respuestas en formato JSON. Esta elección resulta adecuada para un prototipo de TFG porque mantiene el código compacto, facilita la depuración y ofrece una documentación automática de la API durante la ejecución del servidor.
+\begin{wrapfigure}{r}{0.32\textwidth}
+    \vspace{-12pt}
+    \centering
+    \includegraphics[width=0.30\textwidth]{figs/fast_api_logo.png}
+    \caption{Logo FastAPI}
+    \label{fig:logo_fastapi}
+    \vspace{-8pt}
+\end{wrapfigure}
+
+La implementación se realiza con FastAPI, un framework Python orientado a la creación de APIs web. En el contexto de TierraViva, FastAPI permite definir endpoints claros, validar parámetros de consulta y devolver respuestas en formato JSON. Esta elección mantiene el código compacto, facilita la depuración y ofrece una documentación automática de la API durante la ejecución del servidor.
 
 La API se ejecuta mediante Uvicorn, escuchando en el puerto \texttt{8000}. El script de gestión \texttt{tierraviva.sh} arranca por separado el proceso de ingesta y el servidor web, de modo que la lectura de ThingSpeak y la consulta desde el dashboard quedan desacopladas. Si el dashboard realiza varias peticiones seguidas, estas se atienden desde la base de datos local, sin forzar una consulta nueva a ThingSpeak en cada refresco de pantalla.
 

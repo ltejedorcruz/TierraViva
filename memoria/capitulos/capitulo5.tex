@@ -5,6 +5,15 @@ Una vez definida la arquitectura final del sistema, este capítulo describe la i
 
 En la arquitectura final, la estación no es un simple nodo que obedece instrucciones externas. Cada estación debe medir, evaluar reglas locales, accionar el riego cuando corresponda y publicar su estado. Por ello, la implementación hardware y el firmware tienen un papel central dentro del prototipo.
 
+\begin{wrapfigure}{r}{0.22\textwidth}
+    \vspace{-12pt}
+    \centering
+    \includegraphics[width=0.20\textwidth]{figs/arduino_logo.png}
+    \caption{Logo Arduino}
+    \label{fig:logo_arduino}
+    \vspace{-8pt}
+\end{wrapfigure}
+
 La implementación se ha desarrollado de forma incremental. En primer lugar, se preparó el entorno de trabajo con Arduino UNO y se comprobó la programación básica de la placa. A continuación, se validaron los sensores de forma individual y conjunta, se integró el módulo de comunicaciones LTE A7670E-LASA, se implementó el envío de telemetría hacia ThingSpeak y se preparó la lógica de actuación mediante relé y bomba de agua. Esta secuencia permitió reducir riesgos, ya que cada bloque fue probado antes de incorporarse al firmware completo de la estación.
 
 \section{Preparación de Arduino UNO}
