@@ -20,7 +20,7 @@ Adafruit_BME280 bme;
 // Configuración general
 // ====
 const char APN[] = "internet";
-const char THINGSPEAK_API_KEY[] = "2E94ZA4IBJ2KRU7U";
+const char THINGSPEAK_API_KEY[] = "****************";
 
 const int SOIL_PIN = A0;
 const int RELAY_PIN = 7;

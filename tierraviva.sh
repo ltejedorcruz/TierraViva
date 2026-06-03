@@ -5,11 +5,9 @@
 #  Uso:
 #    ./tierraviva.sh install    → Instalar dependencias y crear BD
 #    ./tierraviva.sh start      → Arrancar ingestor + API (foreground)
-#    ./tierraviva.sh systemd    → Crear/actualizar servicios systemd
 #    ./tierraviva.sh status     → Ver estado de los servicios
 #    ./tierraviva.sh stop       → Parar servicios systemd
 #    ./tierraviva.sh logs       → Ver logs de los servicios
-#    ./tierraviva.sh check      → Verificar configuración
 # ============================================================
 #!/usr/bin/env bash
 set -Eeuo pipefail
