@@ -1,0 +1,305 @@
+\chapter{Relación ingresos-gastos y viabilidad económica}
+\label{anexo:relacion_ingresos_gastos}
+
+Este anexo recoge la relación entre los recursos económicos disponibles, los gastos asociados al prototipo TierraViva y una estimación del coste total del proyecto. El objetivo no es presentar TierraViva como un producto comercial cerrado, sino analizar la viabilidad económica de un prototipo académico que podría evolucionar hacia una solución más completa de riego inteligente.
+
+Los costes materiales detallados de cada componente se recogen en el Anexo \ref{anexo:materiales}. En este apartado se ofrece una visión agregada, diferenciando entre gasto directo del prototipo, recursos disponibles, coste estimado de desarrollo y viabilidad de reproducción.
+
+\section{Criterio económico utilizado}
+
+Para analizar el proyecto de forma realista se distinguen tres conceptos:
+
+\begin{itemize}
+    \item \textbf{Gasto directo}: dinero destinado a la compra de componentes, materiales y servicios necesarios para construir el prototipo.
+    \item \textbf{Recursos no monetizados}: recursos utilizados en el proyecto sin traducirse en un pago directo, como tutorización académica, software libre o acceso a un entorno de pruebas.
+    \item \textbf{Coste valorado}: estimación económica del tiempo dedicado al análisis, diseño, montaje, programación, pruebas y documentación.
+\end{itemize}
+
+Esta separación evita mezclar el coste real de construir el prototipo con el valor económico completo del trabajo realizado. 
+
+\section{Resumen económico del prototipo}
+
+A partir del anexo de materiales, el coste directo estimado del prototipo asciende a \textbf{420.50 \euro{}}. Este importe incluye dos estaciones de campo, el nodo de supervisión con Raspberry Pi, comunicaciones, alimentación, actuación y material auxiliar de montaje.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.45\textwidth}|p{0.25\textwidth}|p{0.20\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Concepto} & \textbf{Tipo} & \textbf{Importe} \\
+\hline
+Coste material del prototipo & Gasto directo & 420.50 \euro{} \\
+\hline
+Reserva para imprevistos & 10\% del coste material & 42.05 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Presupuesto recomendado de reproducción} & \textbf{Material + imprevistos} & \textbf{462.55 \euro{}} \\
+\hline
+\end{tabular}
+\caption{Resumen económico directo del prototipo TierraViva.}
+\label{tab:resumen_economico_directo}
+\end{table}
+
+La reserva de imprevistos no representa necesariamente un gasto realizado, sino un margen razonable para cubrir sustitución de componentes, cables adicionales, conectores, material de aislamiento o pequeñas compras no previstas durante el montaje.
+
+\section{Distribución de gastos por bloques}
+
+Para facilitar la lectura económica del prototipo, los componentes se agrupan por bloques funcionales. Esta agrupación permite identificar qué partes del sistema concentran mayor inversión.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.32\textwidth}|p{0.43\textwidth}|p{0.15\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Bloque} & \textbf{Elementos incluidos} & \textbf{Coste} \\
+\hline
+Sensorización & Sensores de humedad de suelo, BME280 y BH1750. & 16.40 \euro{} \\
+\hline
+Procesamiento y supervisión & Arduino UNO y Raspberry Pi 5. & 233.62 \euro{} \\
+\hline
+Comunicaciones & Módulos LTE A7670E-LASA y tarjetas SIM. & 38.00 \euro{} \\
+\hline
+Alimentación y actuación & Baterías, relé, LM2596 y bombas de agua. & 114.48 \euro{} \\
+\hline
+Montaje y material auxiliar & Protoboard, cableado, resistencias, condensadores y consumibles. & 18.00 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Total} & \textbf{Coste material estimado del prototipo.} & \textbf{420.50 \euro{}} \\
+\hline
+\end{tabular}
+\caption{Distribución de gastos del prototipo por bloques funcionales.}
+\label{tab:gastos_por_bloques}
+\end{table}
+
+Como se observa en la Tabla \ref{tab:gastos_por_bloques}, el mayor peso económico corresponde al bloque de procesamiento y supervisión, principalmente por la Raspberry Pi 5. Este coste debe interpretarse correctamente: la Raspberry Pi actúa como nodo central del sistema y no tendría que duplicarse necesariamente por cada nueva estación añadida.
+
+\section{Coste aproximado por estación}
+
+El prototipo está planteado con dos estaciones remotas y un nodo central de supervisión. Si se excluye la Raspberry Pi 5, que funciona como recurso compartido, el coste aproximado asociado a las dos estaciones remotas es:
+
+El coste asociado al conjunto de estaciones remotas se obtiene restando al coste total del prototipo el importe correspondiente al nodo central de supervisión:
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+Coste total del prototipo & 420.50 \euro{} \\
+Coste del nodo central Raspberry Pi & -204.20 \euro{} \\
+\hline
+Coste conjunto de estaciones remotas & 216.30 \euro{} \\
+\end{tabular}
+\end{center}
+
+Al estar el prototipo formado por dos estaciones remotas, el coste orientativo por estación se estima dividiendo ese importe entre dos:
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+Coste conjunto de estaciones remotas & 216.30 \euro{} \\
+Número de estaciones & 2 \\
+\hline
+Coste orientativo por estación & 108.15 \euro{} \\
+\end{tabular}
+\end{center}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.48\textwidth}|p{0.25\textwidth}|p{0.17\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Concepto} & \textbf{Cálculo} & \textbf{Importe} \\
+\hline
+Coste total del prototipo & Anexo de materiales & 420.50 \euro{} \\
+\hline
+Coste del nodo central Raspberry Pi & Raspberry Pi 5 & 204.20 \euro{} \\
+\hline
+Coste conjunto de estaciones remotas & 420.50 - 204.20 & 216.30 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Coste orientativo por estación} & \textbf{216.30 / 2} & \textbf{108.15 \euro{}} \\
+\hline
+\end{tabular}
+\caption{Estimación del coste orientativo por estación remota.}
+\label{tab:coste_por_estacion}
+\end{table}
+
+Esta estimación es útil para analizar una posible ampliación futura del sistema. Aunque el coste exacto de una nueva estación dependería de precios, disponibilidad y componentes equivalentes, el cálculo muestra que el nodo central representa una inversión inicial compartida, mientras que cada estación adicional tendría un coste incremental menor.
+
+\section{Ingresos y recursos disponibles}
+
+Durante el desarrollo del TFG no se han generado ingresos comerciales. Por ello, en este anexo el término ingresos se interpreta como recursos económicos o no económicos que han permitido realizar el proyecto.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.43\textwidth}|p{0.19\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso} & \textbf{Descripción} & \textbf{Valor económico} \\
+\hline
+Aportación propia & Compra de componentes y materiales necesarios para construir el prototipo. & 420.50 \euro{} \\
+\hline
+Tutorización académica & Seguimiento técnico, orientación de ingeniería y contextualización experimental del proyecto. & No monetizado \\
+\hline
+Agrolab de Móstoles & Posibilidad de disponer de una parcela para realizar pruebas en un entorno más cercano al uso real. & No monetizado \\
+\hline
+Software libre o gratuito & Arduino IDE, Python, FastAPI, SQLite, GitHub y tecnologías web. & 0 \euro{} \\
+\hline
+ThingSpeak & Plataforma IoT utilizada para recepción y consulta de telemetría durante el prototipo. & 0 \euro{} \\
+\hline
+\end{tabular}
+\caption{Recursos económicos y no económicos disponibles para el desarrollo de TierraViva.}
+\label{tab:ingresos_recursos_tierraviva}
+\end{table}
+
+La ausencia de ingresos comerciales es coherente con la naturaleza académica del proyecto. TierraViva se plantea como un prototipo funcional y documentado, no como una solución comercial en explotación.
+
+\section{Relación ingresos-gastos}
+
+La relación económica directa del proyecto se resume en la Tabla \ref{tab:relacion_ingresos_gastos_final}. En ella se diferencia entre el balance real de caja y el presupuesto recomendado si otra persona quisiera reproducir el prototipo con un pequeño margen de seguridad.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.48\textwidth}|p{0.25\textwidth}|p{0.17\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Concepto} & \textbf{Tipo} & \textbf{Importe} \\
+\hline
+Aportación propia para materiales & Recurso económico & 420.50 \euro{} \\
+\hline
+Coste material del prototipo & Gasto directo & -420.50 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Balance económico directo} & \textbf{Ingresos - gastos} & \textbf{0.00 \euro{}} \\
+\hline
+Reserva recomendada para imprevistos & Margen de seguridad & -42.05 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Presupuesto recomendado de reproducción} & \textbf{Material + 10\%} & \textbf{462.55 \euro{}} \\
+\hline
+Ingresos comerciales durante el TFG & No aplica & 0.00 \euro{} \\
+\hline
+\end{tabular}
+\caption{Relación directa entre recursos económicos y gastos del prototipo.}
+\label{tab:relacion_ingresos_gastos_final}
+\end{table}
+
+Desde el punto de vista económico directo, el proyecto queda equilibrado mediante aportación propia. Desde el punto de vista de reproducción, sería recomendable disponer de un presupuesto algo superior al coste material exacto para cubrir imprevistos habituales en prototipos electrónicos.
+
+\section{Coste de desarrollo valorado}
+
+Además del coste material, TierraViva requiere una dedicación significativa en análisis, diseño, programación, integración, pruebas y documentación. Aunque estas horas no suponen un pago directo dentro del marco académico del TFG, sí representan el valor técnico del trabajo realizado.
+
+Para realizar una estimación orientativa se toma una dedicación acumulada de \textbf{950 horas} entre el verano de 2025, momento en el que comenzó la definición inicial del proyecto, y julio de 2026, fecha de defensa del TFG. Esta cifra debe interpretarse como una estimación prudente del esfuerzo dedicado, ya que el desarrollo ha requerido trabajo continuado durante el curso, jornadas prolongadas de integración y depuración, y una dedicación intensiva durante la fase final de documentación y cierre.
+
+Como coste interno de referencia se emplea un valor conservador de \textbf{15 \euro{}/h}. Esta cifra no pretende representar una tarifa profesional cerrada, sino valorar de forma sencilla el esfuerzo técnico y documental asociado al proyecto.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.43\textwidth}|c|c|c|}
+\hline
+\rowcolor{gray!20}
+\textbf{Actividad} & \textbf{Horas} & \textbf{Coste/h} & \textbf{Coste} \\
+\hline
+Definición inicial de la idea y alcance & 60 h & 15 \euro{}/h & 900.00 \euro{} \\
+\hline
+Revisión de alternativas tecnológicas & 70 h & 15 \euro{}/h & 1050.00 \euro{} \\
+\hline
+Reajuste de arquitectura y toma de decisiones técnicas & 70 h & 15 \euro{}/h & 1050.00 \euro{} \\
+\hline
+Selección, compra y preparación de componentes & 55 h & 15 \euro{}/h & 825.00 \euro{} \\
+\hline
+Montaje, cableado e integración hardware & 95 h & 15 \euro{}/h & 1425.00 \euro{} \\
+\hline
+Pruebas del módulo LTE A7670E-LASA y comunicaciones & 75 h & 15 \euro{}/h & 1125.00 \euro{} \\
+\hline
+Desarrollo del firmware de estación & 110 h & 15 \euro{}/h & 1650.00 \euro{} \\
+\hline
+Integración con ThingSpeak & 60 h & 15 \euro{}/h & 900.00 \euro{} \\
+\hline
+Desarrollo en Raspberry Pi, API, SQLite y dashboard & 115 h & 15 \euro{}/h & 1725.00 \euro{} \\
+\hline
+Pruebas, depuración y validación del sistema & 90 h & 15 \euro{}/h & 1350.00 \euro{} \\
+\hline
+Redacción de memoria, anexos y revisión final & 150 h & 15 \euro{}/h & 2250.00 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Total desarrollo valorado} & \textbf{950 h} &  & \textbf{14250.00 \euro{}} \\
+\hline
+\end{tabular}
+\caption{Estimación del coste de desarrollo valorado.}
+\label{tab:coste_desarrollo_valorado}
+\end{table}
+
+\section{Coste total valorado del proyecto}
+
+Si se considera únicamente el gasto material, TierraViva es un prototipo de bajo coste relativo. Sin embargo, si se valora el tiempo de desarrollo, integración, pruebas y documentación, el coste total del proyecto aumenta de forma significativa.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.52\textwidth}|p{0.25\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Concepto} & \textbf{Importe} \\
+\hline
+Coste material del prototipo & 420.50 \euro{} \\
+\hline
+Reserva de imprevistos & 42.05 \euro{} \\
+\hline
+Coste de desarrollo valorado & 14250.00 \euro{} \\
+\hline
+\rowcolor{gray!15}
+\textbf{Coste total valorado con margen de reproducción} & \textbf{14712.55 \euro{}} \\
+\hline
+\end{tabular}
+\caption{Coste total valorado del proyecto TierraViva.}
+\label{tab:coste_total_valorado}
+\end{table}
+
+Esta tabla permite distinguir claramente entre el coste material de reproducir el prototipo y el valor económico del trabajo técnico necesario para desarrollarlo. La diferencia entre ambos importes refleja que TierraViva no se limita a la compra de componentes, sino que incorpora diseño, integración, programación, pruebas y documentación.
+
+\section{Escenarios de viabilidad}
+
+Para analizar la viabilidad económica de TierraViva se plantean tres escenarios: prototipo académico, reproducción técnica y evolución futura.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.38\textwidth}|p{0.27\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Escenario} & \textbf{Descripción} & \textbf{Valoración económica} \\
+\hline
+Prototipo académico & Sistema desarrollado para validar arquitectura, comunicaciones, sensorización, almacenamiento y actuación. & Viable con una inversión material aproximada de 420.50 \euro{}. \\
+\hline
+Reproducción técnica & Montaje equivalente por otra persona, considerando margen de seguridad para imprevistos. & Recomendable disponer de unos 462.55 \euro{}. \\
+\hline
+Ampliación con más estaciones & Incorporación de nuevas estaciones manteniendo el nodo central de supervisión. & Coste incremental orientativo de 108.15 \euro{} por estación, sin considerar variaciones de precios. \\
+\hline
+Evolución precomercial & Mejora de robustez, cajas estancas, protección ambiental, seguridad, instalación y pruebas prolongadas. & Requeriría inversión adicional y una nueva estimación económica. \\
+\hline
+\end{tabular}
+\caption{Escenarios de viabilidad económica del proyecto.}
+\label{tab:escenarios_viabilidad}
+\end{table}
+
+\section{Conclusión}
+
+El análisis económico muestra que TierraViva es viable como prototipo académico con un coste material contenido. La inversión directa se concentra principalmente en el nodo de supervisión y en los elementos de alimentación y actuación, mientras que los sensores y módulos de estación mantienen un coste relativamente bajo.
+
+La principal diferencia aparece al valorar el tiempo de desarrollo. Aunque el desembolso material es reducido, el verdadero valor del proyecto está en la integración de componentes, la programación del firmware, la comunicación LTE, la conexión con ThingSpeak, el backend en Raspberry Pi, la API, el dashboard, las pruebas y la documentación técnica.
+
+Por tanto, TierraViva puede considerarse un prototipo económicamente razonable para un Trabajo de Fin de Grado y, al mismo tiempo, una muy buenabase técnica ampliable para futuras versiones cercanas a una implantación real.

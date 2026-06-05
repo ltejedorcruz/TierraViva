@@ -1,0 +1,100 @@
+\chapter{Cronograma del proyecto}
+\label{anexo:cronograma}
+
+Este anexo recoge la planificación temporal seguida durante el desarrollo de TierraViva. El cronograma se ha estructurado por fases para reflejar la evolución real del proyecto, desde la definición inicial de la idea hasta la integración del prototipo, las pruebas de funcionamiento y la redacción final de la memoria.
+
+La planificación no debe interpretarse como una secuencia rígida y completamente lineal. Al tratarse de un proyecto de carácter experimental, con integración de hardware, comunicaciones móviles, servicios en la nube y software de supervisión, algunas tareas se han solapado y otras han requerido iteraciones adicionales. Esta forma de trabajo ha permitido adaptar el diseño a las limitaciones encontradas durante el desarrollo, manteniendo el objetivo principal del proyecto: construir un sistema funcional, defendible y técnicamente coherente para la monitorización y automatización del riego.
+
+\section{Fases principales del proyecto}
+
+El desarrollo de TierraViva se ha dividido en varias fases. Cada una de ellas responde a una necesidad concreta del proyecto y contribuye progresivamente a la construcción del prototipo final.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.16\textwidth}|p{0.25\textwidth}|p{0.47\textwidth}|}
+\hline
+\textbf{Fase} & \textbf{Periodo estimado} & \textbf{Descripción} \\
+\hline
+Fase 1 & M1 & Definición inicial de la idea, análisis del problema y estudio de posibles enfoques para agricultura inteligente, monitorización ambiental y automatización del riego. \\
+\hline
+Fase 2 & M1--M2 & Revisión de tecnologías de comunicación y primera arquitectura conceptual. Se valoraron alternativas como LoRaWAN, WiFi y conectividad móvil, teniendo en cuenta cobertura, complejidad, consumo y viabilidad para un prototipo académico. \\
+\hline
+Fase 3 & M2--M3 & Reajuste del alcance del proyecto y definición de la arquitectura final basada en estaciones remotas con Arduino UNO, comunicación LTE mediante A7670E-LASA, ThingSpeak como plataforma intermedia y Raspberry Pi como nodo de supervisión. \\
+\hline
+Fase 4 & M3--M4 & Selección de componentes hardware: sensores ambientales, sensor de humedad del suelo, módulo LTE, relé, bomba de agua, alimentación y cableado. Elaboración de esquemas preliminares de conexión y criterios de seguridad eléctrica. \\
+\hline
+Fase 5 & M4--M5 & Desarrollo inicial del firmware de estación. Integración de sensores, lectura de variables, validación básica de datos, activación del relé y envío de telemetría a ThingSpeak mediante peticiones HTTP. \\
+\hline
+Fase 6 & M5--M6 & Desarrollo del software de supervisión en Raspberry Pi: consulta de datos desde ThingSpeak, almacenamiento local en SQLite, API con FastAPI y primeros componentes del dashboard web. \\
+\hline
+Fase 7 & M6--M7 & Integración de la lógica de riego automático. Definición de umbrales, tiempos máximos de activación, periodo de seguridad entre riegos, registro de eventos y mecanismos de protección frente a lecturas no válidas. \\
+\hline
+Fase 8 & M7--M8 & Pruebas de integración del sistema completo: estación de campo, comunicación LTE, publicación de datos, consulta desde Raspberry Pi, visualización web y actuación sobre la bomba mediante relé. \\
+\hline
+Fase 9 & M8--M9 & Análisis de resultados, revisión de limitaciones, documentación técnica, elaboración de figuras, anexos, tablas y redacción final de la memoria. \\
+\hline
+\end{tabular}
+\caption{Fases principales del desarrollo de TierraViva.}
+\label{cuadro:fases_cronograma}
+\end{center}
+\end{table}
+
+\section{Cronograma general}
+
+La Tabla \ref{cuadro:cronograma_general} resume la distribución temporal de las tareas principales.
+
+\begin{table}[H]
+\begin{center}
+\scriptsize
+\begin{tabular}{|p{0.31\textwidth}|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Actividad} & \textbf{M1} & \textbf{M2} & \textbf{M3} & \textbf{M4} & \textbf{M5} & \textbf{M6} & \textbf{M7} & \textbf{M8} & \textbf{M9} \\
+\hline
+Definición del problema y objetivos & X & X &  &  &  &  &  &  &  \\
+\hline
+Estudio de alternativas tecnológicas & X & X & X &  &  &  &  &  &  \\
+\hline
+Reajuste de arquitectura y alcance &  & X & X &  &  &  &  &  &  \\
+\hline
+Selección y adquisición de componentes &  &  & X & X &  &  &  &  &  \\
+\hline
+Diseño del cableado y montaje preliminar &  &  & X & X & X &  &  &  &  \\
+\hline
+Pruebas del módulo LTE A7670E-LASA &  &  &  & X & X &  &  &  &  \\
+\hline
+Desarrollo del firmware de estación &  &  &  & X & X & X &  &  &  \\
+\hline
+Integración con ThingSpeak &  &  &  &  & X & X & X &  &  \\
+\hline
+Desarrollo del backend en Raspberry Pi &  &  &  &  &  & X & X &  &  \\
+\hline
+Desarrollo del dashboard web &  &  &  &  &  & X & X & X &  \\
+\hline
+Lógica de riego automático y seguridad &  &  &  &  &  &  & X & X &  \\
+\hline
+Pruebas de integración del prototipo &  &  &  &  &  &  & X & X & X \\
+\hline
+Análisis de resultados y limitaciones &  &  &  &  &  &  &  & X & X \\
+\hline
+Redacción y revisión de la memoria & X & X & X & X & X & X & X & X & X \\
+\hline
+\end{tabular}
+\caption{Cronograma general del proyecto TierraViva.}
+\label{cuadro:cronograma_general}
+\end{center}
+\end{table}
+
+\section{Dependencias entre tareas}
+
+Algunas tareas del cronograma dependían directamente de la finalización o estabilización de tareas previas. Las dependencias más relevantes fueron las siguientes:
+
+\begin{itemize}
+    \item La programación del firmware dependía de la selección definitiva de sensores, pines y componentes electrónicos.
+    \item La integración con ThingSpeak dependía de la estabilización de la comunicación LTE y de la definición de los campos de telemetría.
+    \item El backend de Raspberry Pi dependía de disponer de una estructura de datos estable para almacenar lecturas y eventos de riego.
+    \item El dashboard web dependía de la API local y de la definición de los estados relevantes del sistema.
+    \item Las pruebas de riego automático dependían de haber validado previamente la lectura de humedad del suelo, el relé y la actuación sobre la bomba.
+\end{itemize}
+
+Estas dependencias justifican que varias tareas se hayan desarrollado de forma iterativa. En especial, la integración entre hardware, comunicaciones y software requirió ciclos sucesivos de prueba, corrección y validación.

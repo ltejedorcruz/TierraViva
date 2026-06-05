@@ -113,20 +113,22 @@ Este anexo recoge los principales componentes utilizados en el prototipo TierraV
 \section{Referencias comerciales de compra}
 \label{anexo:referencias_compra}
 
-Algunos componentes se adquirieron a través de distribuidores generalistas, principalmente para facilitar la disponibilidad y reducir el tiempo de aprovisionamiento. Estas referencias se incluyen únicamente como trazabilidad de compra. Para la justificación técnica se han utilizado, siempre que ha sido posible, hojas de datos o documentación del fabricante del componente.
+En este apartado se recogen las referencias comerciales utilizadas para identificar los componentes adquiridos o empleados durante el montaje del prototipo. La información se presenta con un criterio de trazabilidad: proveedor, denominación comercial y función concreta dentro del sistema.
+
+En los componentes comprados a través de plataformas generalistas, la referencia se ha indicado mediante el identificador comercial disponible en la propia plataforma, ya que en muchos casos el producto se vende como módulo compatible y no como componente industrial con una única referencia normalizada.
 
 \begin{table}[H]
 \begin{center}
 \small
-\begin{tabular}{|p{0.28\textwidth}|p{0.30\textwidth}|p{0.30\textwidth}|}
+\begin{tabular}{|p{0.26\textwidth}|p{0.36\textwidth}|p{0.28\textwidth}|}
 \hline
-\textbf{Componente} & \textbf{Referencia comercial} & \textbf{Uso en el prototipo} \\
+\textbf{Componente} & \textbf{Referencia comercial de compra} & \textbf{Uso en el prototipo} \\
 \hline
-Sensor capacitivo de humedad de suelo & AZDelivery, módulo higrómetro capacitivo V1.2 compatible con Arduino. & Lectura analógica de humedad del sustrato. \\
+Sensor capacitivo de humedad de suelo & AliExpress, módulo sensor capacitivo de humedad de suelo compatible con Arduino. Referencia comercial: item 1005005962452779. & Lectura analógica de la humedad del sustrato mediante la entrada A0 del Arduino UNO. \\
 \hline
-BME280 & Módulo BME280 compatible con alimentación de 5 V. & Medición ambiental: temperatura, humedad relativa y presión. \\
+Sensor ambiental BME280 & AliExpress, módulo BME280 para medición ambiental. Referencia comercial: item 1005006220365245. & Medición de temperatura, humedad relativa y presión atmosférica mediante bus I2C. \\
 \hline
-BH1750 / GY-302 & Módulo GY-302 basado en sensor BH1750. & Medición de luminosidad ambiente en lux. \\
+Sensor de luminosidad BH1750 / GY-302 & AliExpress, módulo GY-302 basado en sensor BH1750. Referencia comercial: item 1005001621873442. & Medición de luminosidad ambiente en lux mediante bus I2C. \\
 \hline
 \end{tabular}
 \caption{Referencias comerciales de sensores empleados}
@@ -134,4 +136,125 @@ BH1750 / GY-302 & Módulo GY-302 basado en sensor BH1750. & Medición de luminos
 \end{center}
 \end{table}
 
-La referencia comercial permite identificar el tipo de módulo utilizado, pero no sustituye a la documentación técnica. Por este motivo, en el cuerpo principal se citan fuentes técnicas específicas para justificar las características principales de cada sensor: documentación de AZ-Delivery para el sensor capacitivo, hoja de datos de Bosch Sensortec para el BME280 y hoja de datos del BH1750FVI para el sensor de luminosidad.
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.36\textwidth}|p{0.28\textwidth}|}
+\hline
+\textbf{Componente} & \textbf{Referencia comercial de compra} & \textbf{Uso en el prototipo} \\
+\hline
+Arduino UNO compatible & AliExpress, placa compatible con Arduino UNO. Referencia comercial: item 1005011896677449. & Unidad de adquisición y control de cada estación remota, encargada de leer sensores, gestionar comunicaciones y activar el relé. \\
+\hline
+Raspberry Pi 5, 8 GB & Amazon España, Raspberry Pi 5 8GB, referencia comercial SC1112. ASIN: B0CK2FCG1K. & Nodo central de supervisión, consulta de datos, registro local, lógica de decisión y panel de visualización. \\
+\hline
+Módulo LTE A7670E-LASA & Módulo de comunicaciones 4G/LTE A7670E-LASA empleado en el prototipo. Referencia comercial específica pendiente de consignar en el listado final de compras. & Comunicación remota de las estaciones con la nube mediante red móvil y peticiones HTTP. \\
+\hline
+Tarjeta SIM de datos & Tarjeta SIM comercial de operador móvil. & Acceso a red móvil para el envío de datos desde las estaciones remotas. \\
+\hline
+\end{tabular}
+\caption{Referencias comerciales de procesamiento y comunicaciones}
+\label{cuadro:referencias_comerciales_procesamiento_comunicaciones}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.36\textwidth}|p{0.28\textwidth}|}
+\hline
+\textbf{Componente} & \textbf{Referencia comercial de compra} & \textbf{Uso en el prototipo} \\
+\hline
+Batería 12 V & Amazon España, batería Yuasa YTX7L-BS-WC 12 V sin mantenimiento. ASIN: B07FJF6JRZ. & Alimentación principal de 12 V para la estación y para la carga de actuación. \\
+\hline
+Módulo relé 5 V & Amazon España, módulo relé de un canal con optoacoplador para control desde microcontrolador. Referencia comercial Innfeeltech. ASIN: B0CM2Y1WMZ. & Conmutación de la carga de 12 V asociada al sistema de riego. \\
+\hline
+Bomba de agua 12 V & Referencia comercial pendiente de completar. & Elemento de actuación hidráulica para activar el riego cuando el sistema lo ordena. \\
+\hline
+Convertidor DC-DC LM2596 & Amazon, módulo reductor de tensión LM2596 ASIN: B0FS1FN2H4. & Conversión de la tensión de entrada de 12 V a una tensión regulada de 5 V para alimentar la electrónica de control. \\
+\hline
+\end{tabular}
+\caption{Referencias comerciales de alimentación y actuación}
+\label{cuadro:referencias_comerciales_alimentacion_actuacion}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.36\textwidth}|p{0.28\textwidth}|}
+\hline
+\textbf{Componente} & \textbf{Referencia comercial de compra} & \textbf{Uso en el prototipo} \\
+\hline
+Protoboard y placa de montaje & Material adquirido en tienda de electrónica. & Montaje, pruebas y conexionado inicial de los circuitos del prototipo. \\
+\hline
+Cableado Dupont y cable eléctrico & Material adquirido en tienda de electrónica. & Interconexión entre sensores, Arduino UNO, módulo LTE, relé y alimentación. \\
+\hline
+Resistencias & Material adquirido en tienda de electrónica. & Implementación de divisores de tensión y acondicionamiento básico de señales. \\
+\hline
+Condensadores & Material adquirido en tienda de electrónica. & Estabilización local de alimentación y apoyo al filtrado eléctrico durante las pruebas. \\
+\hline
+Macarrón termorretráctil y material aislante & Material adquirido en tienda de electrónica. & Protección mecánica y aislamiento eléctrico de conexiones. \\
+\hline
+Caja, soporte de madera y elementos auxiliares & Material adquirido en ferretería. & Integración física del prototipo, soporte de componentes y protección básica durante las pruebas. \\
+\hline
+LED y elementos menores de señalización & Material adquirido en tienda de electrónica. & Indicaciones visuales y apoyo durante pruebas de funcionamiento. \\
+\hline
+\end{tabular}
+\caption{Referencias comerciales de material auxiliar de montaje}
+\label{cuadro:referencias_comerciales_material_auxiliar}
+\end{center}
+\end{table}
+
+\section{Costes del prototipo}
+\label{anexo:costes_prototipo}
+
+Además de las referencias comerciales, se ha realizado una estimación del coste de los materiales empleados en el prototipo. El objetivo de esta estimación no es establecer un presupuesto industrial cerrado, sino cuantificar el orden de magnitud económico necesario para reproducir una versión funcional del sistema TierraViva.
+
+Los importes indicados corresponden a precios aproximados de adquisición o reposición en el momento de desarrollo del proyecto. En componentes comprados en plataformas generalistas, el precio puede variar en función del vendedor, disponibilidad, descuentos temporales, gastos de envío o condiciones de compra. En el caso de material auxiliar adquirido en tienda de electrónica o procedente de material ya disponible, se ha agrupado el coste de forma aproximada.
+
+\begin{table}[H]
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{4pt}
+
+\begin{tabularx}{\textwidth}{|
+>{\raggedright\arraybackslash}X|
+>{\centering\arraybackslash}p{0.13\textwidth}|
+>{\centering\arraybackslash}p{0.18\textwidth}|
+>{\centering\arraybackslash}p{0.16\textwidth}|}
+\hline
+\textbf{Componente} & \textbf{Cantidad} & \textbf{Coste unitario aprox.} & \textbf{Subtotal aprox.} \\
+\hline
+Sensor capacitivo de humedad de suelo & 2 & 1.88 \euro{} & 3.76 \euro{} \\
+\hline
+Sensor ambiental BME280 & 2 & 5.59 \euro{} & 11.18 \euro{} \\
+\hline
+Sensor de luminosidad BH1750 / GY-302 & 2 & 0.73 \euro{} & 1.46 \euro{} \\
+\hline
+Arduino UNO compatible & 2 & 14.71 \euro{} & 29.42 \euro{} \\
+\hline
+Raspberry Pi 5, 8 GB & 1 & 204.20 \euro{} & 204.20 \euro{} \\
+\hline
+Módulo LTE A7670E-LASA & 2 & 14.00 \euro{} & 28.00 \euro{} \\
+\hline
+Tarjeta SIM & 2 & 5.00 \euro{} & 10.00 \euro{} \\
+\hline
+Batería 12 V & 2 & 44.50 \euro{} & 89.00 \euro{} \\
+\hline
+Módulo relé 5 V & 1 pack de 3 piezas & 9.19 \euro{} & 9.19 \euro{} \\
+\hline
+Convertidor DC-DC LM2596 & 1 pack de 2 piezas & 6.29 \euro{} & 6.29 \euro{} \\
+\hline
+Bomba de agua 12 V & 2 & 5.00 \euro{} & 10.00 \euro{} \\
+\hline
+Protoboard, cableado, resistencias, condensadores y material auxiliar & 2 lote & 9.00 \euro{} & 18.00 \euro{} \\
+\hline
+\textbf{Total estimado} & -- & -- & \textbf{420.50 \euro{}} \\
+\hline
+\end{tabularx}
+
+\caption{Estimación de costes de los materiales empleados en el prototipo TierraViva}
+\label{cuadro:costes_materiales_tierraviva}
+\end{center}
+\end{table}

@@ -1,0 +1,267 @@
+\chapter{Matriz de trazabilidad entre requisitos y pruebas}
+\label{anexo:trazabilidad_requisitos_pruebas}
+
+Este anexo recoge la trazabilidad entre los requisitos definidos para TierraViva y las pruebas previstas para su validación. Su finalidad es demostrar que cada requisito funcional, no funcional y operativo tiene asociado al menos un mecanismo de comprobación.
+
+La matriz de trazabilidad permite conectar tres niveles del proyecto: lo que el sistema debe cumplir, qué componente o bloque lo implementa y qué prueba permite verificarlo. De esta forma, la validación del prototipo no queda basada únicamente en una descripción general de funcionamiento, sino en una relación explícita entre requisitos, implementación y evidencias.
+
+\section{Criterio de trazabilidad}
+
+Para cada requisito se indican los siguientes elementos:
+
+\begin{itemize}
+    \item \textbf{Código}: identificador del requisito.
+    \item \textbf{Requisito}: descripción resumida.
+    \item \textbf{Bloque responsable}: parte del sistema que implementa o contribuye a cumplir el requisito.
+    \item \textbf{Pruebas asociadas}: casos de prueba definidos en el Anexo \ref{anexo:plan_pruebas}.
+    \item \textbf{Evidencia esperada}: captura, log, fotografía, registro o resultado que permite justificar el cumplimiento.
+\end{itemize}
+
+La evidencia concreta de cada prueba se documentará de forma progresiva en el Anexo \ref{anexo:diario_experimentos}, donde se registran los resultados reales, incidencias y correcciones aplicadas.
+
+\section{Trazabilidad de requisitos funcionales}
+
+La Tabla \ref{tab:trazabilidad_rf} relaciona los requisitos funcionales del sistema con los bloques técnicos responsables y las pruebas que permiten validarlos.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.22}
+\scriptsize
+\begin{tabular}{|p{0.11\textwidth}|p{0.22\textwidth}|p{0.24\textwidth}|p{0.16\textwidth}|p{0.17\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Requisito} & \textbf{Bloque responsable} & \textbf{Pruebas asociadas} & \textbf{Evidencia esperada} \\
+\hline
+RF-01 & Medición de humedad del suelo & Sensor capacitivo de humedad, Arduino UNO y firmware de adquisición. & P04, P14 & Monitor serie, lectura en seco/húmedo y registro en ThingSpeak. \\
+\hline
+RF-02 & Medición ambiental & Sensor BME280, bus I2C y firmware de adquisición. & P02, P16 & Lecturas coherentes de temperatura, humedad relativa y presión. \\
+\hline
+RF-03 & Medición de luminosidad & Sensor BH1750, bus I2C y firmware de adquisición. & P03, P16 & Variación de lux entre sombra, luz ambiental y luz directa. \\
+\hline
+RF-04 & Envío remoto de telemetría & Módulo A7670E-LASA, comunicación LTE, HTTP y ThingSpeak. & P05, P06, P15, P16 & Entrada nueva en ThingSpeak y log de publicación. \\
+\hline
+RF-05 & Identificación de estación & Configuración de estación, canal ThingSpeak, ingestor y base SQLite. & P07, P08, P16 & Registros diferenciados por \texttt{station\_id}. \\
+\hline
+RF-06 & Almacenamiento histórico & Raspberry Pi, \texttt{main.py}, \texttt{database.py} y SQLite. & P07, P08, P16 & Tabla \texttt{readings} con lecturas persistidas. \\
+\hline
+RF-07 & Visualización del estado & API FastAPI y dashboard web. & P09, P10, P16 & Dashboard con última lectura, estado, frescura y gráficas. \\
+\hline
+RF-08 & Decisión local de riego & Firmware Arduino, regla de humedad, cooldown y modo seguro. & P13, P14, P16 & Registro de decisión local y ausencia de actuación ante dato inválido. \\
+\hline
+RF-09 & Actuación local sobre el riego & Pin de control, módulo relé, bomba de 12 V y firmware de actuación. & P11, P12, P13, P16 & Relé conmuta, bomba se activa y se apaga al finalizar. \\
+\hline
+RF-10 & Publicación de estado de actuación & Firmware de estación, campos de estado en ThingSpeak e ingesta en Raspberry Pi. & P06, P07, P08, P10, P16 & Valores de \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code}. \\
+\hline
+RF-11 & Seguridad de funcionamiento & Firmware, estado seguro, límite temporal, cooldown y apagado explícito. & P11, P12, P13, P14, P15, P16 & Bomba apagada ante error, reinicio, cooldown o lectura inválida. \\
+\hline
+\end{tabular}
+\caption{Matriz de trazabilidad de requisitos funcionales.}
+\label{tab:trazabilidad_rf}
+\end{table}
+
+\section{Trazabilidad de requisitos no funcionales}
+
+Los requisitos no funcionales no siempre se validan con una única prueba concreta. En muchos casos se comprueban mediante decisiones de diseño, documentación, pruebas de integración o evidencias de reproducibilidad.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.22}
+\scriptsize
+\begin{tabular}{|p{0.11\textwidth}|p{0.22\textwidth}|p{0.26\textwidth}|p{0.17\textwidth}|p{0.14\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Requisito} & \textbf{Criterio de cumplimiento} & \textbf{Pruebas / anexos asociados} & \textbf{Cobertura} \\
+\hline
+RNF-01 & Modularidad & El sistema está separado en estación, ThingSpeak, Raspberry Pi, SQLite, API y dashboard. & P16, manual de instalación, manual API & Directa \\
+\hline
+RNF-02 & Bajo coste & Se utilizan componentes comerciales accesibles y se documenta el coste del prototipo. & Anexo de materiales, relación ingresos-gastos & Directa \\
+\hline
+RNF-03 & Reproducibilidad & El montaje, configuración, instalación y uso están documentados. & Manual de instalación, esquemas eléctricos, plan de pruebas & Directa \\
+\hline
+RNF-04 & Facilidad de depuración & El sistema permite probar sensores, LTE, ThingSpeak, Raspberry, API y dashboard por separado. & P01--P10, P16, diario de experimentos & Directa \\
+\hline
+RNF-05 & Consumo razonable & Se evita lectura continua innecesaria y se define una frecuencia de telemetría moderada. & ET-01, ET-02, pruebas de funcionamiento & Parcial \\
+\hline
+RNF-06 & Tolerancia a fallos & Ante fallos de lectura, comunicación o actuación se mantiene un estado seguro. & P13, P14, P15, riesgos, seguridad funcional & Directa \\
+\hline
+RNF-07 & Escalabilidad & La arquitectura admite más de una estación mediante identificadores y canales separados. & P07, P08, P10, P16 & Directa \\
+\hline
+RNF-08 & Claridad de visualización & El dashboard presenta lecturas, estados, frescura, gráficas e histórico. & P10, manual de usuario & Directa \\
+\hline
+RNF-09 & Adecuación académica & El alcance prioriza funciones verificables y evita prometer funcionalidades no implementadas. & Plan de pruebas, diario de experimentos, conclusiones & Directa \\
+\hline
+\end{tabular}
+\caption{Matriz de trazabilidad de requisitos no funcionales.}
+\label{tab:trazabilidad_rnf}
+\end{table}
+
+\section{Trazabilidad de especificaciones temporales y operativas}
+
+Las especificaciones temporales y operativas definen el comportamiento esperado del sistema durante la ejecución. La Tabla \ref{tab:trazabilidad_et} resume cómo se validan o documentan.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.22}
+\scriptsize
+\begin{tabular}{|p{0.11\textwidth}|p{0.24\textwidth}|p{0.20\textwidth}|p{0.18\textwidth}|p{0.17\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Parámetro} & \textbf{Valor / criterio} & \textbf{Pruebas asociadas} & \textbf{Evidencia esperada} \\
+\hline
+ET-01 & Periodo de lectura de sensores & 30 s iniciales & P02, P03, P04 & Monitor serie o logs con ciclos periódicos. \\
+\hline
+ET-02 & Frecuencia de envío de telemetría & 30 s iniciales & P06, P16 & Entradas sucesivas en ThingSpeak. \\
+\hline
+ET-03 & Frecuencia de actualización del dashboard & 3--5 s & P10 & Dashboard actualizando estado sin recargar la página. \\
+\hline
+ET-04 & Intervalo de evaluación local & 30 s iniciales & P13, P14 & Ciclos de evaluación en firmware. \\
+\hline
+ET-05 & Tiempo máximo de bomba activa & 60 s máximo & P12, P13 & Bomba apagada tras el tiempo configurado. \\
+\hline
+ET-06 & Tiempo mínimo entre riegos & Configurable & P13 & Segundo riego bloqueado por cooldown. \\
+\hline
+ET-07 & Tiempo máximo sin publicación válida & 5 min & P15 & Registro de fallo o estado seguro ante pérdida de publicación. \\
+\hline
+ET-08 & Estado seguro por defecto & Bomba apagada & P11, P14, P15 & Relé apagado al arrancar o ante error. \\
+\hline
+ET-09 & Comportamiento ante dato inválido & Ignorar y registrar & P14 & No activación de bomba y código de error. \\
+\hline
+ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actuación & P15 & Sistema mantiene estado seguro sin depender de conexión. \\
+\hline
+\end{tabular}
+\caption{Matriz de trazabilidad de especificaciones temporales y operativas.}
+\label{tab:trazabilidad_et}
+\end{table}
+
+\section{Cobertura de pruebas sobre requisitos}
+
+La Tabla \ref{tab:cobertura_pruebas_requisitos} muestra la relación inversa: qué requisitos cubre cada prueba principal. Esta vista permite comprobar que las pruebas no se han definido de forma aislada, sino como respuesta a requisitos concretos.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.22}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|p{0.14\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Prueba} & \textbf{Descripción resumida} & \textbf{Requisitos cubiertos} & \textbf{Tipo} \\
+\hline
+P01 & Verificación de alimentación & RNF-04, RNF-06, ET-08 & Técnica \\
+\hline
+P02 & Lectura de BME280 & RF-02, RNF-04 & Unitaria \\
+\hline
+P03 & Lectura de BH1750 & RF-03, RNF-04 & Unitaria \\
+\hline
+P04 & Lectura de humedad del suelo & RF-01, RF-08, RNF-04 & Unitaria \\
+\hline
+P05 & Comunicación AT con A7670E-LASA & RF-04, RNF-04 & Integración \\
+\hline
+P06 & Publicación en ThingSpeak & RF-04, RF-10, ET-02 & Integración \\
+\hline
+P07 & Consulta desde Raspberry Pi & RF-05, RF-06, RF-10 & Integración \\
+\hline
+P08 & Almacenamiento en SQLite & RF-05, RF-06, RNF-07 & Integración \\
+\hline
+P09 & API local & RF-07, RNF-04, RNF-08 & Integración \\
+\hline
+P10 & Dashboard web & RF-07, RNF-08, ET-03 & Aceptación \\
+\hline
+P11 & Relé sin bomba & RF-09, RF-11, ET-08 & Seguridad \\
+\hline
+P12 & Bomba con activación temporizada & RF-09, RF-11, ET-05 & Seguridad \\
+\hline
+P13 & Cooldown entre riegos & RF-08, RF-09, RF-11, ET-06 & Seguridad \\
+\hline
+P14 & Lectura inválida de humedad & RF-01, RF-08, RF-11, ET-09 & Seguridad \\
+\hline
+P15 & Pérdida temporal de comunicación & RF-04, RF-11, RNF-06, ET-07, ET-10 & Resiliencia \\
+\hline
+P16 & Integración completa & RF-01--RF-11, RNF-01, RNF-03, RNF-07 & Extremo a extremo \\
+\hline
+\end{tabular}
+\caption{Cobertura de requisitos por cada caso de prueba.}
+\label{tab:cobertura_pruebas_requisitos}
+\end{table}
+
+\section{Requisitos críticos}
+
+No todos los requisitos tienen el mismo impacto sobre la validez del prototipo. Para priorizar la validación, se identifican como críticos aquellos que afectan directamente a la seguridad, actuación física, comunicación remota o coherencia de datos.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.22}
+\small
+\begin{tabular}{|p{0.16\textwidth}|p{0.34\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Requisito} & \textbf{Motivo de criticidad} & \textbf{Validación mínima exigible} \\
+\hline
+RF-01 & La humedad del suelo condiciona la decisión de riego. & Prueba en seco, húmedo y rango intermedio. \\
+\hline
+RF-04 & Sin telemetría remota no existe supervisión del sistema. & Publicación visible en ThingSpeak. \\
+\hline
+RF-06 & Sin histórico no puede analizarse la evolución del prototipo. & Inserción comprobada en SQLite. \\
+\hline
+RF-08 & La decisión local define cuándo se actúa sobre el riego. & Prueba de umbral, cooldown y dato inválido. \\
+\hline
+RF-09 & La actuación física introduce riesgo hidráulico y eléctrico. & Prueba con relé y bomba temporizada. \\
+\hline
+RF-11 & Evita activaciones indefinidas o peligrosas. & Pruebas de estado seguro, reinicio y error. \\
+\hline
+RNF-06 & La tolerancia a fallos sostiene la robustez del prototipo. & Prueba ante fallo de comunicación o lectura inválida. \\
+\hline
+ET-05 & Limita el tiempo máximo de bomba activa. & Medición de apagado tras tiempo configurado. \\
+\hline
+ET-08 & Define el estado seguro por defecto. & Relé apagado al arrancar y ante fallo. \\
+\hline
+\end{tabular}
+\caption{Requisitos considerados críticos para la validación del prototipo.}
+\label{tab:requisitos_criticos}
+\end{table}
+
+\section{Requisitos parcialmente cubiertos o dependientes de evidencias futuras}
+
+Algunos requisitos pueden estar diseñados y documentados, pero requieren evidencias adicionales en la versión final de la memoria. La Tabla \ref{tab:requisitos_evidencia_futura} identifica estos casos para evitar presentar como completamente validado aquello que aún debe completarse experimentalmente.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.22}
+\small
+\begin{tabular}{|p{0.16\textwidth}|p{0.34\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Requisito} & \textbf{Situación actual} & \textbf{Evidencia pendiente o recomendable} \\
+\hline
+RNF-05 & El diseño contempla frecuencias razonables, pero no se ha realizado una optimización energética completa. & Medidas de consumo o justificación de trabajo futuro. \\
+\hline
+RNF-07 & La arquitectura admite varias estaciones, pero la validación puede estar limitada por el número de nodos montados. & Evidencia de registros diferenciados por estación A/B. \\
+\hline
+ET-07 & El comportamiento ante falta de publicación está definido, pero debe probarse con interrupción controlada. & Log de pérdida temporal y recuperación. \\
+\hline
+ET-10 & El estado seguro ante pérdida de comunicación está definido, pero debe validarse durante una prueba controlada. & Registro de bomba apagada o no actuación. \\
+\hline
+\end{tabular}
+\caption{Requisitos que requieren evidencia adicional antes del cierre de la memoria.}
+\label{tab:requisitos_evidencia_futura}
+\end{table}
+
+\section{Criterio de aceptación de cobertura}
+
+Para considerar suficientemente cubierta la validación del prototipo se establecen los siguientes criterios:
+
+\begin{itemize}
+    \item todos los requisitos funcionales deben tener al menos una prueba asociada;
+    \item los requisitos críticos deben contar con evidencia real en el diario de experimentos;
+    \item ningún requisito relacionado con seguridad de riego debe quedar validado únicamente por diseño;
+    \item los requisitos no funcionales deben estar justificados mediante diseño, documentación o prueba;
+    \item las especificaciones temporales deben comprobarse en firmware, dashboard, API o pruebas de actuación;
+    \item cualquier requisito no validado completamente debe quedar identificado como pendiente, limitado o trabajo futuro.
+\end{itemize}
+
+Estos criterios permiten evitar una validación superficial. El objetivo no es afirmar que TierraViva es un producto industrial terminado, sino demostrar que el prototipo cumple de forma trazable el alcance definido para el Trabajo de Fin de Grado.
+
+\section{Conclusión}
+
+La matriz de trazabilidad muestra que los requisitos definidos para TierraViva están cubiertos por pruebas concretas, componentes identificables y evidencias esperadas. Esta relación refuerza la defensa técnica del proyecto porque permite seguir el recorrido completo desde la necesidad inicial hasta la validación experimental.
+
+El anexo también permite detectar qué aspectos requieren evidencias adicionales antes de cerrar la memoria final. En particular, deben priorizarse las pruebas asociadas a humedad del suelo, publicación en ThingSpeak, almacenamiento SQLite, dashboard, actuación temporizada y seguridad de funcionamiento. Con ello, la validación del sistema queda organizada, justificable y coherente con el alcance real del prototipo.

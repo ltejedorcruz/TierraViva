@@ -1,8 +1,88 @@
-\chapter{Esquemas eléctricos y conexiones}
-\label{anexo:esquemas_conexion}
+\chapter{Esquemas eléctricos del prototipo}
+\label{anexo:esquemas_electricos}
+
+Este anexo recoge los esquemas eléctricos de referencia utilizados durante el diseño y montaje del prototipo TierraViva.
+
+Los esquemas incluidos tienen carácter técnico y documental. No sustituyen a las tablas de conexión detalladas del manual de instalación, sino que sirven como apoyo visual para comprender la arquitectura física del montaje.
+
+\section{Esquema general de una estación}
+
+La Figura \ref{fig:esquema_estacion_tierraviva} muestra el esquema general de una estación TierraViva elaborado en Cirkit Designer. En él se representa la conexión entre la batería de 12 V, el regulador LM2596, el Arduino UNO, los sensores, el módulo LTE A7670E-LASA, el relé y la bomba de 12 V.
+
 \begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figs/esquema_estacion_TierraViva.png}
-\caption{Esquema de conexión de una estación de campo de TierraViva. En la fase de prueba se representa un LED como carga de verificación; en el montaje final se sustituye por la bomba de agua de 12 V controlada mediante relé.}
-\label{fig:esquema_estacion_tierraviva}
+    \centering
+    \includegraphics[width=\textwidth]{figs/esquema_estacion_TierraViva.png}
+    \caption{Esquema eléctrico general de una estación TierraViva elaborado en Cirkit Designer.}
+    \label{fig:esquema_estacion_tierraviva}
 \end{figure}
+
+\section{Bloques representados en el esquema}
+
+El esquema de la estación puede dividirse en varios bloques funcionales:
+
+\begin{itemize}
+    \item \textbf{Alimentación}: formada por una batería de 12 V y un regulador LM2596 ajustado a 5 V para alimentar la electrónica de control.
+    \item \textbf{Control}: formado por el Arduino UNO, encargado de leer sensores, gestionar comunicaciones y controlar el relé.
+    \item \textbf{Sensorización}: formada por el sensor capacitivo de humedad del suelo, el BME280 y el BH1750.
+    \item \textbf{Comunicación}: formada por el módulo LTE A7670E-LASA y su antena.
+    \item \textbf{Actuación}: formada por el módulo relé y la bomba de agua de 12 V.
+    \item \textbf{Protección y estabilización}: formada por resistencias, condensadores y elementos auxiliares de acondicionamiento eléctrico.
+\end{itemize}
+
+\section{Correspondencia con el cableado del prototipo}
+
+La Tabla \ref{tab:correspondencia_esquema_cableado} resume la correspondencia entre los principales bloques del esquema y las conexiones descritas en el manual de instalación.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.28\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Bloque} & \textbf{Elemento principal} & \textbf{Función dentro de la estación} \\
+\hline
+Alimentación & Batería 12 V y LM2596 & Proporcionar alimentación de potencia y tensión regulada de 5 V para la electrónica. \\
+\hline
+Control & Arduino UNO & Coordinar lectura de sensores, publicación de datos y actuación sobre el relé. \\
+\hline
+Comunicación & A7670E-LASA & Enviar telemetría a ThingSpeak mediante red móvil LTE. \\
+\hline
+Sensorización ambiental & BME280 y BH1750 & Medir temperatura, humedad relativa, presión y luminosidad. \\
+\hline
+Sensorización de suelo & Sensor capacitivo de humedad & Medir el estado hídrico del sustrato mediante entrada analógica. \\
+\hline
+Actuación & Relé y bomba 12 V & Activar físicamente el riego cuando se cumplen las condiciones definidas. \\
+\hline
+\end{tabular}
+\caption{Correspondencia entre el esquema eléctrico y los bloques funcionales de la estación.}
+\label{tab:correspondencia_esquema_cableado}
+\end{table}
+
+\section{Notas de interpretación}
+
+El esquema debe interpretarse como una representación del prototipo de estación, no como un diseño industrial definitivo. Durante el montaje real deben comprobarse siempre los siguientes puntos:
+
+\begin{itemize}
+    \item la salida del LM2596 debe estar ajustada a 5.0 V antes de alimentar el Arduino;
+    \item todas las masas deben estar conectadas en común;
+    \item el módulo A7670E-LASA debe alimentarse con una tensión compatible con su placa;
+    \item la señal desde Arduino hacia el RX del módulo LTE debe adaptarse mediante divisor de tensión;
+    \item la bomba o electroválvula de 12 V no debe alimentarse desde el Arduino;
+    \item el relé debe utilizar el contacto normalmente abierto para que el sistema arranque con el riego desactivado;
+    \item la electrónica debe protegerse frente a humedad, polvo y salpicaduras en pruebas exteriores.
+\end{itemize}
+
+\section{Referencias de diseño}
+
+El esquema se ha elaborado como apoyo al montaje físico y a la documentación del prototipo. Durante el desarrollo se ha utilizado una versión de trabajo en Cirkit Designer y documentación auxiliar de conexionado:
+
+\begin{itemize}
+    \item Proyecto en Cirkit Designer: \url{https://app.cirkitdesigner.com/project/56e39eeb-b4bb-4151-9afe-028a0ed83c81}
+    \item Documento auxiliar de trabajo: \url{https://docs.google.com/document/d/17rb1VoeUL5uT__aJyi-xQO7PCpAMMzpoz16vxB_WfM0/edit?usp=drivesdk}
+\end{itemize}
+
+Estas referencias se incluyen como material de apoyo al desarrollo. La memoria mantiene como referencia principal la imagen exportada y las tablas de conexión recogidas en el manual de instalación, ya que los documentos externos pueden modificarse o dejar de estar disponibles.
+
+% DOC: https://docs.google.com/document/d/17rb1VoeUL5uT__aJyi-xQO7PCpAMMzpoz16vxB_WfM0/edit?usp=drivesdk
+% PROYECTO: https://app.cirkitdesigner.com/project/56e39eeb-b4bb-4151-9afe-028a0ed83c81

@@ -80,16 +80,16 @@ let config = {
       "204": "no riego",
       "206": "modo seguro",
       "400": "error",
-      "429": "cooldown"
+      "429": "Cooldown Activo"
     };
 
     const EVENT_CODE_LABELS = {
-      "100": "idle",
-      "206": "safe mode",
-      "210": "riego ON",
-      "211": "riego OFF",
+      "100": "Reposo / sin evento",
+      "206": "Modo seguro activo",
+      "210": "Riego ON",
+      "211": "Riego OFF",
       "400": "error",
-      "429": "cooldown"
+      "429": "Cooldown Activo"
     };
 
     function translateCode(value, labels) {

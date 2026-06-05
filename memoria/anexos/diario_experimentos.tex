@@ -1,0 +1,655 @@
+\chapter{Diario de experimentos y evidencias de validación}
+\label{anexo:diario_experimentos}
+
+Este anexo recoge el diario de experimentos del proyecto TierraViva. Su finalidad es documentar de forma trazable las pruebas realizadas, los resultados obtenidos, las incidencias encontradas y las correcciones aplicadas durante el desarrollo del prototipo.
+
+A diferencia del plan de pruebas, que define qué debe comprobarse y con qué criterio, este diario registra la ejecución práctica de esas pruebas. Por tanto, constituye una evidencia del proceso real de validación del sistema y permite reconstruir cómo ha evolucionado el prototipo desde pruebas parciales de componentes hasta pruebas de integración completa.
+
+\section{Criterio de registro}
+
+Cada experimento se documenta siguiendo una ficha común. Esta estructura permite comparar pruebas, repetir ensayos y asociar cada resultado con una evidencia concreta.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.58\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Descripción} \\
+\hline
+Identificador & Código único del experimento o prueba ejecutada. \\
+\hline
+Fecha & Día aproximado o real de ejecución. \\
+\hline
+Bloque probado & Parte del sistema evaluada: sensores, LTE, ThingSpeak, Raspberry Pi, API, dashboard, relé o integración completa. \\
+\hline
+Configuración utilizada & Versión de firmware, software, canal ThingSpeak, estación, umbrales o parámetros relevantes. \\
+\hline
+Procedimiento & Pasos realizados durante el experimento. \\
+\hline
+Resultado esperado & Comportamiento que debía observarse para considerar válida la prueba. \\
+\hline
+Resultado obtenido & Resultado real observado durante la ejecución. \\
+\hline
+Incidencias & Problemas, errores, comportamientos anómalos o limitaciones detectadas. \\
+\hline
+Corrección aplicada & Cambio realizado para resolver o mitigar la incidencia. \\
+\hline
+Evidencia & Captura, fotografía, log, registro en ThingSpeak, consulta a SQLite o respuesta de API asociada. \\
+\hline
+Estado & Superada, superada con observaciones, fallida, bloqueada o pendiente. \\
+\hline
+\end{tabular}
+\caption{Estructura utilizada para registrar los experimentos de TierraViva.}
+\label{tab:estructura_diario_experimentos}
+\end{table}
+
+\section{Estados utilizados}
+
+Para mantener coherencia con el plan de pruebas, cada experimento se clasifica con uno de los siguientes estados.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.58\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Estado} & \textbf{Significado} \\
+\hline
+Superada & El experimento cumple el resultado esperado sin incidencias relevantes. \\
+\hline
+Superada con observaciones & La funcionalidad principal queda validada, pero se detectan aspectos a mejorar o documentar. \\
+\hline
+Fallida & El experimento no cumple el resultado esperado y requiere corrección. \\
+\hline
+Bloqueada & El experimento no puede ejecutarse por falta de componente, configuración, entorno o dependencia previa. \\
+\hline
+Pendiente & El experimento está definido, pero todavía no se ha ejecutado o no se dispone de evidencia suficiente. \\
+\hline
+\end{tabular}
+\caption{Estados empleados en el diario de experimentos.}
+\label{tab:estados_diario_experimentos}
+\end{table}
+
+\section{Resumen de campañas de experimentación}
+
+El proceso experimental se organiza en campañas. Cada campaña agrupa pruebas relacionadas y permite avanzar desde validaciones simples hacia pruebas de integración completa.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.14\textwidth}|p{0.30\textwidth}|p{0.36\textwidth}|p{0.10\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campaña} & \textbf{Bloque} & \textbf{Objetivo} & \textbf{Estado} \\
+\hline
+C01 & Alimentación y montaje eléctrico & Comprobar tensiones, masa común, conexión de sensores, relé y módulo LTE antes de integrar el sistema completo. & Pendiente \\
+\hline
+C02 & Sensores & Validar lecturas de humedad de suelo, temperatura, humedad ambiental, presión y luminosidad. & Pendiente \\
+\hline
+C03 & Comunicaciones LTE & Verificar comandos AT, SIM, registro en red y envío HTTP mediante A7670E-LASA. & Pendiente \\
+\hline
+C04 & ThingSpeak & Comprobar publicación de telemetría y correspondencia entre campos y variables. & Pendiente \\
+\hline
+C05 & Raspberry Pi y SQLite & Validar instalación, ingesta desde ThingSpeak y almacenamiento local en base de datos. & Pendiente \\
+\hline
+C06 & API FastAPI & Verificar endpoints de configuración, última lectura, histórico, estadísticas y salud. & Pendiente \\
+\hline
+C07 & Dashboard web & Comprobar visualización de lecturas, estados, gráficas, resumen y tabla de registros. & Pendiente \\
+\hline
+C08 & Relé y bomba & Validar actuación temporizada, apagado seguro y cooldown. & Pendiente \\
+\hline
+C09 & Integración completa & Probar flujo extremo a extremo: estación, ThingSpeak, Raspberry Pi, SQLite, API, dashboard y actuación local. & Pendiente \\
+\hline
+C10 & Prueba en entorno real o controlado & Validar el prototipo en maceta, parcela o entorno de pruebas del Agrolab. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Campañas de experimentación previstas para TierraViva.}
+\label{tab:campanas_experimentacion}
+\end{table}
+
+\section{Registro de experimentos}
+
+\subsection{C01. Alimentación y montaje eléctrico}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-01 & Ajuste del LM2596 & Salida regulada a 5.0 V antes de alimentar Arduino y módulos. & Pendiente \\
+\hline
+EXP-02 & Verificación de masa común & Arduino, sensores, relé y módulo LTE comparten referencia GND. & Pendiente \\
+\hline
+EXP-03 & Revisión de divisor de tensión hacia RX del A7670E & La señal TX del Arduino queda adaptada antes de entrar al RX del módem. & Pendiente \\
+\hline
+EXP-04 & Prueba de arranque sin bomba conectada & El sistema arranca sin reinicios y con relé en estado apagado. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de alimentación y montaje eléctrico.}
+\label{tab:exp_alimentacion}
+\end{table}
+
+\subsection{C02. Sensores}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-05 & Lectura del BME280 & Temperatura, humedad relativa y presión con valores coherentes. & Pendiente \\
+\hline
+EXP-06 & Lectura del BH1750 & Variación clara entre sombra, luz ambiental y luz directa. & Pendiente \\
+\hline
+EXP-07 & Lectura del sensor de humedad en seco & Valor estable y diferenciable respecto a condición húmeda. & Pendiente \\
+\hline
+EXP-08 & Lectura del sensor de humedad en húmedo & Valor estable y diferenciable respecto a condición seca. & Pendiente \\
+\hline
+EXP-09 & Cálculo de porcentaje de humedad & Conversión de lectura bruta a porcentaje dentro de un rango interpretable. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de sensorización.}
+\label{tab:exp_sensores}
+\end{table}
+
+\subsection{C03. Comunicaciones LTE}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-10 & Respuesta básica del A7670E-LASA & El módem responde correctamente a \texttt{AT}. & Pendiente \\
+\hline
+EXP-11 & Comprobación de SIM & La SIM aparece lista y sin PIN activo. & Pendiente \\
+\hline
+EXP-12 & Comprobación de señal & El comando de señal devuelve un valor interpretable. & Pendiente \\
+\hline
+EXP-13 & Registro en red & El módem se registra correctamente en la red móvil. & Pendiente \\
+\hline
+EXP-14 & Activación de contexto de datos & El módulo permite iniciar conexión de datos para enviar HTTP. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de comunicación LTE.}
+\label{tab:exp_lte}
+\end{table}
+
+\subsection{C04. Publicación en ThingSpeak}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-15 & Envío manual de prueba a ThingSpeak & El canal recibe una entrada nueva con el valor enviado. & Pendiente \\
+\hline
+EXP-16 & Envío desde Arduino mediante LTE & La estación publica una lectura completa en el canal correspondiente. & Pendiente \\
+\hline
+EXP-17 & Correspondencia campo-variable & Cada campo de ThingSpeak contiene la variable prevista. & Pendiente \\
+\hline
+EXP-18 & Publicación de evento y diagnóstico & Los campos de estado reflejan reposo, riego, error o cooldown según corresponda. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de publicación en ThingSpeak.}
+\label{tab:exp_thingspeak}
+\end{table}
+
+\subsection{C05. Raspberry Pi, ingesta y SQLite}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-19 & Ejecución de \texttt{./tierraviva.sh install} & El entorno virtual, dependencias y base de datos quedan preparados. & Pendiente \\
+\hline
+EXP-20 & Inicialización de SQLite & La base de datos contiene las tablas \texttt{readings}, \texttt{system\_state} y \texttt{valve\_events}. & Pendiente \\
+\hline
+EXP-21 & Ingesta desde ThingSpeak & \texttt{main.py} recupera lecturas del canal configurado. & Pendiente \\
+\hline
+EXP-22 & Inserción en tabla \texttt{readings} & Las lecturas recuperadas quedan almacenadas con estación, fecha y valores. & Pendiente \\
+\hline
+EXP-23 & Evitar duplicados por \texttt{entry\_id} & El sistema no inserta repetidamente la misma entrada de ThingSpeak. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de Raspberry Pi, ingesta y SQLite.}
+\label{tab:exp_raspberry_sqlite}
+\end{table}
+
+\subsection{C06. API FastAPI}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-24 & Arranque de API con Uvicorn & La API queda accesible en el puerto 8000. & Pendiente \\
+\hline
+EXP-25 & Consulta de \texttt{/api/health} & La respuesta indica servicio operativo y base de datos accesible. & Pendiente \\
+\hline
+EXP-26 & Consulta de \texttt{/api/config} & La respuesta muestra estaciones activas, umbrales y rutas principales. & Pendiente \\
+\hline
+EXP-27 & Consulta de \texttt{/api/latest} & La API devuelve la última lectura de la estación seleccionada. & Pendiente \\
+\hline
+EXP-28 & Consulta de \texttt{/api/readings} & La API devuelve histórico reciente de lecturas. & Pendiente \\
+\hline
+EXP-29 & Consulta de \texttt{/api/stats} & La API calcula medias, mínimos y máximos en la ventana temporal configurada. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de API FastAPI.}
+\label{tab:exp_api}
+\end{table}
+
+\subsection{C07. Dashboard web}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-30 & Copia de \texttt{dashboard/} a \texttt{frontend/} & La API puede servir \texttt{frontend/index.html}. & Pendiente \\
+\hline
+EXP-31 & Acceso a dashboard desde navegador & La interfaz carga desde \texttt{http://<IP>:8000/}. & Pendiente \\
+\hline
+EXP-32 & Visualización de lectura actual & Se muestran humedad, temperatura, humedad ambiental, luminosidad y presión. & Pendiente \\
+\hline
+EXP-33 & Visualización de gráficas & Las gráficas representan las últimas lecturas almacenadas. & Pendiente \\
+\hline
+EXP-34 & Tabla de lecturas recientes & La tabla muestra registros recuperados desde la API. & Pendiente \\
+\hline
+EXP-35 & Estado de frescura de datos & El dashboard diferencia datos recientes, antiguos u offline. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de dashboard web.}
+\label{tab:exp_dashboard}
+\end{table}
+
+\subsection{C08. Relé, bomba y seguridad funcional}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-36 & Arranque con relé apagado & El sistema inicia siempre con el riego desactivado. & Pendiente \\
+\hline
+EXP-37 & Conmutación de relé sin bomba & El relé conmuta y vuelve a apagado sin carga hidráulica. & Pendiente \\
+\hline
+EXP-38 & Activación temporizada con bomba & La bomba se activa durante el tiempo definido y se apaga automáticamente. & Pendiente \\
+\hline
+EXP-39 & Cooldown entre riegos & El sistema bloquea una segunda activación si no ha pasado el tiempo mínimo. & Pendiente \\
+\hline
+EXP-40 & Lectura inválida de humedad & El sistema no activa riego si la lectura no es válida. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de relé, bomba y seguridad funcional.}
+\label{tab:exp_rele_bomba}
+\end{table}
+
+\subsection{C09. Integración completa}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.12\textwidth}|p{0.24\textwidth}|p{0.32\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Experimento} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\hline
+EXP-41 & Flujo estación--ThingSpeak & La estación publica una lectura completa en el canal correspondiente. & Pendiente \\
+\hline
+EXP-42 & Flujo ThingSpeak--Raspberry & La Raspberry recupera la última lectura publicada. & Pendiente \\
+\hline
+EXP-43 & Flujo Raspberry--SQLite & La lectura queda almacenada en la base de datos local. & Pendiente \\
+\hline
+EXP-44 & Flujo SQLite--API & La API devuelve la lectura almacenada. & Pendiente \\
+\hline
+EXP-45 & Flujo API--dashboard & El dashboard representa correctamente la lectura. & Pendiente \\
+\hline
+EXP-46 & Flujo completo con actuación local & La estación decide, actúa y publica el estado resultante. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Experimentos de integración completa.}
+\label{tab:exp_integracion_completa}
+\end{table}
+
+\section{Registro detallado de incidencias}
+
+Además de los experimentos, se registran las incidencias detectadas durante el desarrollo. Esta tabla debe completarse cada vez que aparezca un problema relevante, aunque posteriormente quede resuelto.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{|p{0.10\textwidth}|p{0.19\textwidth}|p{0.24\textwidth}|p{0.25\textwidth}|p{0.12\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{ID} & \textbf{Bloque afectado} & \textbf{Incidencia detectada} & \textbf{Corrección o decisión adoptada} & \textbf{Estado} \\
+\hline
+INC-01 & Configuración Raspberry & \texttt{main.py} no arranca si faltan variables de ThingSpeak. & Revisar \texttt{.env}, cargar variables antes de iniciar servicios y comprobar logs. & Pendiente de evidencia \\
+\hline
+INC-02 & Dashboard & La API sirve \texttt{frontend/index.html}, mientras que el dashboard fuente está en \texttt{dashboard/}. & Copiar \texttt{dashboard/} a \texttt{frontend/} antes de servir la interfaz. & Pendiente de evidencia \\
+\hline
+INC-03 & A7670E-LASA & Posibles reinicios del módem durante transmisión por alimentación insuficiente. & Verificar fuente, regulador LM2596, masa común y corriente disponible. & Pendiente \\
+\hline
+INC-04 & Humedad del suelo & Variación de lecturas según colocación y humedad real del sustrato. & Calibrar en seco/húmedo y documentar umbrales usados. & Pendiente \\
+\hline
+INC-05 & Relé/bomba & Riesgo de activación no deseada durante pruebas iniciales. & Probar primero sin bomba, usar contacto normalmente abierto y limitar tiempo por firmware. & Pendiente \\
+\hline
+\end{tabular}
+\caption{Registro inicial de incidencias técnicas del proyecto.}
+\label{tab:registro_incidencias_diario}
+\end{table}
+
+\section{Plantilla de ficha individual de experimento}
+
+Para las pruebas más relevantes se recomienda añadir una ficha individual con mayor detalle. La siguiente plantilla puede duplicarse tantas veces como sea necesario.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.60\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Contenido} \\
+\hline
+Identificador & EXP-XX \\
+\hline
+Fecha & DD/MM/2026 \\
+\hline
+Bloque probado & Sensores / LTE / ThingSpeak / Raspberry Pi / API / Dashboard / Riego \\
+\hline
+Objetivo & Describir qué se quiere validar. \\
+\hline
+Configuración & Versión de firmware, canal, estación, umbrales, script o endpoint utilizado. \\
+\hline
+Procedimiento & Enumerar los pasos ejecutados. \\
+\hline
+Resultado esperado & Indicar el comportamiento esperado. \\
+\hline
+Resultado obtenido & Registrar el resultado real observado. \\
+\hline
+Incidencias & Indicar errores, bloqueos, reinicios, valores inesperados o problemas de configuración. \\
+\hline
+Corrección aplicada & Describir la acción realizada para resolver la incidencia. \\
+\hline
+Evidencia & Fotografía, captura, log, respuesta HTTP, registro ThingSpeak o consulta SQLite. \\
+\hline
+Estado final & Superada / Superada con observaciones / Fallida / Bloqueada / Pendiente. \\
+\hline
+\end{tabular}
+\caption{Plantilla para ficha individual de experimento.}
+\label{tab:plantilla_ficha_experimento}
+\end{table}
+
+\section{Fichas de experimentos relevantes}
+
+Las siguientes fichas deben completarse con resultados reales conforme se ejecuten las pruebas. Se incluyen porque corresponden a puntos críticos del sistema y deben quedar documentados antes de la entrega final.
+
+\subsection{EXP-16. Publicación desde Arduino en ThingSpeak}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.60\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Contenido} \\
+\hline
+Objetivo & Validar que la estación publica una lectura completa en ThingSpeak mediante el módulo A7670E-LASA. \\
+\hline
+Procedimiento & Encender estación, comprobar sensores, registrar red LTE, enviar HTTP y revisar canal ThingSpeak. \\
+\hline
+Resultado esperado & Nueva entrada visible en ThingSpeak con humedad de suelo, temperatura, humedad ambiental, luminosidad, presión, estado de relé, evento y código de diagnóstico. \\
+\hline
+Evidencia requerida & Captura de ThingSpeak con claves ocultas y monitor serie del Arduino. \\
+\hline
+Estado & Pendiente de completar con resultado real. \\
+\hline
+\end{tabular}
+\caption{Ficha del experimento EXP-16.}
+\label{tab:ficha_exp_16}
+\end{table}
+
+\subsection{EXP-22. Inserción de lecturas en SQLite}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.60\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Contenido} \\
+\hline
+Objetivo & Validar que las lecturas recuperadas desde ThingSpeak se almacenan correctamente en la base de datos local. \\
+\hline
+Procedimiento & Ejecutar \texttt{./tierraviva.sh start}, revisar logs de \texttt{main.py} y consultar la tabla \texttt{readings}. \\
+\hline
+Resultado esperado & La base de datos contiene registros con \texttt{station\_id}, \texttt{entry\_id}, fecha y variables ambientales. \\
+\hline
+Evidencia requerida & Captura de terminal con consulta SQLite y log de ingesta. \\
+\hline
+Estado & Pendiente de completar con resultado real. \\
+\hline
+\end{tabular}
+\caption{Ficha del experimento EXP-22.}
+\label{tab:ficha_exp_22}
+\end{table}
+
+\subsection{EXP-25. Comprobación de \texttt{/api/health}}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.60\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Contenido} \\
+\hline
+Objetivo & Verificar que la API FastAPI está operativa y puede acceder a la base de datos y al frontend. \\
+\hline
+Procedimiento & Arrancar sistema, acceder a \texttt{/api/health} desde navegador o ejecutar \texttt{curl}. \\
+\hline
+Resultado esperado & Respuesta JSON con \texttt{ok: true}, estación activa, ruta de base de datos y estado del frontend. \\
+\hline
+Evidencia requerida & Captura del navegador o terminal con la respuesta JSON. \\
+\hline
+Estado & Pendiente de completar con resultado real. \\
+\hline
+\end{tabular}
+\caption{Ficha del experimento EXP-25.}
+\label{tab:ficha_exp_25}
+\end{table}
+
+\subsection{EXP-31. Acceso al dashboard web}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.60\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Contenido} \\
+\hline
+Objetivo & Comprobar que el dashboard web se sirve correctamente desde la Raspberry Pi. \\
+\hline
+Procedimiento & Copiar \texttt{dashboard/} a \texttt{frontend/}, arrancar API y abrir \texttt{http://<IP\_RASPBERRY>:8000/}. \\
+\hline
+Resultado esperado & La interfaz muestra estación, lecturas, estado, gráficas y tabla de registros. \\
+\hline
+Evidencia requerida & Captura del dashboard con datos reales o de prueba. \\
+\hline
+Estado & Pendiente de completar con resultado real. \\
+\hline
+\end{tabular}
+\caption{Ficha del experimento EXP-31.}
+\label{tab:ficha_exp_31}
+\end{table}
+
+\subsection{EXP-38. Activación temporizada de bomba}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.60\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Contenido} \\
+\hline
+Objetivo & Validar que la bomba se activa durante un tiempo limitado y vuelve a apagarse de forma segura. \\
+\hline
+Procedimiento & Ejecutar prueba controlada con bomba conectada, recipiente de agua y supervisión directa. \\
+\hline
+Resultado esperado & La bomba se activa únicamente durante el intervalo configurado y el relé vuelve a estado apagado. \\
+\hline
+Evidencia requerida & Vídeo, fotografía o registro del monitor serie que muestre activación y apagado. \\
+\hline
+Estado & Pendiente de completar con resultado real. \\
+\hline
+\end{tabular}
+\caption{Ficha del experimento EXP-38.}
+\label{tab:ficha_exp_38}
+\end{table}
+
+\section{Evidencias recomendadas}
+
+Las evidencias deben incorporarse progresivamente a la memoria. No es necesario incluir todas las capturas posibles, pero sí aquellas que demuestren los puntos críticos del sistema.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.42\textwidth}|p{0.18\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Evidencia} & \textbf{Qué demuestra} & \textbf{Experimentos asociados} \\
+\hline
+Foto del montaje eléctrico & Existencia física del prototipo y conexión de bloques. & EXP-01--EXP-04 \\
+\hline
+Monitor serie Arduino & Lecturas, eventos, módem y publicación. & EXP-05--EXP-18 \\
+\hline
+Captura de ThingSpeak & Publicación real de telemetría. & EXP-15--EXP-18 \\
+\hline
+Log de \texttt{main.py} & Ingesta desde ThingSpeak. & EXP-21--EXP-23 \\
+\hline
+Consulta SQLite & Persistencia local de lecturas. & EXP-20--EXP-23 \\
+\hline
+Respuesta \texttt{/api/health} & API operativa y base de datos accesible. & EXP-25 \\
+\hline
+Respuesta \texttt{/api/latest} & Última lectura disponible vía API. & EXP-27 \\
+\hline
+Captura del dashboard & Visualización final del sistema. & EXP-31--EXP-35 \\
+\hline
+Foto o vídeo del relé/bomba & Actuación física y apagado seguro. & EXP-36--EXP-40 \\
+\hline
+Prueba en maceta o parcela & Validación en entorno controlado o realista. & EXP-46 \\
+\hline
+\end{tabular}
+\caption{Evidencias recomendadas para documentar la validación del prototipo.}
+\label{tab:evidencias_recomendadas}
+\end{table}
+
+\section{Matriz de cobertura pruebas-evidencias}
+
+La Tabla \ref{tab:matriz_pruebas_evidencias} relaciona los principales casos de prueba del plan de pruebas con los experimentos y evidencias que permiten validarlos.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.10\textwidth}|p{0.24\textwidth}|p{0.25\textwidth}|p{0.27\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Prueba} & \textbf{Qué valida} & \textbf{Experimentos asociados} & \textbf{Evidencia mínima} \\
+\hline
+P01 & Alimentación & EXP-01--EXP-04 & Foto del montaje y medida con multímetro. \\
+\hline
+P02--P04 & Sensores & EXP-05--EXP-09 & Monitor serie con lecturas coherentes. \\
+\hline
+P05 & Módulo LTE & EXP-10--EXP-14 & Monitor serie con respuestas AT. \\
+\hline
+P06 & ThingSpeak & EXP-15--EXP-18 & Captura del canal con nueva entrada. \\
+\hline
+P07--P08 & Raspberry Pi y SQLite & EXP-19--EXP-23 & Log de ingesta y consulta SQLite. \\
+\hline
+P09 & API local & EXP-24--EXP-29 & Respuestas JSON de endpoints. \\
+\hline
+P10 & Dashboard & EXP-30--EXP-35 & Captura del dashboard. \\
+\hline
+P11--P12 & Relé y bomba & EXP-36--EXP-38 & Foto/vídeo de actuación y apagado. \\
+\hline
+P13--P14 & Seguridad funcional & EXP-39--EXP-40 & Registro de cooldown o error de lectura. \\
+\hline
+P15 & Pérdida temporal de comunicación & EXP-21, EXP-25, EXP-35 & Log de fallo y recuperación o estado offline. \\
+\hline
+P16 & Integración completa & EXP-41--EXP-46 & Capturas de ThingSpeak, SQLite, API y dashboard. \\
+\hline
+\end{tabular}
+\caption{Matriz de cobertura entre pruebas, experimentos y evidencias.}
+\label{tab:matriz_pruebas_evidencias}
+\end{table}
+
+\section{Criterios de cierre del diario}
+
+Antes de cerrar la memoria final, este diario debe revisarse para asegurar que no contiene pruebas críticas sin evidencia. Se consideran imprescindibles las siguientes comprobaciones:
+
+\begin{itemize}
+    \item al menos una evidencia de lectura de sensores;
+    \item al menos una evidencia de publicación en ThingSpeak;
+    \item al menos una evidencia de ingesta en Raspberry Pi;
+    \item al menos una evidencia de almacenamiento en SQLite;
+    \item al menos una evidencia de API operativa;
+    \item al menos una evidencia de dashboard con datos;
+    \item al menos una evidencia de relé o bomba en prueba controlada;
+    \item registro de incidencias reales encontradas y correcciones aplicadas.
+\end{itemize}
+
+Si alguna de estas evidencias no está disponible, debe indicarse de forma explícita el motivo: prueba pendiente, falta de entorno de campo, componente no disponible, limitación temporal o decisión de alcance.
+
+\section{Conclusión}
+
+El diario de experimentos complementa el plan de pruebas y permite demostrar que TierraViva se ha desarrollado mediante un proceso iterativo de validación. La documentación de resultados, incidencias y evidencias evita presentar el prototipo como una solución construida de forma lineal, y refleja con mayor fidelidad la realidad de un proyecto que combina hardware, comunicaciones móviles, servicios en la nube, software local y actuación física sobre un sistema de riego.
+
+En la versión final de la memoria, este anexo deberá actualizarse con resultados reales, capturas, fotografías y logs seleccionados. Su valor principal no reside en mostrar que todas las pruebas han sido perfectas desde el principio, sino en demostrar que los problemas se han detectado, entendido, corregido o delimitado de forma técnica.

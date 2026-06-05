@@ -1,0 +1,234 @@
+\chapter{Gestión de riesgos}
+\label{anexo:gestion_riesgos}
+
+Este anexo recoge los principales riesgos identificados durante el desarrollo de TierraViva y las medidas previstas para reducir su probabilidad o limitar su impacto. Al tratarse de un prototipo que combina electrónica, comunicaciones móviles, sensores, servicios en la nube, software de supervisión y actuación física sobre el riego, resulta necesario documentar los puntos más sensibles del sistema.
+
+El objetivo no es presentar una lista exhaustiva de fallos posibles, sino dejar constancia de los riesgos más relevantes para el desarrollo, las pruebas y una posible evolución futura del prototipo.
+
+\section{Criterio de valoración}
+
+Cada riesgo se ha valorado según dos dimensiones:
+
+\begin{itemize}
+    \item \textbf{Probabilidad}: posibilidad de que el riesgo se produzca durante el desarrollo o las pruebas.
+    \item \textbf{Impacto}: efecto que tendría sobre el funcionamiento del prototipo, la seguridad, la calidad de los datos o la planificación.
+\end{itemize}
+
+La combinación de ambos criterios permite clasificar cada riesgo como bajo, medio o alto.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.55}
+\setlength{\tabcolsep}{12pt}
+\small
+\begin{tabular}{|>{\centering\arraybackslash}m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{2.8cm}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Probabilidad / Impacto} & \textbf{Bajo} & \textbf{Medio} & \textbf{Alto} \\
+\hline
+\textbf{Baja} & \cellcolor{green!20}Bajo & \cellcolor{green!20}Bajo & \cellcolor{yellow!30}Medio \\
+\hline
+\textbf{Media} & \cellcolor{green!20}Bajo & \cellcolor{yellow!30}Medio & \cellcolor{red!25}Alto \\
+\hline
+\textbf{Alta} & \cellcolor{yellow!30}Medio & \cellcolor{red!25}Alto & \cellcolor{red!25}Alto \\
+\hline
+\end{tabular}
+\caption{Matriz de valoración de riesgos utilizada en TierraViva.}
+\label{tab:matriz_valoracion_riesgos}
+\end{table}
+
+\section{Resumen de riesgos identificados}
+
+La Tabla \ref{tab:resumen_riesgos} resume los riesgos más relevantes del proyecto. Se han seleccionado aquellos que pueden afectar de forma directa al funcionamiento del prototipo o a la validez de las pruebas.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|c|p{6.6cm}|c|c|c|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Riesgo} & \textbf{Prob.} & \textbf{Imp.} & \textbf{Nivel} \\
+\hline
+R01 & Alimentación insuficiente o inestable del módulo LTE A7670E-LASA. & M & A & \cellcolor{red!25}Alto \\
+\hline
+R02 & Lecturas incorrectas del sensor de humedad del suelo por falta de calibración o mala colocación. & M & A & \cellcolor{red!25}Alto \\
+\hline
+R03 & Degradación puntual del enlace LTE por ubicación, antena, incidencia del operador o reinicio del módem. & M & M & \cellcolor{yellow!30}Medio \\
+\hline
+R04 & Indisponibilidad temporal de ThingSpeak o límites de uso de la plataforma. & B & M & \cellcolor{yellow!30}Medio \\
+\hline
+R05 & Activación incorrecta o excesiva de la bomba por error de lógica o lectura anómala. & B & A & \cellcolor{red!25}Alto \\
+\hline
+R06 & Daño eléctrico por cableado incorrecto, niveles lógicos incompatibles o ausencia de masa común. & M & A & \cellcolor{red!25}Alto \\
+\hline
+R07 & Exposición de la electrónica a humedad, polvo, lluvia o salpicaduras durante pruebas exteriores. & M & A & \cellcolor{red!25}Alto \\
+\hline
+R08 & Exposición accidental de claves API o credenciales sensibles en el repositorio o documentación. & M & M & \cellcolor{yellow!30}Medio \\
+\hline
+R09 & Inconsistencias entre firmware, backend, API y dashboard durante la evolución del código. & M & M & \cellcolor{yellow!30}Medio \\
+\hline
+R10 & Retrasos en pruebas de campo por disponibilidad de parcela, climatología o logística de montaje. & M & M & \cellcolor{yellow!30}Medio \\
+\hline
+\end{tabular}
+\caption{Resumen de riesgos principales del proyecto TierraViva.}
+\label{tab:resumen_riesgos}
+\end{table}
+
+\section{Mapa de riesgos por bloques del sistema}
+
+Para facilitar la lectura, los riesgos se agrupan según la parte del sistema a la que afectan principalmente.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.60\textwidth}|p{0.10\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Bloque} & \textbf{Riesgos asociados} & \textbf{Nivel} \\
+\hline
+Alimentación y electrónica & R01, R06, R07 & \cellcolor{red!25}Alto \\
+\hline
+Sensorización & R02 & \cellcolor{red!25}Alto \\
+\hline
+Actuación hidráulica & R05 & \cellcolor{red!25}Alto \\
+\hline
+Comunicaciones y nube & R03, R04 & \cellcolor{yellow!30}Medio \\
+\hline
+Software y configuración & R08, R09 & \cellcolor{yellow!30}Medio \\
+\hline
+Planificación y pruebas & R10 & \cellcolor{yellow!30}Medio \\
+\hline
+\end{tabular}
+\caption{Agrupación de riesgos por bloques del sistema.}
+\label{tab:mapa_riesgos_bloques}
+\end{table}
+
+\section{Riesgos críticos y medidas adoptadas}
+
+A continuación se desarrollan únicamente los riesgos considerados más sensibles para el funcionamiento del prototipo. Esta selección permite centrar el análisis en los puntos que realmente podrían comprometer la validación de TierraViva.
+
+\subsection{R01. Alimentación del módulo LTE}
+
+El módulo A7670E-LASA puede presentar picos de consumo durante el registro en red o el envío de datos. Si la alimentación no es estable, pueden aparecer reinicios, bloqueos o pérdida de comunicación.
+
+\textbf{Medidas adoptadas:}
+
+\begin{itemize}
+    \item verificación previa de la salida del regulador LM2596;
+    \item comprobación del módulo mediante comandos AT antes de integrarlo con el Arduino;
+    \item uso de masa común entre los elementos del sistema;
+    \item separación conceptual entre alimentación de control y alimentación de cargas de mayor consumo;
+    \item repetición de pruebas de comunicación antes de conectar el conjunto completo.
+\end{itemize}
+
+\subsection{R02. Fiabilidad de la humedad del suelo}
+
+La humedad del suelo es la variable principal para decidir el riego. Una lectura incorrecta puede provocar que el sistema riegue sin necesidad o que no actúe cuando el suelo está seco.
+
+\textbf{Medidas adoptadas:}
+
+\begin{itemize}
+    \item calibración del sensor con referencias de suelo seco y suelo húmedo;
+    \item revisión de la posición del sensor en el sustrato;
+    \item definición de umbrales configurables;
+    \item validación de rangos antes de ejecutar acciones de riego;
+    \item registro de la lectura que motiva cada decisión.
+\end{itemize}
+
+\subsection{R05. Actuación incorrecta sobre la bomba}
+
+La actuación sobre el riego es el punto más delicado del sistema, ya que implica modificar físicamente el entorno. Un error de control podría mantener la bomba activa más tiempo del previsto.
+
+\textbf{Medidas adoptadas:}
+
+\begin{itemize}
+    \item limitación del tiempo máximo de riego por firmware;
+    \item desactivación explícita del relé al finalizar cada evento;
+    \item periodo mínimo de seguridad entre riegos consecutivos;
+    \item arranque del sistema con el relé en estado apagado;
+    \item registro de eventos de riego para facilitar la trazabilidad.
+\end{itemize}
+
+\subsection{R06. Integración eléctrica del prototipo}
+
+La conexión de sensores, módulo LTE, relé, bomba y alimentación requiere especial cuidado. Una polaridad incorrecta, una masa común mal conectada o niveles lógicos no adaptados pueden provocar fallos o daños en componentes.
+
+\textbf{Medidas adoptadas:}
+
+\begin{itemize}
+    \item revisión del cableado antes de alimentar el sistema;
+    \item adaptación de nivel lógico entre Arduino y A7670E-LASA mediante divisor resistivo;
+    \item comprobación de continuidad y tensiones con multímetro;
+    \item documentación del esquema de conexión;
+    \item pruebas por bloques antes de integrar todos los elementos.
+\end{itemize}
+
+\subsection{R07. Exposición ambiental del montaje}
+
+Las pruebas en exterior pueden exponer la electrónica a humedad, polvo, salpicaduras o tirones de cable. Aunque TierraViva es un prototipo académico y no un producto industrial, estas condiciones deben tenerse en cuenta.
+
+\textbf{Medidas adoptadas:}
+
+\begin{itemize}
+    \item protección del montaje durante pruebas exteriores;
+    \item supervisión directa de los ensayos;
+    \item limitación de la exposición a pruebas controladas;
+    \item separación física entre electrónica y elementos hidráulicos;
+    \item planteamiento de cajas estancas como mejora para una versión futura.
+\end{itemize}
+
+\section{Relación entre riesgos y pruebas}
+
+La gestión de riesgos se conecta directamente con el plan de pruebas. Cada riesgo relevante debe tener una comprobación asociada que permita verificar que las medidas adoptadas funcionan correctamente.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|c|p{0.38\textwidth}|p{0.40\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Riesgo} & \textbf{Prueba asociada} & \textbf{Evidencia esperada} \\
+\hline
+R01 & Prueba de encendido, respuesta AT y envío de datos del A7670E-LASA. & Respuestas correctas del módem y ausencia de reinicios durante la transmisión. \\
+\hline
+R02 & Prueba de lectura del sensor en seco, húmedo y condiciones intermedias. & Valores diferenciables y coherentes para definir umbrales de riego. \\
+\hline
+R05 & Prueba de activación temporizada del relé y apagado automático. & La bomba o carga se desactiva al finalizar el tiempo programado. \\
+\hline
+R06 & Prueba de integración eléctrica por bloques. & Tensiones correctas, masa común y funcionamiento estable de sensores y actuadores. \\
+\hline
+R07 & Prueba controlada en entorno exterior o parcela. & Funcionamiento del prototipo sin exposición directa peligrosa para la electrónica. \\
+\hline
+R08 & Revisión de repositorio y ficheros de configuración. & Ausencia de claves reales en código, memoria o capturas públicas. \\
+\hline
+R09 & Prueba de integración firmware--ThingSpeak--Raspberry--dashboard. & Lecturas coherentes desde la estación hasta la interfaz web. \\
+\hline
+\end{tabular}
+\caption{Relación entre riesgos principales y pruebas de validación.}
+\label{tab:riesgos_pruebas}
+\end{table}
+
+\section{Riesgo residual}
+
+Tras aplicar las medidas anteriores, algunos riesgos siguen existiendo de forma residual. Esto es normal en un prototipo físico conectado a servicios externos y probado en un entorno no completamente controlado.
+
+En la versión actual se consideran aceptables los siguientes riesgos residuales:
+
+\begin{itemize}
+    \item pérdida temporal de publicación en la nube, siempre que la estación mantenga una lógica local segura;
+    \item necesidad de recalibrar el sensor si cambia el tipo de suelo o la profundidad de instalación;
+    \item limitación de las pruebas a un número reducido de estaciones;
+    \item ausencia de protección industrial permanente frente a intemperie;
+    \item dependencia de credenciales y configuración externa para la comunicación con ThingSpeak.
+\end{itemize}
+
+Estos riesgos no invalidan el proyecto, ya que TierraViva se plantea como un prototipo funcional de Trabajo de Fin de Grado y no como un producto industrial final. Sin embargo, sí delimitan correctamente su alcance y orientan posibles mejoras futuras.
+
+\section{Conclusión}
+
+La gestión de riesgos permite identificar los puntos más sensibles de TierraViva: alimentación del módulo LTE, fiabilidad de la humedad del suelo, actuación sobre la bomba, integración eléctrica y protección del montaje durante pruebas exteriores.
+
+Las medidas adoptadas reducen estos riesgos y hacen que el prototipo sea más seguro, trazable y defendible. Además, este análisis permite conectar directamente los riesgos con el plan de pruebas, evitando que la validación del sistema se limite a comprobar únicamente el funcionamiento en condiciones ideales.

@@ -1,0 +1,567 @@
+\chapter{Manual de referencia de la API}
+\label{anexo:manual_api}
+
+Este anexo documenta la API local de TierraViva implementada sobre FastAPI. Su finalidad es servir como referencia técnica para consultar los endpoints disponibles, sus parámetros, las respuestas esperadas y los errores más habituales.
+
+La API se ejecuta en la Raspberry Pi y trabaja sobre los datos almacenados previamente en SQLite. No consulta directamente los sensores ni se comunica por puerto serie con las estaciones. Las lecturas son publicadas por las estaciones en ThingSpeak, recuperadas por el ingestor \texttt{main.py}, almacenadas mediante \texttt{database.py} y expuestas posteriormente por \texttt{api.py}.
+
+\section{Alcance}
+
+La versión actual de la API permite:
+
+\begin{itemize}
+    \item servir el dashboard web desde la ruta raíz;
+    \item consultar la configuración activa del sistema;
+    \item obtener la última lectura de una estación;
+    \item recuperar lecturas históricas recientes;
+    \item calcular estadísticas por estación y ventana temporal;
+    \item comprobar el estado básico del servicio.
+\end{itemize}
+
+\section{URL base}
+
+Durante el despliegue local en Raspberry Pi, la API se sirve en el puerto \texttt{8000}. Desde la propia Raspberry Pi puede consultarse mediante:
+
+\begin{verbatim}
+http://127.0.0.1:8000
+\end{verbatim}
+
+Desde otro equipo conectado a la misma red local:
+
+\begin{verbatim}
+http://<IP_RASPBERRY>:8000
+\end{verbatim}
+
+\section{Convenciones generales}
+
+Todas las respuestas de la API se devuelven en formato JSON, salvo la ruta raíz \texttt{/}, que sirve el fichero HTML del dashboard.
+
+En las respuestas JSON se utiliza habitualmente el campo \texttt{ok}:
+
+\begin{itemize}
+    \item \texttt{ok: true}: la petición se ha procesado correctamente;
+    \item \texttt{ok: false}: la petición es válida, pero no existen datos para devolver.
+\end{itemize}
+
+El parámetro de estación se denomina \texttt{station}. Si se omite, la API utiliza la estación configurada por defecto mediante la variable \texttt{STATION\_ID}.
+
+\section{Variables de configuración utilizadas}
+
+La Tabla \ref{tab:variables_api_resumidas} recoge las variables de entorno que afectan directamente al comportamiento de la API.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.32\textwidth}|p{0.18\textwidth}|p{0.38\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Variable} & \textbf{Valor por defecto} & \textbf{Uso} \\
+\hline
+\texttt{TIERRAVIVA\_HOME} & \texttt{\textasciitilde/tierraviva} & Ruta base usada para localizar \texttt{data/}, \texttt{frontend/} y la base SQLite. \\
+\hline
+\texttt{STATION\_ID} & \texttt{A} & Estación seleccionada por defecto. \\
+\hline
+\texttt{STATIONS} & \texttt{A,B} & Lista de estaciones activas mostradas por la API. \\
+\hline
+\texttt{SOIL\_LOW\_THRESHOLD} & \texttt{35} & Umbral inferior para clasificar humedad del suelo. \\
+\hline
+\texttt{SOIL\_HIGH\_THRESHOLD} & \texttt{45} & Umbral superior para clasificar humedad del suelo. \\
+\hline
+\texttt{WEB\_REFRESH\_SECONDS} & \texttt{3} & Intervalo de refresco recomendado para el dashboard. \\
+\hline
+\texttt{DATA\_STALE\_SECONDS} & \texttt{90} & Tiempo utilizado para clasificar una lectura como reciente, antigua u offline. \\
+\hline
+\end{tabular}
+\caption{Variables de configuración utilizadas por la API.}
+\label{tab:variables_api_resumidas}
+\end{table}
+
+Las variables de ThingSpeak no se utilizan directamente en \texttt{api.py}; se emplean en el proceso de ingesta \texttt{main.py}.
+
+\section{Resumen de endpoints}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.16\textwidth}|p{0.28\textwidth}|p{0.42\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Método} & \textbf{Endpoint} & \textbf{Función} \\
+\hline
+GET & \texttt{/} & Sirve el dashboard web desde \texttt{frontend/index.html}. \\
+\hline
+GET & \texttt{/api/config} & Devuelve configuración activa y estado básico de ingesta. \\
+\hline
+GET & \texttt{/api/latest} & Devuelve la última lectura almacenada de una estación. \\
+\hline
+GET & \texttt{/api/readings} & Devuelve el histórico reciente de lecturas de una estación. \\
+\hline
+GET & \texttt{/api/stats} & Devuelve estadísticas agregadas de una estación. \\
+\hline
+GET & \texttt{/api/health} & Comprueba el estado básico de API, base de datos y frontend. \\
+\hline
+\end{tabular}
+\caption{Endpoints disponibles en la API actual de TierraViva.}
+\label{tab:endpoints_api_actual}
+\end{table}
+
+\section{GET /}
+
+Sirve la interfaz web principal del dashboard.
+
+\subsection*{Petición}
+
+\begin{verbatim}
+GET http://<IP_RASPBERRY>:8000/
+\end{verbatim}
+
+\subsection*{Respuesta esperada}
+
+Si el fichero \texttt{frontend/index.html} existe, el navegador muestra el dashboard de TierraViva.
+
+\subsection*{Error posible}
+
+Si el fichero no existe, la API devuelve un error HTTP 404:
+
+\begin{verbatim}
+{
+  "detail": "No se encontró frontend/index.html"
+}
+\end{verbatim}
+
+\section{GET /api/config}
+
+Devuelve la configuración activa de la API para una estación.
+
+\subsection*{Parámetros}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\hline
+\texttt{station} & texto & No & Estación consultada. Si se omite, se utiliza \texttt{STATION\_ID}. \\
+\hline
+\end{tabular}
+\caption{Parámetros de \texttt{/api/config}.}
+\label{tab:parametros_api_config_resumido}
+\end{table}
+
+\subsection*{Ejemplo}
+
+\begin{verbatim}
+curl "http://127.0.0.1:8000/api/config?station=A"
+\end{verbatim}
+
+\subsection*{Respuesta esperada}
+
+\begin{verbatim}
+{
+  "ok": true,
+  "station_id": "A",
+  "active_stations": ["A", "B"],
+  "soil_low_threshold": 35.0,
+  "soil_high_threshold": 45.0,
+  "web_refresh_seconds": 3,
+  "data_stale_seconds": 90,
+  "base_dir": "/home/pi/TierraViva",
+  "database_path": "/home/pi/TierraViva/data/tierraviva.db",
+  "last_ingest_ts": "2026-06-01T10:15:00Z",
+  "last_entry_id": "125"
+}
+\end{verbatim}
+
+\section{GET /api/latest}
+
+Devuelve la última lectura almacenada para una estación.
+
+\subsection*{Parámetros}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\hline
+\texttt{station} & texto & No & Estación consultada, por ejemplo \texttt{A} o \texttt{B}. \\
+\hline
+\end{tabular}
+\caption{Parámetros de \texttt{/api/latest}.}
+\label{tab:parametros_api_latest_resumido}
+\end{table}
+
+\subsection*{Ejemplo}
+
+\begin{verbatim}
+curl "http://127.0.0.1:8000/api/latest?station=A"
+\end{verbatim}
+
+\subsection*{Respuesta con datos}
+
+\begin{verbatim}
+{
+  "ok": true,
+  "station_id": "A",
+  "reading": {
+    "id": 32,
+    "entry_id": 125,
+    "station_id": "A",
+    "ts": "2026-06-01T10:15:00Z",
+    "soil_moisture_pct": 38.5,
+    "temperature_c": 24.1,
+    "humidity_pct": 52.0,
+    "light_lux": 760.0,
+    "pressure_hpa": 1012.4,
+    "relay_state": 0,
+    "system_event": 100,
+    "debug_code": 204,
+    "source": "thingspeak",
+    "raw_json": "{...}"
+  },
+  "age_seconds": 8,
+  "freshness": "fresh",
+  "soil_state": "normal"
+}
+\end{verbatim}
+
+\subsection*{Respuesta sin datos}
+
+\begin{verbatim}
+{
+  "ok": false,
+  "station_id": "A",
+  "reading": null,
+  "status": "sin_datos"
+}
+\end{verbatim}
+
+\section{GET /api/readings}
+
+Devuelve una lista de lecturas recientes almacenadas para una estación.
+
+\subsection*{Parámetros}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\hline
+\texttt{station} & texto & No & Estación consultada. \\
+\hline
+\texttt{limit} & entero & No & Número máximo de lecturas devueltas. Rango permitido: 1 a 500. Valor por defecto: 120. \\
+\hline
+\end{tabular}
+\caption{Parámetros de \texttt{/api/readings}.}
+\label{tab:parametros_api_readings_resumido}
+\end{table}
+
+\subsection*{Ejemplo}
+
+\begin{verbatim}
+curl "http://127.0.0.1:8000/api/readings?station=A&limit=20"
+\end{verbatim}
+
+\subsection*{Respuesta esperada}
+
+\begin{verbatim}
+{
+  "ok": true,
+  "station_id": "A",
+  "count": 20,
+  "readings": [
+    {
+      "id": 32,
+      "entry_id": 125,
+      "station_id": "A",
+      "ts": "2026-06-01T10:15:00Z",
+      "soil_moisture_pct": 38.5,
+      "temperature_c": 24.1,
+      "humidity_pct": 52.0,
+      "light_lux": 760.0,
+      "pressure_hpa": 1012.4,
+      "relay_state": 0,
+      "system_event": 100,
+      "debug_code": 204,
+      "source": "thingspeak",
+      "raw_json": "{...}"
+    }
+  ]
+}
+\end{verbatim}
+
+\section{GET /api/stats}
+
+Devuelve estadísticas agregadas de una estación durante una ventana temporal.
+
+\subsection*{Parámetros}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\hline
+\texttt{station} & texto & No & Estación consultada. \\
+\hline
+\texttt{hours} & entero & No & Ventana temporal en horas. Rango permitido: 1 a 720. Valor por defecto: 24. \\
+\hline
+\end{tabular}
+\caption{Parámetros de \texttt{/api/stats}.}
+\label{tab:parametros_api_stats_resumido}
+\end{table}
+
+\subsection*{Ejemplo}
+
+\begin{verbatim}
+curl "http://127.0.0.1:8000/api/stats?station=A&hours=24"
+\end{verbatim}
+
+\subsection*{Respuesta esperada}
+
+La respuesta incluye el identificador de estación, la ventana temporal, el número de muestras y estadísticas agregadas de las variables medidas.
+
+\begin{verbatim}
+{
+  "ok": true,
+  "station_id": "A",
+  "hours": 24,
+  "samples": 18,
+  "window_start": "2026-06-01T00:00:00Z",
+  "first_ts": "2026-06-01T08:30:00Z",
+  "last_ts": "2026-06-01T10:15:00Z",
+  "soil": {
+    "avg": 39.2,
+    "min": 35.8,
+    "max": 44.1
+  },
+  "temperature": {
+    "avg": 24.0,
+    "min": 21.8,
+    "max": 26.5
+  },
+  "humidity": {
+    "avg": 53.1,
+    "min": 48.0,
+    "max": 60.2
+  },
+  "light": {
+    "avg": 650.5,
+    "min": 120.0,
+    "max": 980.0
+  },
+  "pressure": {
+    "avg": 1012.3,
+    "min": 1010.8,
+    "max": 1013.6
+  }
+}
+\end{verbatim}
+
+\section{GET /api/health}
+
+Devuelve una comprobación básica del estado del servicio.
+
+\subsection*{Parámetros}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\hline
+\texttt{station} & texto & No & Estación sobre la que se comprueba si existen datos. \\
+\hline
+\end{tabular}
+\caption{Parámetros de \texttt{/api/health}.}
+\label{tab:parametros_api_health_resumido}
+\end{table}
+
+\subsection*{Ejemplo}
+
+\begin{verbatim}
+curl "http://127.0.0.1:8000/api/health?station=A"
+\end{verbatim}
+
+\subsection*{Respuesta esperada}
+
+\begin{verbatim}
+{
+  "ok": true,
+  "station_id": "A",
+  "active_stations": ["A", "B"],
+  "database": "/home/pi/TierraViva/data/tierraviva.db",
+  "frontend_exists": true,
+  "has_data": true
+}
+\end{verbatim}
+
+\section{Campos principales de una lectura}
+
+Las lecturas devueltas por la API proceden de la tabla \texttt{readings}. La Tabla \ref{tab:campos_lectura_api_resumido} resume los campos más relevantes para el consumo desde el dashboard.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.30\textwidth}|p{0.18\textwidth}|p{0.40\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Tipo} & \textbf{Descripción} \\
+\hline
+\texttt{id} & entero & Identificador interno de SQLite. \\
+\hline
+\texttt{entry\_id} & entero & Identificador de entrada procedente de ThingSpeak. \\
+\hline
+\texttt{station\_id} & texto & Identificador de estación. \\
+\hline
+\texttt{ts} & texto ISO 8601 & Fecha de inserción o procesamiento local. \\
+\hline
+\texttt{soil\_moisture\_pct} & número & Humedad del suelo en porcentaje. \\
+\hline
+\texttt{temperature\_c} & número & Temperatura ambiente en grados Celsius. \\
+\hline
+\texttt{humidity\_pct} & número & Humedad relativa ambiental. \\
+\hline
+\texttt{light\_lux} & número & Luminosidad en lux. \\
+\hline
+\texttt{pressure\_hpa} & número & Presión atmosférica en hPa. \\
+\hline
+\texttt{relay\_state} & entero & Estado del relé, si está disponible como campo normalizado. \\
+\hline
+\texttt{system\_event} & entero & Evento de sistema, si está disponible como campo normalizado. \\
+\hline
+\texttt{debug\_code} & entero & Código auxiliar de diagnóstico, si está disponible como campo normalizado. \\
+\hline
+\texttt{source} & texto & Origen de la lectura, normalmente \texttt{thingspeak}. \\
+\hline
+\texttt{raw\_json} & texto JSON & Respuesta original conservada para trazabilidad. \\
+\hline
+\end{tabular}
+\caption{Campos principales de una lectura devuelta por la API.}
+\label{tab:campos_lectura_api_resumido}
+\end{table}
+
+La codificación detallada de \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code} se documenta en el Anexo \ref{anexo:estructura_thingspeak_estados}.
+
+\section{Clasificación de frescura y humedad}
+
+El endpoint \texttt{/api/latest} añade dos clasificaciones calculadas por la API:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.26\textwidth}|p{0.36\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Valores} & \textbf{Significado} \\
+\hline
+\texttt{freshness} & \texttt{fresh}, \texttt{stale}, \texttt{offline}, \texttt{desconocido} & Indica si la última lectura es reciente, antigua, demasiado antigua o no interpretable. \\
+\hline
+\texttt{soil\_state} & \texttt{seco}, \texttt{normal}, \texttt{húmedo}, \texttt{sin\_dato} & Clasifica la humedad del suelo según los umbrales configurados. \\
+\hline
+\end{tabular}
+\caption{Clasificaciones calculadas por la API.}
+\label{tab:clasificaciones_api_resumidas}
+\end{table}
+
+La interpretación para el usuario final se desarrolla en el Anexo \ref{anexo:manual_usuario}.
+
+\section{Validación de parámetros}
+
+FastAPI valida automáticamente algunos parámetros numéricos. Si se solicita un valor fuera de rango, la API devuelve un error HTTP 422.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.22\textwidth}|p{0.38\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Parámetro} & \textbf{Validación} \\
+\hline
+\texttt{/api/readings} & \texttt{limit} & Entero entre 1 y 500. \\
+\hline
+\texttt{/api/stats} & \texttt{hours} & Entero entre 1 y 720. \\
+\hline
+\end{tabular}
+\caption{Validaciones de parámetros realizadas por la API.}
+\label{tab:validacion_parametros_api_resumida}
+\end{table}
+
+En la versión actual, el parámetro \texttt{station} se normaliza a mayúsculas. La API no rechaza automáticamente una estación que no esté en la lista \texttt{STATIONS}; si no existen datos para esa estación, la respuesta será equivalente a una consulta sin registros.
+
+\section{Códigos HTTP habituales}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.26\textwidth}|p{0.42\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Situación} & \textbf{Interpretación} \\
+\hline
+200 & Petición correcta & La API ha procesado la petición. El campo \texttt{ok} indica si existen datos. \\
+\hline
+404 & Dashboard no encontrado & Falta el fichero \texttt{frontend/index.html}. \\
+\hline
+422 & Parámetro inválido & Un parámetro no cumple las restricciones, por ejemplo \texttt{limit=0}. \\
+\hline
+500 & Error interno & Fallo no controlado durante la ejecución. Deben revisarse los logs. \\
+\hline
+\end{tabular}
+\caption{Códigos HTTP habituales en la API.}
+\label{tab:codigos_http_api_resumidos}
+\end{table}
+
+\section{Relación con el dashboard}
+
+El dashboard consume los endpoints de la API para actualizar la interfaz:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.52\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Uso en dashboard} \\
+\hline
+\texttt{/api/config} & Carga estaciones activas, umbrales y tiempos de refresco. \\
+\hline
+\texttt{/api/latest} & Actualiza tarjetas principales y estado de conexión. \\
+\hline
+\texttt{/api/readings} & Alimenta gráficas y tabla de últimas lecturas. \\
+\hline
+\texttt{/api/stats} & Alimenta el resumen estadístico. \\
+\hline
+\texttt{/api/health} & Permite comprobar disponibilidad básica del servicio. \\
+\hline
+\end{tabular}
+\caption{Uso de los endpoints por parte del dashboard.}
+\label{tab:relacion_api_dashboard_resumida}
+\end{table}
+
+\section{Conclusión}
+
+La API de TierraViva proporciona una capa local de consulta sobre los datos almacenados en la Raspberry Pi. Sus endpoints permiten obtener configuración, última lectura, histórico, estadísticas y estado básico del servicio. 

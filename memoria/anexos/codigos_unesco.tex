@@ -1,0 +1,87 @@
+\chapter{Clasificación UNESCO del proyecto}
+\label{anexo:codigos_unesco}
+
+Este anexo recoge los códigos UNESCO asociados al proyecto TierraViva, tomando como referencia la Nomenclatura Internacional de UNESCO para los campos de Ciencia y Tecnología \cite{unesco_nomenclatura_cyt}. La clasificación se ha realizado a partir del alcance real del prototipo desarrollado: estaciones de campo autónomas para monitorización ambiental y de suelo, decisión local de riego, comunicación LTE/HTTP con ThingSpeak, almacenamiento histórico en Raspberry Pi, API y dashboard web de supervisión.
+
+La selección no pretende enumerar todos los ámbitos que aparecen de forma tangencial en el proyecto, sino identificar aquellos campos de conocimiento que describen de forma directa el trabajo realizado. Por ello, se distinguen códigos principales, códigos secundarios y códigos complementarios u opcionales.
+
+\section{Códigos principales}
+
+Los códigos principales representan el núcleo técnico y funcional de TierraViva: riego automatizado, control local, adquisición de datos mediante sensores, comunicación remota y supervisión software.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.30\textwidth}|p{0.42\textwidth}|}
+\hline
+\textbf{Código UNESCO} & \textbf{Denominación} & \textbf{Justificación en TierraViva} \\
+\hline
+\texttt{3102.05} & Riego & Es el código principal del proyecto, ya que TierraViva se orienta a la automatización y supervisión del riego en cultivos desatendidos. La actuación física sobre la bomba se decide a partir de la humedad del suelo y de condiciones de seguridad definidas en el firmware. \\
+\hline
+\texttt{3311.02} & Ingeniería de control & El prototipo incorpora una lógica de control local en cada estación: lectura de sensores, evaluación de umbrales, periodo de \textit{cooldown}, modo seguro y activación temporizada del relé. La estación no se limita a medir, sino que toma decisiones de actuación. \\
+\hline
+\texttt{3304.12} & Dispositivos de control & Las estaciones utilizan Arduino UNO como controlador local para coordinar sensores, comunicaciones, relé y bomba. El microcontrolador ejecuta la lógica de supervisión inmediata y garantiza que la actuación sobre el riego sea limitada y segura. \\
+\hline
+\texttt{3304.13} & Dispositivos de transmisión de datos & El sistema transmite telemetría desde las estaciones hacia ThingSpeak mediante el módulo A7670E-LASA y peticiones HTTP. La Raspberry Pi consulta posteriormente esos datos para construir el histórico y alimentar el dashboard. \\
+\hline
+\texttt{3325.05} & Radiocomunicaciones & La conectividad de campo se apoya en comunicación móvil LTE/4G. El módulo A7670E-LASA proporciona acceso remoto a Internet sin depender de WiFi local ni de conexión física con la Raspberry Pi. \\
+\hline
+\end{tabular}
+\caption{Códigos UNESCO principales asociados al proyecto TierraViva.}
+\label{cuadro:codigos_unesco_principales}
+\end{center}
+\end{table}
+
+\section{Códigos secundarios}
+
+Los códigos secundarios describen áreas relevantes del desarrollo, aunque no constituyen por sí solas el objetivo final del proyecto. Se incluyen porque TierraViva integra firmware, backend, base de datos, API y visualización web.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.30\textwidth}|p{0.42\textwidth}|}
+\hline
+\textbf{Código UNESCO} & \textbf{Denominación} & \textbf{Justificación en TierraViva} \\
+\hline
+\texttt{1203.17} & Informática & El proyecto incluye desarrollo software en varias capas: firmware de estación, scripts de supervisión en Raspberry Pi, API FastAPI, almacenamiento SQLite y dashboard web. \\
+\hline
+\texttt{1203.18} & Sistemas de información, diseño y componentes & La Raspberry Pi funciona como sistema de información local: consulta ThingSpeak, valida lecturas, almacena datos, expone endpoints y proporciona información estructurada al dashboard. \\
+\hline
+\texttt{1203.23} & Lenguajes de programación & TierraViva requiere programación en distintos entornos: C/C++ para Arduino, Python para backend y supervisión, JavaScript para el dashboard y scripts auxiliares de despliegue. \\
+\hline
+\texttt{3304.17} & Sistemas en tiempo real & La estación ejecuta un ciclo periódico de lectura, decisión, actuación y publicación. Aunque no se trata de un sistema de tiempo real estricto, sí existe control temporizado de la bomba, gestión de retardos, cooldown y tiempos máximos de actuación. \\
+\hline
+\texttt{3307.03} & Diseño de circuitos & Montaje electrónico, el divisor de tensión, la alimentación regulada, relé y cableado. No obstante, el proyecto integra módulos comerciales y no diseña una placa electrónica propia. \\
+\hline
+\texttt{3311.07} & Instrumentos electrónicos & El prototipo utiliza sensores electrónicos para medir humedad del suelo, temperatura, humedad relativa, presión y luminosidad. Estas medidas constituyen la base de la monitorización y de la decisión local de riego. \\
+\hline
+\end{tabular}
+\caption{Códigos UNESCO secundarios vinculados al desarrollo software, sensorización y supervisión.}
+\label{cuadro:codigos_unesco_secundarios}
+\end{center}
+\end{table}
+
+\section{Códigos no seleccionados}
+
+Durante el desarrollo del proyecto se han mencionado áreas que podrían parecer relacionadas, pero que no se consideran adecuadas como clasificación principal de TierraViva en su estado actual.
+
+\begin{table}[H]
+\begin{center}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.30\textwidth}|p{0.42\textwidth}|}
+\hline
+\textbf{Código UNESCO} & \textbf{Denominación} & \textbf{Motivo de descarte} \\
+\hline
+\texttt{1203.04} & Inteligencia artificial & No se selecciona porque la versión actual del sistema no implementa aprendizaje automático ni modelos predictivos. La decisión de riego se basa en reglas locales, umbrales, validación de lecturas y condiciones de seguridad. \\
+\hline
+\texttt{3308} & Ingeniería y tecnología del medio ambiente & Aunque el proyecto tiene motivación sostenible, su contribución técnica principal no es un estudio ambiental, sino un prototipo IoT de monitorización y riego automatizado. \\
+\hline
+\texttt{3103} & Agronomía & El proyecto se aplica a un contexto agrícola, pero no desarrolla un estudio agronómico completo sobre cultivos, productividad, fertilidad o técnicas de cultivo. Por ello, se prioriza \texttt{3102.05} Riego. \\
+\hline
+\end{tabular}
+\caption{Códigos descartados como clasificación principal del proyecto.}
+\label{cuadro:codigos_unesco_descartados}
+\end{center}
+\end{table}
+
+Esta selección refleja de forma equilibrada la naturaleza multidisciplinar de TierraViva. El proyecto no pertenece únicamente al ámbito agrario ni únicamente al ámbito informático: combina riego, sensorización, control embebido, comunicaciones móviles, almacenamiento de datos y visualización web. Por ese motivo, la clasificación más defendible es una combinación de códigos agrarios, tecnológicos, de instrumentación, telecomunicaciones y sistemas de información.

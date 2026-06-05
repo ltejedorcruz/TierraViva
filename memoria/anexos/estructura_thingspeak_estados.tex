@@ -1,0 +1,303 @@
+\chapter{Estructura de canales ThingSpeak y codificación de estados}
+\label{anexo:estructura_thingspeak_estados}
+
+Este anexo documenta el contrato de datos utilizado por TierraViva en ThingSpeak. Su finalidad es fijar qué publica la estación remota en cada campo del canal, cómo se interpretan los estados operativos y qué correspondencia existe entre la telemetría enviada por Arduino y los nombres internos utilizados por la Raspberry Pi.
+
+\section{Papel de ThingSpeak}
+
+ThingSpeak cumple una función concreta dentro de TierraViva: recibir la telemetría publicada por las estaciones y permitir su consulta posterior desde la Raspberry Pi. Esta decisión simplifica la comunicación entre la estación de campo y el nodo local de supervisión, ya que la estación solo necesita publicar datos y no mantener una conexión directa con la Raspberry Pi.
+
+El riego se decide en el firmware de la estación. Por tanto, ThingSpeak no controla la bomba, no modifica umbrales y no envía comandos a Arduino.
+
+\section{Separación por estaciones}
+
+Para evitar mezclar datos de distintas ubicaciones, cada estación debe utilizar un canal ThingSpeak independiente. En la configuración prevista se contemplan las estaciones \texttt{A} y \texttt{B}.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.22\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Estación} & \textbf{Variable de canal} & \textbf{Uso previsto} \\
+\hline
+\texttt{A} & \texttt{THINGSPEAK\_CHANNEL\_A} & Canal principal de la primera estación remota. \\
+\hline
+\texttt{B} & \texttt{THINGSPEAK\_CHANNEL\_B} & Canal previsto para una segunda estación o ampliación del sistema. \\
+\hline
+\end{tabular}
+\caption{Separación lógica de estaciones mediante canales ThingSpeak.}
+\label{tab:canales_thingspeak_estaciones}
+\end{table}
+
+La Raspberry Pi recorre las estaciones configuradas en \texttt{STATIONS} y consulta el canal correspondiente a cada una. Si una estación no tiene canal definido, se ignora durante la ingesta.
+
+\section{Estructura de campos}
+
+Cada canal de ThingSpeak dispone de ocho campos. TierraViva utiliza los cinco primeros para variables físicas y los tres últimos para estado operativo de la estación.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.14\textwidth}|p{0.26\textwidth}|p{0.44\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Nombre interno} & \textbf{Descripción} \\
+\hline
+\texttt{field1} & \texttt{soil\_moisture\_pct} & Humedad del suelo expresada en porcentaje. Es la variable principal para la decisión local de riego. \\
+\hline
+\texttt{field2} & \texttt{temperature\_c} & Temperatura ambiente medida por el BME280, expresada en grados Celsius. \\
+\hline
+\texttt{field3} & \texttt{humidity\_pct} & Humedad relativa ambiental medida por el BME280. \\
+\hline
+\texttt{field4} & \texttt{light\_lux} & Luminosidad medida por el BH1750, expresada en lux. \\
+\hline
+\texttt{field5} & \texttt{pressure\_hpa} & Presión atmosférica medida por el BME280, expresada en hPa. \\
+\hline
+\texttt{field6} & \texttt{relay\_state} & Estado del relé publicado por la estación: \texttt{0} apagado, \texttt{1} activo. \\
+\hline
+\texttt{field7} & \texttt{system\_event} & Código de evento del sistema: reposo, modo seguro, riego, error o cooldown. \\
+\hline
+\texttt{field8} & \texttt{debug\_code} & Código auxiliar de diagnóstico utilizado para depuración e interpretación del estado. \\
+\hline
+\end{tabular}
+\caption{Estructura de campos utilizada en los canales ThingSpeak de TierraViva.}
+\label{tab:estructura_campos_thingspeak}
+\end{table}
+
+Esta estructura permite que cada entrada de ThingSpeak contenga una fotografía completa del estado de la estación: condiciones medidas, estado del relé y motivo de la decisión tomada por el firmware.
+
+\section{Formato de publicación}
+
+La estación construye una petición HTTP de actualización del canal utilizando la clave de escritura y los ocho campos definidos. De forma conceptual, la petición tiene la siguiente estructura:
+
+\begin{verbatim}
+http://api.thingspeak.com/update?
+    api_key=<WRITE_API_KEY>
+    &field1=<humedad_suelo>
+    &field2=<temperatura>
+    &field3=<humedad_ambiental>
+    &field4=<luminosidad>
+    &field5=<presion>
+    &field6=<estado_rele>
+    &field7=<evento_sistema>
+    &field8=<codigo_debug>
+\end{verbatim}
+
+Las claves reales no deben aparecer en la memoria, en capturas ni en el repositorio. En la documentación se representan mediante marcadores como \texttt{<WRITE\_API\_KEY>}.
+
+\section{Codificación del estado del relé}
+
+El campo \texttt{field6} indica el estado del relé en el momento de la publicación.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.18\textwidth}|p{0.24\textwidth}|p{0.44\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Valor} & \textbf{Estado} & \textbf{Interpretación} \\
+\hline
+\texttt{0} & Relé apagado & La bomba no debería estar alimentada en el momento de la lectura publicada. \\
+\hline
+\texttt{1} & Relé activo & La estación informa de que el relé está activo y la bomba puede estar funcionando. \\
+\hline
+Sin dato & Desconocido & No se ha recibido un valor válido para el estado del relé. \\
+\hline
+\end{tabular}
+\caption{Interpretación del campo \texttt{relay\_state}.}
+\label{tab:interpretacion_relay_state}
+\end{table}
+
+Este valor representa el estado publicado en la última telemetría disponible. Si la lectura es antigua, el estado físico real puede haber cambiado.
+
+\section{Codificación de eventos de sistema}
+
+El campo \texttt{field7} contiene el evento principal de la estación durante el ciclo de funcionamiento. La Tabla \ref{tab:codificacion_system_event} resume los códigos utilizados.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.16\textwidth}|p{0.26\textwidth}|p{0.44\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Etiqueta} & \textbf{Significado} \\
+\hline
+\texttt{100} & \texttt{idle} & Estación en reposo. No hay riego activo en el ciclo actual. \\
+\hline
+\texttt{206} & \texttt{safe mode} & La estación se encuentra en modo seguro. Se aplican condiciones más conservadoras antes de actuar. \\
+\hline
+\texttt{210} & \texttt{riego ON} & La estación ha activado el riego. \\
+\hline
+\texttt{211} & \texttt{riego OFF} & La estación ha finalizado el riego y ha apagado el relé. \\
+\hline
+\texttt{400} & \texttt{error} & Se ha detectado un error relevante, normalmente asociado a sensores o lecturas no válidas. \\
+\hline
+\texttt{429} & \texttt{cooldown} & La estación ha bloqueado una activación porque no ha finalizado el tiempo mínimo entre riegos. \\
+\hline
+\end{tabular}
+\caption{Codificación del campo \texttt{system\_event}.}
+\label{tab:codificacion_system_event}
+\end{table}
+
+Este campo permite distinguir si la estación está en reposo, en modo seguro, regando, finalizando un riego o bloqueando una activación por seguridad.
+
+\section{Codificación de diagnóstico}
+
+El campo \texttt{field8} contiene un código auxiliar de diagnóstico. Este valor complementa al evento principal y facilita la depuración.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.16\textwidth}|p{0.26\textwidth}|p{0.44\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Etiqueta} & \textbf{Significado} \\
+\hline
+\texttt{200} & \texttt{OK} & Funcionamiento correcto en el ciclo actual. \\
+\hline
+\texttt{204} & \texttt{no riego} & No se ha activado el riego porque no se cumplen las condiciones necesarias. \\
+\hline
+\texttt{206} & \texttt{modo seguro} & La estación está operando en modo seguro. \\
+\hline
+\texttt{400} & \texttt{error} & Se ha detectado un error o una lectura no válida. \\
+\hline
+\texttt{429} & \texttt{cooldown} & El riego se ha bloqueado por periodo de seguridad entre activaciones. \\
+\hline
+\end{tabular}
+\caption{Codificación del campo \texttt{debug\_code}.}
+\label{tab:codificacion_debug_code}
+\end{table}
+
+La diferencia entre \texttt{system\_event} y \texttt{debug\_code} es que el primero describe el evento principal del sistema, mientras que el segundo resume el resultado o condición auxiliar del ciclo.
+
+\section{Interpretación conjunta de estados}
+
+La interpretación más útil se obtiene combinando \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code}.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.18\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{\texttt{relay\_state}} & \textbf{\texttt{system\_event}} & \textbf{\texttt{debug\_code}} & \textbf{Interpretación} \\
+\hline
+\texttt{0} & \texttt{100} & \texttt{204} & Estación en reposo. No se activa el riego porque no se cumplen las condiciones necesarias. \\
+\hline
+\texttt{0} & \texttt{206} & \texttt{206} & Estación en modo seguro. El sistema aplica criterios más conservadores. \\
+\hline
+\texttt{1} & \texttt{210} & \texttt{200} & Riego activo. El relé está activado durante el intervalo configurado. \\
+\hline
+\texttt{0} & \texttt{211} & \texttt{200} & Riego finalizado. El relé ha vuelto a estado apagado. \\
+\hline
+\texttt{0} & \texttt{400} & \texttt{400} & Error de sensores o lectura no válida. La respuesta segura es no activar el riego. \\
+\hline
+\texttt{0} & \texttt{429} & \texttt{429} & Riego bloqueado por cooldown. La estación evita una activación demasiado cercana a la anterior. \\
+\hline
+\end{tabular}
+\caption{Interpretación conjunta de estado de relé, evento y diagnóstico.}
+\label{tab:relacion_evento_diagnostico_actuacion}
+\end{table}
+
+Esta tabla permite que los valores publicados en ThingSpeak se puedan traducir a estados comprensibles.
+
+\section{Normalización en Raspberry Pi}
+
+El ingestor \texttt{main.py} consulta la última entrada del canal ThingSpeak y traduce los campos genéricos \texttt{field1}--\texttt{field8} a nombres internos. La normalización aplicada se resume en la Tabla \ref{tab:normalizacion_campos_thingspeak}.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo recibido} & \textbf{Nombre interno} & \textbf{Conversión esperada} \\
+\hline
+\texttt{entry\_id} & \texttt{entry\_id} & Entero. \\
+\hline
+\texttt{created\_at} & \texttt{created\_at} & Fecha original de ThingSpeak. \\
+\hline
+\texttt{field1} & \texttt{soil\_moisture\_pct} & Número real. \\
+\hline
+\texttt{field2} & \texttt{temperature\_c} & Número real. \\
+\hline
+\texttt{field3} & \texttt{humidity\_pct} & Número real. \\
+\hline
+\texttt{field4} & \texttt{light\_lux} & Número real. \\
+\hline
+\texttt{field5} & \texttt{pressure\_hpa} & Número real. \\
+\hline
+\texttt{field6} & \texttt{relay\_state} & Entero. \\
+\hline
+\texttt{field7} & \texttt{system\_event} & Texto o código numérico. \\
+\hline
+\texttt{field8} & \texttt{debug\_code} & Texto o código numérico. \\
+\hline
+\end{tabular}
+\caption{Normalización de campos recibidos desde ThingSpeak.}
+\label{tab:normalizacion_campos_thingspeak}
+\end{table}
+
+El valor \texttt{entry\_id} se utiliza para evitar insertar varias veces la misma entrada. Si el identificador recibido coincide con el último procesado para esa estación, la lectura se considera duplicada y se ignora.
+
+\section{Persistencia y trazabilidad}
+
+Las lecturas se almacenan en la tabla \texttt{readings} de SQLite. Las variables principales se insertan como columnas normalizadas, mientras que la respuesta original de ThingSpeak se conserva en \texttt{raw\_json} para mantener trazabilidad.
+
+Esto es relevante para los campos de estado: \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code} se normalizan durante la ingesta y se registran en los logs, pero pueden conservarse principalmente dentro de \texttt{raw\_json} si no se insertan explícitamente como columnas. Por ello, cualquier visualización o depuración debe contemplar la lectura de esos valores desde la respuesta original cuando sea necesario.
+
+\section{Errores habituales de configuración}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.30\textwidth}|p{0.28\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Error} & \textbf{Efecto observable} & \textbf{Corrección recomendada} \\
+\hline
+Clave de escritura incorrecta & El canal no recibe nuevas entradas. & Revisar \texttt{THINGSPEAK\_API\_KEY} en el firmware. \\
+\hline
+Canal incorrecto en Raspberry Pi & Se consulta un canal que no corresponde a la estación. & Revisar \texttt{THINGSPEAK\_CHANNEL\_A/B}. \\
+\hline
+Clave de lectura incorrecta & La Raspberry Pi no puede recuperar datos si el canal es privado. & Revisar \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
+\hline
+Campos desordenados & El dashboard o la API interpretan valores incorrectos. & Mantener fija la correspondencia \texttt{field1}--\texttt{field8}. \\
+\hline
+Sin nuevas entradas & La API mantiene la última lectura disponible o muestra datos antiguos. & Revisar estación, LTE, ThingSpeak, ingestor y alimentación. \\
+\hline
+Publicación demasiado frecuente & ThingSpeak puede no aceptar todas las actualizaciones. & Respetar el intervalo de envío configurado en el firmware. \\
+\hline
+\end{tabular}
+\caption{Errores habituales asociados a la configuración de ThingSpeak.}
+\label{tab:errores_thingspeak}
+\end{table}
+
+\section{Limitaciones de la versión actual}
+
+En la versión actual, ThingSpeak se utiliza únicamente para telemetría ascendente:
+
+\begin{itemize}
+    \item la estación publica datos hacia ThingSpeak;
+    \item la Raspberry Pi consulta datos desde ThingSpeak;
+    \item la decisión de riego se ejecuta localmente en Arduino;
+    \item no se envían órdenes de riego desde el dashboard;
+    \item no existe canal descendente de comandos hacia la estación.
+\end{itemize}
+
+Esta limitación es deliberada. La actuación sobre una bomba implica riesgos eléctricos e hidráulicos, por lo que la versión actual prioriza una lógica local con apagado explícito, cooldown y comportamiento seguro ante lecturas no válidas.
+
+\section{Conclusión}
+
+La estructura de ThingSpeak de TierraViva define un contrato de datos entre estación, plataforma IoT y Raspberry Pi. Los campos \texttt{field1}--\texttt{field5} transportan variables físicas, mientras que \texttt{field6}--\texttt{field8} describen el estado operativo de la estación.
+
+Mantener estable esta correspondencia es esencial para que el firmware, el ingestor, la base de datos, la API y el dashboard interpreten los datos de forma coherente.

@@ -1,0 +1,302 @@
+\chapter{Plan de recursos del proyecto}
+\label{anexo:plan_recursos}
+
+Este anexo recoge los recursos humanos, técnicos, experimentales y documentales necesarios para el desarrollo de TierraViva. Las referencias comerciales, cantidades y costes de los componentes se recogen en el Anexo \ref{anexo:materiales}. La valoración económica global se desarrolla en el Anexo \ref{anexo:relacion_ingresos_gastos}. La planificación temporal se documenta en el Anexo \ref{anexo:cronograma}.
+
+\section{Criterio de organización}
+
+Los recursos del proyecto se han agrupado en cinco categorías:
+
+\begin{itemize}
+    \item recursos humanos y de tutorización;
+    \item recursos hardware;
+    \item recursos software;
+    \item servicios externos;
+    \item recursos experimentales y documentales.
+\end{itemize}
+
+Esta clasificación permite analizar el proyecto desde una perspectiva de gestión, diferenciando entre los medios empleados para construir el prototipo, los recursos necesarios para desarrollarlo y los apoyos que han permitido situarlo en un contexto realista de aplicación.
+
+\section{Recursos humanos}
+
+El desarrollo de TierraViva ha sido realizado principalmente por la autora del TFG. La ejecución técnica, el montaje, la programación, la integración, las pruebas y la redacción de la memoria recaen sobre ella. Los tutores han participado como apoyo académico, técnico y experimental, sin asumir tareas de implementación directa del prototipo.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.25\textwidth}|p{0.40\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Interviniente} & \textbf{Rol} & \textbf{Contribución principal} \\
+\hline
+Lucía Tejedor de la Cruz & Autora y desarrolladora del TFG & Definición del alcance, diseño de arquitectura, selección de componentes, montaje del prototipo, desarrollo de firmware, backend, API, dashboard, pruebas y redacción de la memoria. \\
+\hline
+Javier Simó & Tutor académico y orientación de ingeniería & Supervisión técnica del proyecto, revisión del enfoque de ingeniería, apoyo en decisiones de arquitectura, integración hardware-software y validación del planteamiento técnico. \\
+\hline
+Ana Zazo & Cotutora académica y apoyo experimental/agronómico & Contextualización del proyecto en un entorno real de aplicación, facilitación de una parcela en el Agrolab de Móstoles y apoyo en la orientación experimental del prototipo. \\
+\hline
+Personal del Agrolab de Móstoles & Apoyo de entorno & Colaboración indirecta en el acceso al entorno de pruebas y apoyo contextual para posibles ensayos en condiciones próximas a un escenario real. \\
+\hline
+\end{tabular}
+\caption{Recursos humanos e intervinientes principales del proyecto.}
+\label{tab:recursos_humanos_resumido}
+\end{table}
+
+\section{Distribución de responsabilidades}
+
+Aunque el proyecto se desarrolla de forma individual, TierraViva combina tareas de naturaleza distinta: electrónica, comunicaciones, software, integración, pruebas y documentación. Por ello, se identifican las responsabilidades funcionales indicadas en la Tabla \ref{tab:responsabilidades_recursos}.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.30\textwidth}|p{0.32\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Responsabilidad} & \textbf{Responsable principal} & \textbf{Apoyo o supervisión} \\
+\hline
+Definición del problema y alcance & Autora & Javier Simó / Ana Zazo \\
+\hline
+Diseño técnico de la arquitectura & Autora & Javier Simó \\
+\hline
+Contextualización experimental & Autora & Ana Zazo / Agrolab \\
+\hline
+Selección de componentes & Autora & Javier Simó \\
+\hline
+Montaje e integración hardware & Autora & Javier Simó \\
+\hline
+Desarrollo de firmware Arduino & Autora & Javier Simó \\
+\hline
+Desarrollo en Raspberry Pi, API y dashboard & Autora & Javier Simó \\
+\hline
+Pruebas del prototipo & Autora & Javier Simó / Ana Zazo \\
+\hline
+Redacción y revisión de la memoria & Autora & Javier Simó / Ana Zazo \\
+\hline
+\end{tabular}
+\caption{Distribución de responsabilidades funcionales en TierraViva.}
+\label{tab:responsabilidades_recursos}
+\end{table}
+
+Esta tabla no representa una distribución porcentual de autoría, sino la organización del trabajo y los apoyos disponibles durante el desarrollo.
+
+\section{Recursos hardware}
+
+Los recursos hardware se agrupan por función dentro del sistema. No se detallan aquí referencias comerciales ni precios, ya que esa información se encuentra en el Anexo \ref{anexo:materiales}.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Bloque} & \textbf{Recursos principales} & \textbf{Función dentro del proyecto} \\
+\hline
+Estación remota & Arduino UNO, sensores BME280, BH1750 y sensor capacitivo de humedad del suelo & Medición de variables ambientales y del sustrato, validación local de lecturas y ejecución del firmware de estación. \\
+\hline
+Comunicación móvil & Módulo A7670E-LASA, antena y tarjeta SIM & Envío de telemetría desde la estación hacia ThingSpeak mediante red LTE. \\
+\hline
+Actuación de riego & Módulo relé y bomba de agua de 12 V & Activación física del riego cuando el firmware lo permite, con apagado temporizado. \\
+\hline
+Alimentación & Fuente o batería de 12 V y regulador LM2596 & Suministro energético para electrónica, comunicaciones y carga de actuación. \\
+\hline
+Nodo de supervisión & Raspberry Pi, tarjeta microSD y fuente USB-C & Ejecución de ingesta, base de datos SQLite, API FastAPI y dashboard web. \\
+\hline
+Montaje y protección & Protoboard, cableado, resistencias, condensadores, aislamiento y soporte físico & Conexionado, adaptación básica de señales, pruebas de integración y protección mecánica inicial. \\
+\hline
+\end{tabular}
+\caption{Recursos hardware agrupados por función.}
+\label{tab:recursos_hardware_agrupados}
+\end{table}
+
+La separación por bloques permite distinguir entre recursos propios de cada estación y recursos compartidos. La Raspberry Pi, por ejemplo, actúa como nodo de supervisión y no tendría que duplicarse necesariamente por cada estación adicional.
+
+\section{Recursos software}
+
+Los recursos software se han empleado tanto para programar la estación como para desarrollar la capa local de supervisión.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.24\textwidth}|p{0.38\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso} & \textbf{Categoría} & \textbf{Uso en TierraViva} \\
+\hline
+Arduino IDE & Desarrollo embebido & Programación y carga del firmware en Arduino UNO. \\
+\hline
+C/C++ & Firmware & Lectura de sensores, comunicación con el módem, decisión local de riego y control del relé. \\
+\hline
+Python & Backend local & Ingesta de datos, persistencia, lógica auxiliar y API. \\
+\hline
+FastAPI y Uvicorn & API web & Exposición local de lecturas, histórico, estadísticas y estado del sistema. \\
+\hline
+SQLite & Base de datos & Almacenamiento local de lecturas, estados y eventos. \\
+\hline
+HTML, CSS y JavaScript & Frontend web & Construcción del dashboard de visualización. \\
+\hline
+Bash & Automatización & Instalación, arranque, parada, estado y consulta de logs mediante \texttt{tierraviva.sh}. \\
+\hline
+Git y GitHub & Control de versiones & Organización del código fuente, trazabilidad de cambios y conservación del repositorio. \\
+\hline
+LaTeX & Documentación & Redacción de la memoria, anexos, tablas, figuras y bibliografía. \\
+\hline
+\end{tabular}
+\caption{Recursos software empleados en el desarrollo del proyecto.}
+\label{tab:recursos_software_resumidos}
+\end{table}
+
+\section{Servicios externos}
+
+TierraViva utiliza servicios externos solo cuando aportan una función clara dentro del prototipo. La Tabla \ref{tab:servicios_externos_resumidos} resume estos recursos.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.24\textwidth}|p{0.38\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Servicio} & \textbf{Tipo} & \textbf{Función en el proyecto} \\
+\hline
+ThingSpeak & Plataforma IoT & Recepción de telemetría publicada por las estaciones y consulta posterior desde la Raspberry Pi. \\
+\hline
+Red móvil LTE/4G & Infraestructura de comunicación & Conectividad de las estaciones remotas en ubicaciones sin dependencia directa de una red WiFi local. \\
+\hline
+GitHub & Repositorio remoto & Almacenamiento del código fuente, seguimiento de cambios y acceso al proyecto. \\
+\hline
+\end{tabular}
+\caption{Servicios externos utilizados por TierraViva.}
+\label{tab:servicios_externos_resumidos}
+\end{table}
+
+\section{Recursos experimentales}
+
+Además de los recursos técnicos, TierraViva requiere un entorno donde las medidas y la actuación de riego tengan sentido físico. Por ello, se consideran recursos experimentales los espacios, materiales y condiciones necesarias para validar el comportamiento del prototipo.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.58\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso experimental} & \textbf{Uso previsto} \\
+\hline
+Parcela del Agrolab de Móstoles & Entorno de validación más cercano a una aplicación agrícola real, facilitado como apoyo experimental al proyecto. \\
+\hline
+Maceta o sustrato de prueba & Validación controlada de la lectura de humedad del suelo y de la actuación de riego antes de un despliegue en parcela. \\
+\hline
+Depósito o recipiente de agua & Pruebas de activación de bomba y comprobación del caudal en entorno controlado. \\
+\hline
+Entorno de laboratorio o mesa de montaje & Verificación inicial de cableado, alimentación, sensores, relé y comunicación antes de pruebas con agua. \\
+\hline
+Instrumental básico & Multímetro, ordenador con Arduino IDE, conexión USB, herramientas de montaje y elementos de fijación. \\
+\hline
+\end{tabular}
+\caption{Recursos experimentales necesarios para la validación del prototipo.}
+\label{tab:recursos_experimentales}
+\end{table}
+
+La validación debe avanzar desde un entorno controlado hacia un escenario más realista. Esto reduce riesgos durante las primeras pruebas y permite aislar fallos antes de introducir variables de campo.
+
+\section{Recursos documentales}
+
+La documentación utilizada durante el proyecto se agrupa en recursos de apoyo técnico, académico y de validación.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.56\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso documental} & \textbf{Uso en el proyecto} \\
+\hline
+Documentación de sensores y módulos & Consulta de conexiones, librerías, rangos de medida y comportamiento esperado. \\
+\hline
+Documentación del A7670E-LASA & Configuración mediante comandos AT, registro en red móvil y envío de peticiones HTTP. \\
+\hline
+Documentación de ThingSpeak & Configuración de canales, campos y claves de lectura/escritura. \\
+\hline
+Documentación de FastAPI, SQLite y Python & Desarrollo de ingesta, API, persistencia local y pruebas desde Raspberry Pi. \\
+\hline
+Plantilla oficial de la memoria & Adecuación formal del documento a los requisitos académicos. \\
+\hline
+Notas de pruebas, capturas y logs & Evidencias de funcionamiento, depuración y validación progresiva del prototipo. \\
+\hline
+\end{tabular}
+\caption{Recursos documentales utilizados durante el desarrollo.}
+\label{tab:recursos_documentales_resumidos}
+\end{table}
+
+\section{Asignación de recursos por fase}
+
+La Tabla \ref{tab:recursos_por_fase_resumidos} relaciona los recursos anteriores con las fases generales del proyecto. No se reproduce aquí el cronograma completo, sino una visión de qué recursos resultan críticos en cada bloque de trabajo.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Fase} & \textbf{Recursos principales} & \textbf{Resultado esperado} \\
+\hline
+Definición y alcance & Autora, tutores, documentación académica y contexto Agrolab & Delimitación de objetivos, alcance y escenario de aplicación. \\
+\hline
+Diseño técnico & Documentación técnica, criterios de arquitectura, revisión de alternativas y apoyo de ingeniería & Selección razonada de sensores, comunicaciones, plataforma IoT y nodo de supervisión. \\
+\hline
+Montaje de estación & Arduino, sensores, A7670E-LASA, relé, bomba, alimentación y material auxiliar & Estación remota montada y preparada para pruebas por bloques. \\
+\hline
+Desarrollo software & Arduino IDE, Python, SQLite, FastAPI, JavaScript, GitHub y Bash & Firmware, ingestor, base de datos, API, dashboard y script de gestión. \\
+\hline
+Integración y comunicación & ThingSpeak, red LTE, Raspberry Pi y configuración local & Flujo de datos desde estación hasta almacenamiento local y dashboard. \\
+\hline
+Validación experimental & Entorno de prueba, Agrolab o maceta, instrumental básico, logs y capturas & Evidencias de funcionamiento, incidencias detectadas y ajustes realizados. \\
+\hline
+Documentación final & LaTeX, plantilla oficial, bibliografía, anexos y resultados de pruebas & Memoria completa, coherente y defendible. \\
+\hline
+\end{tabular}
+\caption{Asignación resumida de recursos por fase del proyecto.}
+\label{tab:recursos_por_fase_resumidos}
+\end{table}
+
+\section{Recursos compartidos y escalabilidad}
+
+No todos los recursos crecen de la misma forma si el sistema se amplía. Algunos deben duplicarse por estación, mientras que otros pueden compartirse.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.24\textwidth}|p{0.36\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso} & \textbf{Tipo} & \textbf{Criterio de escalado} \\
+\hline
+Sensores, Arduino, módem LTE, relé y alimentación de estación & Por estación & Deben añadirse para cada nuevo nodo físico. \\
+\hline
+Canal ThingSpeak y claves asociadas & Por estación & Se recomienda un canal independiente para no mezclar datos. \\
+\hline
+Raspberry Pi & Compartido & Puede supervisar varias estaciones si el volumen de datos es moderado. \\
+\hline
+API, base de datos y dashboard & Compartidos & Admiten varias estaciones mediante identificadores y configuración. \\
+\hline
+Documentación, scripts y repositorio & Compartidos & Se reutilizan para reproducir o ampliar el sistema. \\
+\hline
+Entorno de pruebas & Compartido o variable & Depende de la disponibilidad de parcela, macetas o zona de ensayo. \\
+\hline
+\end{tabular}
+\caption{Clasificación de recursos según su comportamiento ante una ampliación del sistema.}
+\label{tab:recursos_escalabilidad}
+\end{table}
+
+Esta distinción resulta relevante porque el coste incremental de añadir estaciones no es igual al coste total del prototipo inicial. Parte de la infraestructura, como la Raspberry Pi, la API, la base de datos y el dashboard, puede reutilizarse.
+
+\section{Conclusión}
+
+El desarrollo de TierraViva ha requerido recursos de naturaleza diversa: personas, componentes electrónicos, herramientas de programación, servicios de comunicación, entorno experimental y documentación técnica. La organización de estos recursos permite entender el proyecto como un sistema integrado, no como una simple suma de componentes.

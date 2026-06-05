@@ -7,6 +7,7 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from database import (
     BASE_DIR,
@@ -30,6 +31,10 @@ WEB_REFRESH_SECONDS = int(os.getenv("WEB_REFRESH_SECONDS", "3"))
 DATA_STALE_SECONDS = int(os.getenv("DATA_STALE_SECONDS", "90"))
 
 app = FastAPI(title="TierraViva Dashboard", version="2.0.0")
+
+app.mount("/css", StaticFiles(directory=str(FRONTEND_DIR / "css")), name="css")
+app.mount("/js", StaticFiles(directory=str(FRONTEND_DIR / "js")), name="js")
+app.mount("/images", StaticFiles(directory=str(FRONTEND_DIR / "images")), name="images")
 
 
 def normalize_station(station: Optional[str]) -> str:
@@ -84,7 +89,14 @@ def index():
         raise HTTPException(status_code=404, detail="No se encontró frontend/index.html")
     return FileResponse(str(index_path))
 
-
+@app.get("/favicon.ico")
+def favicon():
+    favicon_path = FRONTEND_DIR / "images" / "favicon.ico"
+    if not favicon_path.exists():
+        raise HTTPException(status_code=404, detail="No se encontró favicon.ico")
+    return FileResponse(str(favicon_path))
+    
+    
 @app.get("/api/config")
 def api_config(station: Optional[str] = Query(None)):
     selected_station = normalize_station(station)

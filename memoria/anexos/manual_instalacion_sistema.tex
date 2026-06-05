@@ -1,0 +1,388 @@
+\chapter{Manual de instalación y puesta en marcha de TierraViva}
+\label{anexo:manual_instalacion_sistema}
+
+Este anexo describe el procedimiento necesario para instalar y poner en marcha TierraViva a partir del repositorio del proyecto. Su objetivo es permitir que el prototipo pueda reproducirse de forma ordenada, comprobando cada bloque antes de ejecutar una prueba completa.
+
+El manual se centra en la instalación práctica del sistema. Los esquemas eléctricos se recogen en el Anexo \ref{anexo:esquemas_electricos}; los flujos de funcionamiento, en el Anexo \ref{anexo:diagramas_flujo_funcionamiento}; la estructura de ThingSpeak, en el Anexo \ref{anexo:estructura_thingspeak_estados}; y la referencia completa de endpoints, en el Anexo \ref{anexo:manual_api}.
+
+\section{Alcance}
+
+La instalación descrita corresponde a la versión actual de TierraViva, formada por:
+
+\begin{itemize}
+    \item una o varias estaciones remotas basadas en Arduino UNO;
+    \item publicación de telemetría en ThingSpeak mediante LTE;
+    \item Raspberry Pi como nodo local de supervisión;
+    \item base de datos SQLite;
+    \item API local con FastAPI;
+    \item dashboard web accesible desde navegador.
+\end{itemize}
+
+\section{Requisitos previos}
+
+Antes de comenzar la instalación deben estar disponibles los siguientes elementos:
+
+\begin{itemize}
+    \item repositorio del proyecto TierraViva;
+    \item Raspberry Pi con Raspberry Pi OS y conexión a Internet;
+    \item Arduino IDE para cargar el firmware de estación;
+    \item cuenta de ThingSpeak;
+    \item un canal ThingSpeak por estación;
+    \item \texttt{Channel ID}, \texttt{Read API Key} y \texttt{Write API Key} de cada canal;
+    \item tarjeta SIM sin PIN activo;
+    \item módulo A7670E-LASA con antena conectada;
+    \item estación montada según el esquema eléctrico del Anexo \ref{anexo:esquemas_electricos}.
+\end{itemize}
+
+Las claves reales no deben incluirse en la memoria ni subirse al repositorio. En la documentación se utilizarán siempre marcadores como \texttt{<READ\_KEY\_A>} o \texttt{<WRITE\_KEY\_A>}.
+
+\section{Preparación de ThingSpeak}
+
+Para cada estación debe existir un canal ThingSpeak independiente. La correspondencia entre campos y variables se encuentra documentada en el Anexo \ref{anexo:estructura_thingspeak_estados}. Como comprobación mínima, antes de integrar la estación se recomienda verificar que el canal acepta una escritura manual.
+
+\begin{verbatim}
+https://api.thingspeak.com/update?api_key=<WRITE_KEY>&field1=35
+\end{verbatim}
+
+Si la petición es correcta, ThingSpeak devuelve un número de entrada. Después debe comprobarse en el canal que se ha registrado una nueva lectura.
+
+\section{Carga del firmware de estación}
+
+El firmware de la estación se encuentra en:
+
+\begin{verbatim}
+Estacion/Estacion_A_final_Plus/Estacion_A_final_Plus.ino
+\end{verbatim}
+
+Antes de cargarlo en Arduino UNO deben revisarse, como mínimo, los siguientes parámetros:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.34\textwidth}|p{0.48\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Parámetro} & \textbf{Función} \\
+\hline
+\texttt{APN} & APN del operador móvil utilizado por la SIM. \\
+\hline
+\texttt{THINGSPEAK\_API\_KEY} & Clave de escritura del canal ThingSpeak de la estación. \\
+\hline
+\texttt{SOIL\_DRY} & Valor bruto del sensor en condición seca. \\
+\hline
+\texttt{SOIL\_WET} & Valor bruto del sensor en condición húmeda. \\
+\hline
+\texttt{NORMAL\_SOIL\_THRESHOLD} & Umbral de humedad usado en funcionamiento normal. \\
+\hline
+\texttt{SAFE\_SOIL\_THRESHOLD} & Umbral de humedad usado en modo seguro. \\
+\hline
+\texttt{IRRIGATION\_SECONDS} & Duración del riego local. \\
+\hline
+\texttt{COOLDOWN\_MS} & Tiempo mínimo entre dos riegos consecutivos. \\
+\hline
+\texttt{SEND\_INTERVAL\_MS} & Intervalo de publicación de telemetría. \\
+\hline
+\end{tabular}
+\caption{Parámetros principales que deben revisarse antes de cargar el firmware.}
+\label{tab:parametros_firmware_instalacion}
+\end{table}
+
+La carga del firmware se realiza desde Arduino IDE:
+
+\begin{enumerate}
+    \item conectar Arduino UNO al ordenador mediante USB;
+    \item abrir el fichero \texttt{Estacion\_A\_final\_Plus.ino};
+    \item seleccionar la placa \textit{Arduino UNO};
+    \item seleccionar el puerto serie correspondiente;
+    \item compilar el programa;
+    \item cargar el firmware;
+    \item abrir el monitor serie para comprobar sensores, módem y publicación.
+\end{enumerate}
+
+La Figura \ref{fig:arduino_placa_uno} muestra el procedimiento para seleccionar la placa \textit{Arduino UNO} en Arduino IDE. A continuación, la Figura \ref{fig:arduino_puerto_usb} muestra la selección del puerto serie asociado a la placa conectada por USB.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figs/seleccion_placa_Arduino.png}
+    \caption{Selección de la placa \textit{Arduino UNO} en Arduino IDE antes de cargar el firmware de la estación.}
+    \label{fig:arduino_placa_uno}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figs/seleccion_puerto_Arduino.png}
+    \caption{Selección del puerto serie correspondiente a la placa Arduino conectada por USB en Arduino IDE.}
+    \label{fig:arduino_puerto_usb}
+\end{figure}
+
+Debe tenerse en cuenta que el nombre exacto del puerto serie puede variar según el sistema operativo, el adaptador USB empleado y el equipo utilizado durante la instalación.
+
+\section{Instalación del software en Raspberry Pi}
+
+En primer lugar se actualiza el sistema y se instalan las herramientas básicas:
+
+\begin{verbatim}
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y git python3 python3-venv python3-pip sqlite3
+\end{verbatim}
+
+Después se descarga el repositorio:
+
+\begin{verbatim}
+cd /home/pi
+git clone https://github.com/ltejedorcruz/TierraViva.git
+cd TierraViva
+\end{verbatim}
+
+Si el repositorio ya existe, puede actualizarse mediante:
+
+\begin{verbatim}
+cd /home/pi/TierraViva
+git pull
+\end{verbatim}
+
+\section{Configuración del fichero \texttt{.env}}
+
+El fichero \texttt{.env} debe crearse en la raíz del repositorio. Contiene la configuración local de estaciones, ThingSpeak y parámetros de ejecución.
+
+\begin{verbatim}
+nano .env
+\end{verbatim}
+
+Un ejemplo de configuración es:
+
+\begin{verbatim}
+TIERRAVIVA_HOME=/home/pi/TierraViva
+
+STATIONS=A,B
+STATION_ID=A
+
+THINGSPEAK_CHANNEL_A=<CHANNEL_ID_A>
+THINGSPEAK_READ_KEY_A=<READ_KEY_A>
+
+THINGSPEAK_CHANNEL_B=<CHANNEL_ID_B>
+THINGSPEAK_READ_KEY_B=<READ_KEY_B>
+
+POLL_INTERVAL_SECONDS=30
+REQUEST_TIMEOUT_SECONDS=12
+
+SOIL_LOW_THRESHOLD=35
+SOIL_HIGH_THRESHOLD=45
+WEB_REFRESH_SECONDS=3
+DATA_STALE_SECONDS=90
+
+TIERRAVIVA_LOG_LEVEL=INFO
+\end{verbatim}
+
+El fichero \texttt{.env} no debe subirse al repositorio. Si accidentalmente se publica una clave real, debe regenerarse en ThingSpeak.
+
+\section{Preparación del dashboard}
+
+El dashboard fuente se encuentra en el directorio:
+
+\begin{verbatim}
+dashboard/
+\end{verbatim}
+
+La API sirve la interfaz desde:
+
+\begin{verbatim}
+frontend/index.html
+\end{verbatim}
+
+Por tanto, antes de arrancar el sistema debe copiarse el dashboard al directorio \texttt{frontend/}:
+
+\begin{verbatim}
+mkdir -p frontend
+rsync -a dashboard/ frontend/
+\end{verbatim}
+
+Después de este paso debe existir, al menos:
+
+\begin{verbatim}
+frontend/index.html
+frontend/css/tierraviva.css
+frontend/js/tierraviva.js
+\end{verbatim}
+
+\section{Instalación mediante script}
+
+Antes de utilizar el script debe concederse permiso de ejecución:
+
+\begin{verbatim}
+chmod +x tierraviva.sh
+\end{verbatim}
+
+La instalación inicial se realiza con:
+
+\begin{verbatim}
+./tierraviva.sh install
+\end{verbatim}
+
+Este comando prepara el entorno de ejecución del proyecto: crea el entorno virtual, instala dependencias, inicializa la base de datos y crea los directorios necesarios para la ejecución.
+
+Tras la instalación, se recomienda repetir la copia del dashboard para asegurar que el frontend servido por la API está actualizado:
+
+\begin{verbatim}
+rsync -a dashboard/ frontend/
+\end{verbatim}
+
+La tabla \texttt{readings} almacena lecturas, \texttt{system\_state} conserva información de estado del sistema y \texttt{valve\_events} queda preparada para registrar eventos relacionados con la actuación.
+
+\section{Arranque del sistema}
+
+El sistema se arranca mediante:
+
+\begin{verbatim}
+./tierraviva.sh start
+\end{verbatim}
+
+Este comando inicia los procesos principales:
+
+\begin{itemize}
+    \item \texttt{main.py}, encargado de consultar ThingSpeak y almacenar lecturas nuevas;
+    \item \texttt{api.py}, encargado de servir la API y el dashboard web.
+\end{itemize}
+
+Para detener el sistema se utiliza:
+
+\begin{verbatim}
+./tierraviva.sh stop
+\end{verbatim}
+
+Para reiniciarlo:
+
+\begin{verbatim}
+./tierraviva.sh restart
+\end{verbatim}
+
+Para consultar el estado:
+
+\begin{verbatim}
+./tierraviva.sh status
+\end{verbatim}
+
+Para revisar los logs:
+
+\begin{verbatim}
+./tierraviva.sh logs
+\end{verbatim}
+
+\section{Comprobación de la API}
+
+Con el sistema arrancado, se comprueba primero el estado general de la API:
+
+\begin{verbatim}
+curl http://127.0.0.1:8000/api/health
+\end{verbatim}
+
+También puede comprobarse desde navegador:
+
+\begin{verbatim}
+http://<IP_RASPBERRY>:8000/api/health
+\end{verbatim}
+
+Otras comprobaciones útiles son:
+
+\begin{verbatim}
+http://<IP_RASPBERRY>:8000/api/config
+http://<IP_RASPBERRY>:8000/api/latest?station=A
+http://<IP_RASPBERRY>:8000/api/readings?station=A&limit=20
+http://<IP_RASPBERRY>:8000/api/stats?station=A&hours=24
+\end{verbatim}
+
+La descripción completa de endpoints, parámetros y respuestas se recoge en el Anexo \ref{anexo:manual_api}.
+
+\section{Acceso al dashboard}
+
+Una vez arrancada la API y copiado el dashboard en \texttt{frontend/}, la interfaz web se abre desde:
+
+\begin{verbatim}
+http://<IP_RASPBERRY>:8000/
+\end{verbatim}
+
+Si se accede desde la propia Raspberry Pi, puede utilizarse:
+
+\begin{verbatim}
+http://127.0.0.1:8000/
+\end{verbatim}
+
+El dashboard debe mostrar la estación seleccionada, la última lectura disponible, el estado de frescura, variables ambientales, estado de relé, eventos, gráficas y tabla de lecturas recientes.
+
+\section{Comprobación extremo a extremo}
+
+La instalación se considera preparada cuando se completa la siguiente secuencia:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.38\textwidth}|p{0.42\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Comprobación} & \textbf{Resultado esperado} \\
+\hline
+Estación encendida & Arduino, sensores y módem arrancan sin reinicios.\\
+\hline
+Lectura de sensores & Valores coherentes en el monitor serie.\\
+\hline
+Registro LTE & El módem registra red móvil.\\
+\hline
+Publicación en ThingSpeak & Aparece una nueva entrada en el canal.\\
+\hline
+Ingesta en Raspberry Pi & \texttt{main.py} recupera una lectura nueva.\\
+\hline
+Inserción en SQLite & La lectura aparece en \texttt{readings}.\\
+\hline
+API operativa & \texttt{/api/health} responde correctamente.\\
+\hline
+Dashboard visible & La interfaz muestra datos de la estación.\\
+\hline
+Relé sin bomba & El relé conmuta y vuelve a apagado.\\
+\hline
+Bomba temporizada & La bomba se activa y se apaga tras el tiempo configurado.\\
+\hline
+\end{tabular}
+\caption{Checklist de comprobación extremo a extremo.}
+\label{tab:checklist_extremo_a_extremo_instalacion}
+\end{table}
+
+\section{Problemas habituales}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.30\textwidth}|p{0.30\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Problema} & \textbf{Causa probable} & \textbf{Acción recomendada} \\
+\hline
+No aparecen datos en ThingSpeak & Clave de escritura incorrecta, APN incorrecto o fallo LTE. & Revisar firmware, SIM, antena, APN y monitor serie. \\
+\hline
+La Raspberry no recupera datos & Canal o clave de lectura incorrectos. & Revisar \texttt{THINGSPEAK\_CHANNEL\_A/B} y \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
+\hline
+La API no arranca & Entorno virtual o dependencias no preparados. & Ejecutar \texttt{./tierraviva.sh install}. \\
+\hline
+El dashboard no carga & No existe \texttt{frontend/index.html}. & Ejecutar \texttt{rsync -a dashboard/ frontend/}. \\
+\hline
+No hay registros en SQLite & La estación no ha publicado o el ingestor no está activo. & Revisar ThingSpeak y logs de \texttt{main.py}. \\
+\hline
+El relé se activa al arrancar & Lógica invertida o inicialización incorrecta. & Comprobar configuración del firmware y probar sin bomba. \\
+\hline
+La bomba no se apaga & Error de cableado o uso del contacto incorrecto del relé. & Usar contacto normalmente abierto y validar apagado por firmware. \\
+\hline
+El módulo LTE se reinicia & Alimentación insuficiente durante transmisión. & Revisar fuente, LM2596, corriente disponible y masa común. \\
+\hline
+\end{tabular}
+\caption{Problemas habituales durante la instalación y puesta en marcha.}
+\label{tab:problemas_instalacion_resumido}
+\end{table}
+
+\section{Conclusión}
+
+La puesta en marcha de TierraViva debe realizarse por bloques: primero estación y sensores, después publicación en ThingSpeak, más tarde ingesta en Raspberry Pi, base de datos, API, dashboard y finalmente actuación sobre relé o bomba. Esta secuencia permite aislar errores y evita que un fallo de montaje, configuración o comunicación quede oculto dentro de una prueba completa.
+
+El procedimiento descrito en este anexo no sustituye a los anexos técnicos específicos, sino que los ordena en una secuencia práctica de instalación y validación inicial.

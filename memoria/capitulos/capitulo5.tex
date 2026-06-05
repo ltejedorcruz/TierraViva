@@ -64,7 +64,7 @@ El resultado fue correcto: el programa se cargó en la placa a través de \textt
 
 Desde el punto de vista de documentación del proyecto, esta incidencia es relevante porque refleja una condición real del montaje. El uso de placas compatibles reduce el coste del prototipo, pero puede introducir pequeños problemas de preparación, como la necesidad de instalar drivers adicionales. Registrar este paso mejora la reproducibilidad del trabajo, ya que otra persona que replique el sistema podría encontrarse con el mismo síntoma: placa encendida, pero sin puerto COM disponible.
 
-Las evidencias de esta fase se recogen en el Anexo~\ref{anexo:pruebas_iniciales}, incluyendo capturas del Administrador de dispositivos, configuración del Arduino IDE y fotografías de la placa.
+Las evidencias de esta fase se integrarán en el registro de resultados del Anexo~\ref{anexo:plan_pruebas}, junto con las capturas del Administrador de dispositivos, la configuración del Arduino IDE y las fotografías de la placa.
 
 Con la placa correctamente reconocida y la prueba \textit{Blink} superada, el Arduino UNO quedó preparado para la siguiente fase: la conexión y validación de los sensores de la estación de campo. Esta comprobación permitió utilizar la placa como base del firmware autónomo de TierraViva, encargado posteriormente de leer sensores, comunicarse con el módulo LTE, controlar el relé y aplicar la lógica local de riego.
 
@@ -206,30 +206,49 @@ El bloque de adquisición lee las mismas variables validadas en el apartado ante
 
 En el caso de la humedad de suelo, el firmware no trabaja únicamente con el valor bruto del conversor analógico-digital. A partir de los valores de referencia obtenidos durante las pruebas, la lectura se transforma a una escala porcentual mediante una función de conversión. Esta transformación facilita la interpretación posterior: un valor bajo de porcentaje indica una situación de suelo seco, mientras que un valor más alto representa mayor humedad del sustrato.
 
-Un fragmento representativo de esta parte del firmware se muestra en el Código~\ref{cod:lectura_sensores_estacion}. No se incluye aquí el sketch completo, que se recoge en el anexo correspondiente, sino únicamente la lógica esencial de adquisición.
+El firmware también mantiene un modo seguro local. Este modo no es una orden recibida desde la Raspberry Pi, sino un estado interno de la estación. Se activa cuando las lecturas no son fiables o cuando el sistema todavía no ha acumulado suficientes ciclos válidos tras el arranque. En modo seguro, la estación utiliza un criterio más conservador para permitir el riego.
+
+En el código, esta lógica se refleja mediante variables como \texttt{safeMode}, \texttt{sensorOk}, \texttt{validCycleCount} y \texttt{dryCycleCount}. Además, el firmware diferencia entre el evento principal del sistema, almacenado en \texttt{systemEventCode}, y el código auxiliar de diagnóstico, almacenado en \texttt{debugCode}. Esta separación permite publicar en ThingSpeak no solo si la estación está regando o no, sino también el motivo de la decisión.
+
+La lógica de lectura de sensores se muestra en el Código~\ref{cod:lectura_sensores_estacion}. En esta versión, el firmware calcula la humedad del suelo a partir de la lectura analógica, lee las variables ambientales y marca la lectura como no válida si alguno de los sensores devuelve un valor incoherente.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
 void readSensors() {
-  lastSoilRaw = readSoilRaw();
-  soilPercent = soilRawToPercent(lastSoilRaw);
+  sensorOk = true;
 
-  temperatureC = bme.readTemperature();
-  humidityPct = bme.readHumidity();
-  pressureHpa = (int)(bme.readPressure() / 100.0F + 0.5F);
+  soilRawValue = readSoilRaw();
+  soilPercent = soilRawToPercent(soilRawValue);
 
-  float luxF = lightMeter.readLightLevel();
-  if (luxF < 0) luxF = 0;
-  luxValue = (int)(luxF + 0.5F);
+  float t = bme.readTemperature();
+  float h = bme.readHumidity();
+  float p = bme.readPressure();
+  float l = lightMeter.readLightLevel();
+
+  if (isnan(t) || isnan(h) || isnan(p) || l < 0) {
+    sensorOk = false;
+  } else {
+    temperatureC = t;
+    humidityPct = h;
+    pressureHpa = (int)(p / 100.0F + 0.5);
+    luxValue = (int)(l + 0.5);
+  }
+
+  if (!sensorOk) {
+    temperatureC = 0.0;
+    humidityPct = 0.0;
+    pressureHpa = 0;
+    luxValue = 0;
+  }
 }
 \end{lstlisting}
 \caption[Lectura agrupada de sensores en la estación]{Lectura agrupada de sensores en la estación}
 \label{cod:lectura_sensores_estacion}
 \end{code}
 
-La decisión local se apoya en tres ideas: umbral de humedad, confirmación por varios ciclos y tiempo mínimo entre riegos. No se activa el riego por una única lectura aislada, ya que una medida puntual puede verse afectada por ruido, contacto irregular del sensor o pequeñas variaciones del montaje. Por ello, el firmware acumula ciclos consecutivos en los que el suelo aparece seco antes de considerar que realmente procede regar.
+La decisión local se apoya en tres mecanismos: umbral de humedad, confirmación por ciclos consecutivos y tiempo mínimo entre riegos. No se activa el riego por una única lectura aislada, ya que una medida puntual puede verse afectada por ruido, contacto irregular del sensor o pequeñas variaciones del montaje. Por ello, el firmware acumula ciclos consecutivos en los que el suelo aparece seco antes de considerar que realmente procede regar.
 
-Además, se incorpora un periodo de \textit{cooldown}. Después de un riego, la estación bloquea nuevas activaciones durante un tiempo mínimo. Esta medida evita ciclos repetidos de riego en poco tiempo y reduce el riesgo de sobreactuación. La función mostrada en el Código~\ref{cod:cooldown_riego} permite comprobar si todavía se encuentra activo ese periodo de espera.
+Además, se incorpora un periodo de \textit{cooldown}. Después de un riego, la estación bloquea nuevas activaciones durante un tiempo mínimo. Esta medida evita ciclos repetidos de riego en poco tiempo y reduce el riesgo de sobreactuación.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
@@ -242,20 +261,53 @@ bool cooldownActive() {
 \label{cod:cooldown_riego}
 \end{code}
 
-El firmware también mantiene un modo seguro local. Si las lecturas de sensores no son válidas, si el sistema no ha acumulado suficientes ciclos correctos o si se detecta una condición no fiable, la estación evita activar el riego. Este modo seguro no depende de una orden externa de la Raspberry Pi; forma parte del comportamiento interno de la estación. En el código, esta lógica se refleja mediante variables como \texttt{safeMode}, \texttt{sensorOk}, \texttt{validCycleCount} y \texttt{dryCycleCount}.
+El modo seguro se actualiza en cada ciclo a partir del estado de los sensores y del número de ciclos válidos acumulados. Si los sensores no son fiables, el sistema permanece en modo seguro. Si se acumulan varios ciclos correctos, la estación puede volver al funcionamiento normal.
 
-La lógica de decisión local se resume en el Código~\ref{cod:decision_local_riego}. La estación comprueba primero si las lecturas son válidas y si existe un periodo de espera activo. Después aplica el umbral correspondiente según se encuentre o no en modo seguro.
+\begin{code}[H]
+\begin{lstlisting}[language=C++]
+void updateSafetyState() {
+  if (!sensorOk) {
+    safeMode = true;
+    validCycleCount = 0;
+    dryCycleCount = 0;
+    return;
+  }
+
+  validCycleCount++;
+
+  if (safeMode && validCycleCount >= SAFE_EXIT_VALID_CYCLES) {
+    safeMode = false;
+    dryCycleCount = 0;
+  }
+
+  int threshold = safeMode ? SAFE_SOIL_THRESHOLD
+                           : NORMAL_SOIL_THRESHOLD;
+
+  if (soilPercent <= threshold) {
+    if (dryCycleCount < 255) dryCycleCount++;
+  } else {
+    dryCycleCount = 0;
+  }
+}
+\end{lstlisting}
+\caption[Actualización del modo seguro y ciclos de suelo seco]{Actualización del modo seguro y ciclos de suelo seco}
+\label{cod:update_safety_state}
+\end{code}
+
+La función de decisión local se muestra en el Código~\ref{cod:decision_local_riego}. Si existe un error de sensores o un periodo de cooldown activo, la estación no permite el riego y actualiza los códigos de estado correspondientes. Si no existe bloqueo, compara la humedad del suelo con el umbral normal o seguro según el estado interno de la estación.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
 bool shouldIrrigate() {
   if (!sensorOk) {
-    statusCode = 400;
+    systemEventCode = 400;
+    debugCode = 400;
     return false;
   }
 
   if (cooldownActive()) {
-    statusCode = 429;
+    systemEventCode = 429;
+    debugCode = 429;
     return false;
   }
 
@@ -272,80 +324,34 @@ bool shouldIrrigate() {
 \label{cod:decision_local_riego}
 \end{code}
 
-Cuando la estación decide regar, la actuación se realiza de forma local mediante el relé. El Código~\ref{cod:activacion_temporizada_rele} muestra de forma simplificada esta activación temporizada.
+Cuando la estación decide regar, la actuación se realiza de forma local mediante el relé. El Código~\ref{cod:activacion_temporizada_rele} muestra la activación temporizada utilizada en el firmware actual. Durante el riego, el evento principal se marca como \texttt{210}; al finalizar, el relé se apaga y el evento pasa a \texttt{211}.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
 void irrigateForSeconds(unsigned long seconds) {
   relayActive = true;
   digitalWrite(RELAY_PIN, RELAY_ON);
-  statusCode = 200;
+
+  systemEventCode = 210; // riego encendido
+  debugCode = 200;
 
   delay(seconds * 1000UL);
 
   digitalWrite(RELAY_PIN, RELAY_OFF);
   relayActive = false;
   lastIrrigationEndMs = millis();
+
+  systemEventCode = 211; // riego finalizado
+  debugCode = 200;
 }
 \end{lstlisting}
 \caption[Activación temporizada del relé de riego]{Activación temporizada del relé de riego}
 \label{cod:activacion_temporizada_rele}
 \end{code}
 
-La publicación en ThingSpeak se realiza después de leer sensores y actualizar el estado interno de la estación. En la arquitectura final, ThingSpeak se utiliza como plataforma de telemetría y supervisión, no como canal de comandos. Cada estación publica en su canal los valores medidos y tres campos de estado que permiten interpretar el comportamiento del nodo.
+Tras la lectura de sensores, la actualización del modo seguro y la posible actuación sobre el relé, el firmware prepara el estado de la estación para su publicación. Esta publicación no se desarrolla en detalle en esta sección para evitar duplicidades, ya que la correspondencia completa entre variables y campos de ThingSpeak se documenta en la Sección~\ref{sec:envio_datos_thingspeak}.
 
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.18\textwidth}|p{0.30\textwidth}|p{0.42\textwidth}|}
-\hline
-\textbf{Campo} & \textbf{Dato enviado} & \textbf{Descripción} \\
-\hline
-\texttt{field1} & Humedad suelo (\%) & Porcentaje normalizado para el prototipo, calculado a partir de valores de referencia del sensor capacitivo. \\
-\hline
-\texttt{field2} & Temperatura & Temperatura ambiente medida por el BME280. \\
-\hline
-\texttt{field3} & Humedad ambiente & Humedad relativa medida por el BME280. \\
-\hline
-\texttt{field4} & Luminosidad & Nivel de luz ambiente medido por el BH1750. \\
-\hline
-\texttt{field5} & Presión & Presión atmosférica medida por el BME280. \\
-\hline
-\texttt{field6} & Relé activo & Indica si el relé se encuentra activado durante el envío. \\
-\hline
-\texttt{field7} & Modo seguro & Indica si la estación se encuentra en modo seguro. \\
-\hline
-\texttt{field8} & Código de estado & Código que resume el estado operativo o un posible error. \\
-\hline
-\end{tabular}
-\caption{Campos de telemetría enviados por el firmware de estación}
-\label{cuadro:campos_telemetria_firmware}
-\end{center}
-\end{table}
-
-Esta estructura permite que el canal de ThingSpeak no almacene solo medidas ambientales, sino también información operativa. El campo del relé permite comprobar si el actuador estaba activo en el momento de la publicación. El campo de modo seguro informa de si la estación está aplicando una lógica más conservadora. El código de estado permite distinguir entre funcionamiento normal, error de sensor, cooldown u otra condición relevante.
-
-El envío se construye mediante una URL de actualización de ThingSpeak. En el firmware se prepara la petición HTTP incluyendo la clave de escritura y los ocho campos definidos. De forma simplificada, la estructura de la petición HTTP enviada a ThingSpeak se muestra en el Código~\ref{cod:peticion_http_telemetria}.
-
-\begin{code}[h]
-\begin{lstlisting}[language=bash]
-http://api.thingspeak.com/update?api_key=...
-  &field1=soilPercent
-  &field2=temperatureC
-  &field3=humidityPct
-  &field4=luxValue
-  &field5=pressureHpa
-  &field6=relayActive
-  &field7=safeMode
-  &field8=statusCode
-\end{lstlisting}
-\caption[Estructura de la petición HTTP de telemetría]{Estructura de la petición HTTP de telemetría enviada a ThingSpeak}
-\label{cod:peticion_http_telemetria}
-\end{code}
-
-La estación conserva así un ciclo completo de funcionamiento autónomo: mide, interpreta, decide, actúa y publica. La Raspberry Pi puede consultar posteriormente esos datos y representarlos en el dashboard, pero no interviene en el cierre del bucle de control. Esta separación mejora la robustez del prototipo, ya que una caída de la Raspberry no impide que la estación siga aplicando sus reglas locales.
-
-El resultado de esta fase fue un firmware de estación más completo que el empleado únicamente para pruebas de sensores. La estación quedó preparada no solo para generar telemetría, sino para comportarse como un nodo sensor-actuador autónomo, con lógica de riego local, control del relé, cooldown y modo seguro. A partir de este punto, la siguiente fase de implementación se centra en la integración del módulo LTE y en la publicación estable de estos datos en ThingSpeak.
+De este modo, la estación conserva un ciclo completo de funcionamiento autónomo: mide, interpreta, decide, actúa cuando procede y deja preparado el estado operativo para su envío. La Raspberry Pi puede consultar posteriormente esos datos y representarlos en el dashboard, pero no interviene en el cierre del bucle de control.
 
 \section{Integración del A7670E}
 \label{sec:integracion_a7670e}
@@ -613,7 +619,7 @@ Una vez integrados los sensores y validado el módulo LTE, la siguiente fase con
 
 El envío de datos se realiza mediante una petición HTTP de actualización de canal. ThingSpeak permite escribir datos en un canal mediante una URL que incluye la clave de escritura y los campos que se desean actualizar \cite{thingspeak_write_data}. En el caso de TierraViva, la estación construye esa URL a partir de las variables medidas por los sensores y de varios campos internos de estado.
 
-La asociación entre variables y campos no se deja implícita en el código, sino que se mantiene fija para facilitar la lectura posterior desde la plataforma y desde la Raspberry Pi. La Tabla~\ref{cuadro:mapeo_thingspeak_firmware} recoge el mapeo utilizado por el firmware de estación.
+La asociación entre variables y campos no se deja implícita en el código, sino que se mantiene fija para facilitar la lectura posterior desde ThingSpeak y desde la Raspberry Pi. La Tabla~\ref{cuadro:mapeo_thingspeak_firmware} recoge el mapeo utilizado por el firmware de estación.
 
 \begin{table}[H]
 \begin{center}
@@ -632,11 +638,11 @@ La asociación entre variables y campos no se deja implícita en el código, sin
 \hline
 \texttt{field5} & \texttt{pressureHpa} & Presión atmosférica medida por el BME280. \\
 \hline
-\texttt{field6} & \texttt{relayActive} & Estado del relé de actuación. \\
+\texttt{field6} & \texttt{relayActive} & Estado del relé de actuación: \texttt{0} apagado, \texttt{1} activo. \\
 \hline
-\texttt{field7} & \texttt{safeMode} & Estado del modo seguro local. \\
+\texttt{field7} & \texttt{systemEventCode} & Evento principal del sistema: reposo, modo seguro, riego, error o cooldown. \\
 \hline
-\texttt{field8} & \texttt{statusCode} & Código de estado o error de la estación. \\
+\texttt{field8} & \texttt{debugCode} & Código auxiliar de diagnóstico. \\
 \hline
 \end{tabular}
 \caption{Mapeo de variables del firmware a campos de ThingSpeak}
@@ -644,113 +650,119 @@ La asociación entre variables y campos no se deja implícita en el código, sin
 \end{center}
 \end{table}
 
-Los cinco primeros campos corresponden a variables físicas medidas por los sensores. Los tres últimos no son medidas ambientales, sino información operativa. Esta separación permite que una entrada de ThingSpeak represente no solo el estado del entorno, sino también el estado de la estación en el momento del envío. Por ejemplo, el campo \texttt{field6} permite saber si el relé estaba activo, \texttt{field7} indica si la estación se encontraba en modo seguro y \texttt{field8} resume el estado del firmware mediante un código numérico.
+Los cinco primeros campos corresponden a variables físicas medidas por los sensores. Los tres últimos no son medidas ambientales, sino información operativa. Esta separación permite que una entrada de ThingSpeak represente no solo el estado del entorno, sino también el estado de la estación en el momento del envío.
 
-La construcción de la petición se realiza en el firmware mediante una cadena de texto. En ella se incorpora la clave de escritura del canal y los ocho campos definidos. El Código~\ref{cod:construccion_url_thingspeak} muestra de forma simplificada esta construcción. La clave real de escritura no debe aparecer en la memoria ni en el repositorio, por lo que se representa mediante una constante.
+El campo \texttt{field6} permite saber si el relé estaba activo, \texttt{field7} representa el evento principal del sistema y \texttt{field8} resume el resultado o diagnóstico del ciclo. Esta organización coincide con la normalización realizada posteriormente por la Raspberry Pi y con la interpretación mostrada en el dashboard.
+
+La construcción de la petición se realiza en el firmware mediante una cadena de texto. En ella se incorpora la clave de escritura del canal y los ocho campos definidos. La clave real de escritura no aparece en la memoria ni en el repositorio por motivos de seguridad, por lo que se representa mediante una constante. El Código~\ref{cod:construccion_url_thingspeak} muestra el fragmento correspondiente.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
-snprintf(url, sizeof(url),
+snprintf(
+  tsUrl,
+  sizeof(tsUrl),
   "http://api.thingspeak.com/update?api_key=%s"
   "&field1=%d"
-  "&field2=%.2f"
-  "&field3=%.2f"
+  "&field2=%s"
+  "&field3=%s"
   "&field4=%d"
   "&field5=%d"
   "&field6=%d"
   "&field7=%d"
   "&field8=%d",
-  THINGSPEAK_WRITE_KEY,
+  THINGSPEAK_API_KEY,
   soilPercent,
-  temperatureC,
-  humidityPct,
+  tsTemp,
+  tsHum,
   luxValue,
   pressureHpa,
   relayActive ? 1 : 0,
-  safeMode ? 1 : 0,
-  statusCode);
+  systemEventCode,
+  debugCode
+);
 \end{lstlisting}
 \caption[Construcción de la URL de actualización de ThingSpeak]{Construcción de la URL de actualización de ThingSpeak}
 \label{cod:construccion_url_thingspeak}
 \end{code}
 
-El formato elegido mantiene la petición simple y compatible con el servicio HTTP del A7670E. La estación no necesita generar un cuerpo JSON ni establecer una sesión persistente: basta con construir una URL de actualización y solicitarla mediante una petición HTTP GET. Esta decisión reduce la complejidad del firmware y encaja con las limitaciones de memoria y procesamiento del Arduino UNO.
+El formato elegido mantiene la petición simple y compatible con el servicio HTTP del A7670E. La estación no necesita generar un cuerpo JSON ni establecer una sesión persistente: basta con construir una URL de actualización y solicitarla mediante una petición HTTP GET. Esta decisión reduce la complejidad del firmware.
 
-El envío propiamente dicho se delega en la función de comunicación HTTP implementada sobre el A7670E. Desde el punto de vista del firmware principal, el flujo consiste en preparar la URL, comprobar que el módem se encuentra listo, realizar la petición y analizar el resultado. El Código~\ref{cod:envio_thingspeak} muestra una versión simplificada de este proceso.
+El envío propiamente dicho se implementa mediante la función \texttt{sendThingSpeak()}. Esta función prepara la URL, reinicia la sesión HTTP del módem, configura el parámetro \texttt{URL}, ejecuta la acción HTTP y comprueba si la respuesta contiene una acción correcta con código HTTP 200.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
-bool sendTelemetryToThingSpeak() {
-  char url[350];
-  String body;
+bool sendThingSpeak() {
+  dtostrf(temperatureC, 0, 1, tsTemp);
+  dtostrf(humidityPct, 0, 1, tsHum);
 
-  buildThingSpeakUrl(url, sizeof(url));
+  snprintf(
+    tsUrl,
+    sizeof(tsUrl),
+    "http://api.thingspeak.com/update?api_key=%s"
+    "&field1=%d&field2=%s&field3=%s"
+    "&field4=%d&field5=%d"
+    "&field6=%d&field7=%d&field8=%d",
+    THINGSPEAK_API_KEY,
+    soilPercent,
+    tsTemp,
+    tsHum,
+    luxValue,
+    pressureHpa,
+    relayActive ? 1 : 0,
+    systemEventCode,
+    debugCode
+  );
 
-  if (!modemReady) {
-    statusCode = 502;
+  clearModemBuffer();
+  modem.println(F("AT+HTTPTERM"));
+  delay(100);
+
+  if (!sendCommandOK("AT+HTTPINIT", 2500)) {
+    Serial.println(F("HTTPINIT fallo"));
     return false;
   }
 
-  bool ok = httpGETUrl(url, body);
+  clearModemBuffer();
+  modem.print(F("AT+HTTPPARA=\"URL\",\""));
+  modem.print(tsUrl);
+  modem.println(F("\""));
 
-  if (!ok) {
-    statusCode = 503;
+  readReply(httpResp, sizeof(httpResp), 4000);
+
+  if (strstr(httpResp, "OK") == nullptr) {
+    Serial.println(F("HTTPPARA fallo"));
+    sendCommandAny("AT+HTTPTERM", 1500);
     return false;
   }
 
-  statusCode = 201;
-  return true;
+  clearModemBuffer();
+  modem.println(F("AT+HTTPACTION=0"));
+  readReply(httpResp, sizeof(httpResp), 12000);
+
+  bool httpOk = (strstr(httpResp, "+HTTPACTION: 0,200") != nullptr);
+
+  sendCommandAny("AT+HTTPTERM", 1500);
+  return httpOk;
 }
 \end{lstlisting}
 \caption[Envío de telemetría a ThingSpeak]{Envío de telemetría a ThingSpeak desde la estación}
 \label{cod:envio_thingspeak}
 \end{code}
 
-La gestión de respuesta es importante porque el hecho de enviar una petición al módem no garantiza por sí solo que ThingSpeak haya registrado una nueva entrada. La función HTTP debe comprobar que la acción devuelve una respuesta correcta y que el cuerpo recibido es coherente. En ThingSpeak, una escritura correcta suele devolver el identificador de la entrada creada en el canal. En cambio, una respuesta vacía, un código HTTP incorrecto o un fallo de lectura deben tratarse como envío fallido.
+La gestión de respuesta es importante porque el hecho de enviar una petición al módem no garantiza por sí solo que ThingSpeak haya registrado una nueva entrada. Por ello, el firmware comprueba la respuesta del comando \texttt{AT+HTTPACTION}. Si la respuesta incluye un código HTTP 200, la publicación se considera correcta; en caso contrario, la estación informa del fallo por monitor serie y continúa con el siguiente ciclo.
 
-En el firmware, este resultado se utiliza para actualizar el estado interno de la estación. Si el envío se realiza correctamente, se considera que la telemetría ha quedado publicada. Si falla, la estación no debe bloquearse indefinidamente ni asumir que el dato está disponible en la nube. En su lugar, marca el fallo mediante un código de estado y continúa con el ciclo de funcionamiento.
-
-La Tabla~\ref{cuadro:errores_envio_thingspeak} resume los principales errores considerados durante el envío.
-
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.30\textwidth}|p{0.32\textwidth}|p{0.28\textwidth}|}
-\hline
-\textbf{Situación} & \textbf{Efecto} & \textbf{Tratamiento} \\
-\hline
-Módem no preparado & No se puede iniciar la petición HTTP. & Marcar error y reintentar más adelante. \\
-\hline
-Sin registro LTE & No existe conectividad móvil válida. & Evitar el envío y mantener operación local. \\
-\hline
-Error al abrir HTTP & El servicio HTTP del módem no queda inicializado. & Cerrar sesión HTTP y reintentar en el siguiente ciclo. \\
-\hline
-Respuesta no válida & No se confirma la escritura en ThingSpeak. & Registrar fallo de envío. \\
-\hline
-Tiempo de espera agotado & La estación no recibe respuesta dentro del intervalo previsto. & Cancelar operación y continuar ciclo. \\
-\hline
-\end{tabular}
-\caption{Errores considerados durante el envío de telemetría a ThingSpeak}
-\label{cuadro:errores_envio_thingspeak}
-\end{center}
-\end{table}
-
-Los reintentos se plantean de forma controlada. No resulta conveniente realizar bucles indefinidos de envío, ya que podrían bloquear el firmware, aumentar el consumo y dificultar la actuación local. Por ello, si una publicación falla, la estación puede marcar el error y volver a intentarlo en el siguiente ciclo de telemetría. Este enfoque mantiene la estación operativa incluso cuando la conectividad móvil o la plataforma cloud no están disponibles temporalmente.
+Los reintentos se plantean de forma controlada. No resulta conveniente realizar bucles indefinidos de envío, ya que podrían bloquear el firmware, aumentar el consumo y dificultar la actuación local. Por ello, si una publicación falla, la estación vuelve a intentarlo en el siguiente ciclo de telemetría. Este enfoque mantiene la estación operativa incluso cuando la conectividad móvil o la plataforma cloud no están disponibles temporalmente.
 
 También se evita que un fallo de publicación afecte directamente a la seguridad del riego. La estación toma la decisión de actuación de forma local, por lo que una pérdida temporal de conectividad con ThingSpeak no impide aplicar las reglas básicas de riego y seguridad. La consecuencia principal de un fallo de envío es la pérdida de una muestra en la nube, no la pérdida completa del control de la bomba.
 
-El tratamiento de errores se apoya en el campo \texttt{statusCode}. Este campo permite que la estación informe posteriormente de situaciones relevantes, como fallo de comunicación, módem no preparado, cooldown activo, error de sensores o publicación correcta. Aunque el sistema no pretende implementar un protocolo complejo de diagnóstico, estos códigos ayudan a interpretar el comportamiento observado en ThingSpeak y en el dashboard.
-
-Desde el punto de vista de privacidad y seguridad práctica, la clave de escritura del canal debe tratarse como información sensible. En el código del repositorio no debería aparecer la clave real utilizada durante las pruebas. Para la memoria y los anexos, las claves deben ocultarse o sustituirse por valores genéricos. Este criterio evita que un tercero pueda escribir datos en los canales del proyecto.
-
-El resultado de esta fase fue la publicación de una muestra completa de estación en ThingSpeak. Cada envío incluye las variables de suelo y ambiente, junto con el estado del relé, el modo seguro y el código de estado. Con ello, la estación queda conectada a la plataforma cloud y puede ser supervisada de forma remota sin depender de una conexión local con la Raspberry Pi.
+El resultado de esta fase fue la publicación de una muestra completa de estación en ThingSpeak. Cada envío incluye las variables de suelo y ambiente, junto con el estado del relé, el evento principal del sistema y el código auxiliar de diagnóstico. Con ello, la estación queda conectada a la plataforma cloud y puede ser supervisada de forma remota sin depender de una conexión local con la Raspberry Pi.
 
 \section{Control de relé, LED y bomba de agua}
 \label{sec:control_rele_led_bomba}
 
 La actuación física sobre el riego se realiza mediante un módulo relé controlado desde el Arduino UNO. La estación no envía únicamente datos a la nube, sino que también puede activar localmente el sistema de riego cuando se cumplen las condiciones definidas en el firmware. Para ello, el Arduino gobierna una salida digital conectada al módulo relé, y este conmuta la alimentación de la bomba de agua de 12 V.
 
-Durante las primeras pruebas de actuación se puede utilizar un LED o una carga de baja potencia como indicador visual del estado del relé. Esta prueba permite comprobar la lógica de activación sin accionar todavía la bomba real. Una vez validado el comportamiento del firmware, la carga de prueba se sustituye por la bomba de agua, manteniendo el mismo principio de control: el Arduino no alimenta directamente la carga de potencia, sino que controla el relé que abre o cierra el circuito de 12 V.
+Durante las primeras pruebas de actuación se utilizó un LED como indicador visual del estado del relé. Esta prueba permite comprobar la lógica de activación sin accionar todavía la bomba real. Una vez validado el comportamiento del firmware, se mantuvo el LED como indicador visual de apoyo y se incorporó la bomba de agua como carga real de actuación.
 
 El pin utilizado para el control del relé es el pin digital \texttt{D7} del Arduino UNO. Este pin se configura como salida en la inicialización del firmware y se deja en estado desactivado desde el arranque. Así se evita que un reinicio de la placa active accidentalmente la bomba. El estado seguro por defecto de la estación es, por tanto, relé desactivado y bomba apagada.
 
@@ -785,14 +797,13 @@ La conexión de potencia se realiza utilizando los contactos \texttt{COM} y \tex
 
 Cuando el firmware activa el relé, el contacto \texttt{COM} queda unido al contacto \texttt{NO}, cerrando el circuito de alimentación de la bomba. La bomba recibe entonces 12 V y comienza el riego. Al finalizar el tiempo de actuación, el firmware desactiva el pin de control, el relé vuelve a abrir el circuito y la bomba queda apagada.
 
-Un aspecto práctico que debe comprobarse durante las pruebas es si el módulo relé es activo alto o activo bajo. Algunos módulos se activan cuando la entrada \texttt{IN} recibe un nivel alto, mientras que otros lo hacen con nivel bajo. Por ello, en el firmware se definen constantes específicas para representar el estado de activación y desactivación del relé, evitando escribir directamente \texttt{HIGH} o \texttt{LOW} en toda la lógica del programa.
-
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
 const int RELAY_PIN = 7;
 
-const byte RELAY_ON = HIGH;
-const byte RELAY_OFF = LOW;
+// Rele tipico activo en LOW
+const byte RELAY_ON = LOW;
+const byte RELAY_OFF = HIGH;
 \end{lstlisting}
 \caption[Definición del pin y estados del relé]{Definición del pin y estados del relé}
 \label{cod:definicion_rele}
@@ -804,96 +815,62 @@ La inicialización del relé se realiza al comienzo del firmware. Primero se con
 \begin{lstlisting}[language=C++]
 pinMode(RELAY_PIN, OUTPUT);
 digitalWrite(RELAY_PIN, RELAY_OFF);
-relayActive = false;
 \end{lstlisting}
 \caption[Inicialización segura del relé]{Inicialización segura del relé durante el arranque}
 \label{cod:inicializacion_segura_rele}
 \end{code}
 
-El control de la bomba no se implementa como una activación indefinida, sino como una actuación temporizada. Cuando el firmware decide regar, activa el relé, registra el instante de inicio y guarda la duración prevista. A partir de ese momento, el propio firmware debe encargarse de apagar la bomba al finalizar el intervalo configurado.
+El control de la bomba no se implementa como una activación indefinida, sino como una actuación temporizada. Cuando el firmware decide regar, activa el relé, mantiene la bomba encendida durante el intervalo configurado y apaga explícitamente el relé al finalizar. En la versión actual, esta actuación se concentra en la función \texttt{irrigateForSeconds()}.
 
 \begin{code}[H]
 \begin{lstlisting}[language=C++]
-void startRelay(int durationSec) {
-  unsigned long now = millis();
-
-  digitalWrite(RELAY_PIN, RELAY_ON);
+void irrigateForSeconds(unsigned long seconds) {
   relayActive = true;
-  relayStartMs = now;
-  relayDurationMs = (unsigned long)durationSec * 1000UL;
+  digitalWrite(RELAY_PIN, RELAY_ON);
 
-  statusCode = 200;
-  forceTelemetry = true;
-}
-\end{lstlisting}
-\caption[Activación temporizada del relé]{Activación temporizada del relé de riego}
-\label{cod:start_relay}
-\end{code}
+  systemEventCode = 210; // riego encendido
+  debugCode = 200;
 
-La desactivación del relé se centraliza en una función específica. Esto evita que existan varios puntos del programa apagando la bomba de forma distinta. Siempre que se finaliza una actuación, ya sea por duración completada, por timeout de seguridad o por error, se utiliza la misma lógica de apagado.
+  delay(seconds * 1000UL);
 
-\begin{code}[H]
-\begin{lstlisting}[language=C++]
-void stopRelay(const char *reason, bool emergencyTimeout) {
   digitalWrite(RELAY_PIN, RELAY_OFF);
   relayActive = false;
   lastIrrigationEndMs = millis();
 
-  if (emergencyTimeout) {
-    statusCode = 408;
-  }
-
-  forceTelemetry = true;
+  systemEventCode = 211; // riego finalizado
+  debugCode = 200;
 }
 \end{lstlisting}
-\caption[Desactivación segura del relé]{Desactivación segura del relé}
-\label{cod:stop_relay}
+\caption[Actuación temporizada sobre relé y bomba]{Actuación temporizada sobre relé y bomba}
+\label{cod:actuacion_temporizada_rele_bomba}
 \end{code}
 
-La función de servicio del relé comprueba periódicamente si existe una actuación en curso. Si el tiempo transcurrido supera la duración prevista, se apaga la bomba. Además, se incorpora un tiempo máximo de seguridad para evitar que un fallo de lógica deje el relé activado durante más tiempo del permitido.
+Esta lógica tiene una ventaja importante para el alcance actual del prototipo: la activación y el apagado quedan encapsulados en una única función. La bomba no queda a la espera de una orden externa de parada ni depende de la Raspberry Pi. El propio firmware activa el relé, espera el tiempo configurado y lo apaga de forma explícita.
 
-\begin{code}[H]
-\begin{lstlisting}[language=C++]
-void serviceRelayState() {
-  if (!relayActive) return;
+En esta versión, durante los segundos de riego el Arduino permanece dentro de la función de actuación. Esta decisión simplifica el firmware y es suficiente para una prueba controlada con tiempos cortos de riego. En una versión posterior, especialmente si se quisiera permitir actuación concurrente o supervisión más avanzada durante el riego, podría sustituirse por una gestión no bloqueante basada en \texttt{millis()}.
 
-  unsigned long elapsed = millis() - relayStartMs;
-
-  if (elapsed >= relayDurationMs) {
-    stopRelay("duration_completed", false);
-  } else if (elapsed >= FAILSAFE_TIMEOUT_MS) {
-    stopRelay("failsafe_timeout", true);
-  }
-}
-\end{lstlisting}
-\caption[Supervisión del estado del relé]{Supervisión del estado del relé durante el riego}
-\label{cod:service_relay_state}
-\end{code}
-
-Esta lógica permite separar la decisión de riego de la seguridad de actuación. La estación puede decidir activar la bomba cuando la humedad del suelo se encuentra por debajo del umbral definido, pero la duración real de esa activación queda limitada por el firmware. La bomba no depende de una orden externa de apagado ni de la Raspberry Pi; el apagado se realiza localmente en la propia estación.
-
-Además del tiempo máximo de actuación, se aplica un periodo mínimo entre riegos o \textit{cooldown}. Este intervalo evita que la bomba se active repetidamente si las lecturas de humedad oscilan alrededor del umbral. Si el firmware detecta que no ha transcurrido suficiente tiempo desde el último riego, no inicia una nueva actuación y actualiza el código de estado para dejar constancia de la condición.
+Además del tiempo de riego, se aplica un periodo mínimo entre activaciones o \textit{cooldown}. Este intervalo evita que la bomba se active repetidamente si las lecturas de humedad oscilan alrededor del umbral. Si el firmware detecta que no ha transcurrido suficiente tiempo desde el último riego, no inicia una nueva actuación y actualiza los códigos de estado correspondientes.
 
 \begin{table}[H]
 \begin{center}
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.32\textwidth}|p{0.30\textwidth}|}
 \hline
-\textbf{Condición} & \textbf{Comportamiento del firmware} & \textbf{Estado resultante} \\
+\textbf{Condición} & \textbf{Comportamiento del firmware} & \textbf{Estado publicado} \\
 \hline
-Arranque de la estación & Configurar \texttt{D7} como salida y escribir \texttt{RELAY\_OFF}. & Bomba apagada. \\
+Arranque de la estación & Configurar \texttt{D7} como salida y escribir \texttt{RELAY\_OFF}. & Relé apagado. \\
 \hline
-Suelo seco y condiciones válidas & Activar relé durante el tiempo configurado. & Bomba activa temporalmente. \\
+Suelo seco y condiciones válidas & Activar relé durante \texttt{IRRIGATION\_SECONDS}. & \texttt{systemEventCode = 210} durante el riego. \\
 \hline
-Duración completada & Desactivar relé mediante \texttt{stopRelay()}. & Bomba apagada. \\
+Duración completada & Apagar relé y actualizar marca de último riego. & \texttt{systemEventCode = 211}. \\
 \hline
-Cooldown activo & No iniciar nuevo riego. & Bomba apagada. \\
+Cooldown activo & No iniciar nuevo riego. & \texttt{systemEventCode = 429}, \texttt{debugCode = 429}. \\
 \hline
-Duración superior al máximo & Limitar o rechazar la actuación según configuración. & Actuación controlada o no ejecutada. \\
+Lectura de sensores no válida & No activar relé. & \texttt{systemEventCode = 400}, \texttt{debugCode = 400}. \\
 \hline
-Timeout de seguridad & Forzar apagado del relé. & Bomba apagada y estado de error. \\
+Modo seguro activo & Aplicar umbral y confirmación más conservadores. & \texttt{systemEventCode = 206}, \texttt{debugCode = 206} si no se riega. \\
 \hline
-Error interno o lectura no válida & No activar relé o forzar apagado si estaba activo. & Bomba apagada. \\
+Ciclo normal sin riego & Mantener bomba apagada. & \texttt{systemEventCode = 100}, \texttt{debugCode = 204}. \\
 \hline
 \end{tabular}
 \caption{Comportamiento del bloque de actuación ante distintas condiciones}
@@ -901,15 +878,13 @@ Error interno o lectura no válida & No activar relé o forzar apagado si estaba
 \end{center}
 \end{table}
 
-El LED de prueba resulta útil durante la validación porque permite observar visualmente el estado de activación sin conectar todavía una carga hidráulica. En esta fase, el LED puede conectarse como carga de prueba o utilizarse el propio indicador del módulo relé si el módulo lo incorpora. Una vez comprobado que la lógica de activación y apagado funciona correctamente, la prueba debe repetirse con la bomba real durante tiempos cortos y en condiciones controladas.
-
 Eléctricamente, la bomba de agua se comporta como una carga de potencia y puede introducir perturbaciones al conectarse o desconectarse. Por ello, el bloque de actuación no debe alimentarse desde el Arduino, sino desde la línea de 12 V prevista para la carga. El Arduino únicamente entrega la señal de control al módulo relé. Además, todos los bloques deben compartir masa común para que la señal de control sea interpretada correctamente.
 
 Si la bomba utilizada es de corriente continua, es recomendable incorporar protección frente a transitorios, especialmente al tratarse de una carga inductiva. Esta protección puede realizarse mediante un diodo de rueda libre o \textit{flyback} colocado en paralelo con la bomba, con la polaridad adecuada, o mediante un módulo de actuación que ya incorpore protección equivalente.
 
-La actuación ante emergencia o condición no verificable sigue el mismo principio que el modo seguro general del sistema: apagar la bomba. Una emergencia puede corresponder a un timeout de actuación, una lectura inválida, una condición interna incoherente o un fallo detectado durante el ciclo de control. En todos estos casos, el firmware debe desactivar el relé y publicar, cuando la comunicación esté disponible, un código de estado que permita identificar el motivo de la parada.
+La actuación ante una condición no verificable sigue el mismo principio que el modo seguro general del sistema: mantener la bomba apagada. Una lectura inválida, una condición interna incoherente o un periodo de \textit{cooldown} activo impiden iniciar una nueva actuación. Cuando la comunicación está disponible, la estación publica un código de evento y un código de diagnóstico que permiten interpretar el motivo de la decisión.
 
-El resultado de esta fase es un bloque de actuación local, temporizado y verificable. La estación no se limita a encender o apagar una salida digital, sino que controla el relé con criterios de seguridad: arranque apagado, activación limitada, apagado centralizado, cooldown entre riegos, timeout de seguridad y publicación de estado.
+El resultado de esta fase es un bloque de actuación local, temporizado y verificable. La estación no se limita a encender o apagar una salida digital, sino que controla el relé con criterios de seguridad: arranque apagado, activación limitada en el tiempo, apagado explícito al finalizar el riego, cooldown entre activaciones y publicación del estado operativo.
 
 \section{Alimentación de estación}
 \label{sec:alimentacion_estacion}

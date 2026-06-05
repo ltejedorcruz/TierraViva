@@ -1,0 +1,419 @@
+\chapter{Manual de usuario de TierraViva}
+\label{anexo:manual_usuario}
+
+Este anexo describe el uso del sistema TierraViva desde el punto de vista del usuario final. A diferencia del manual de instalación, centrado en el despliegue técnico, este manual explica cómo acceder al dashboard, cómo interpretar las lecturas, cómo comprobar el estado de las estaciones y cómo actuar ante situaciones habituales de funcionamiento.
+
+\section{Alcance del manual}
+
+Este manual cubre las operaciones de uso habituales:
+
+\begin{itemize}
+    \item acceso al dashboard web;
+    \item selección de estación;
+    \item interpretación de lecturas actuales;
+    \item interpretación del estado de humedad del suelo;
+    \item revisión del estado de conexión;
+    \item consulta de gráficas;
+    \item revisión del resumen histórico;
+    \item consulta de la tabla de últimas lecturas;
+    \item interpretación de eventos y códigos de diagnóstico;
+    \item comprobaciones básicas ante fallos.
+\end{itemize}
+
+No se incluyen en este manual las tareas de montaje eléctrico, instalación en Raspberry Pi o configuración de ThingSpeak, ya que dichas tareas se documentan en el Anexo \ref{anexo:manual_instalacion_sistema}. Tampoco se documentan en detalle los endpoints de la API, que se recogen en el Anexo \ref{anexo:manual_api}.
+
+\section{Perfil de usuario}
+
+El dashboard de TierraViva puede ser utilizado por dos tipos principales de usuario:
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.58\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Perfil} & \textbf{Uso principal del sistema} \\
+\hline
+Usuario no técnico & Consultar el estado de la parcela, comprobar si el suelo está seco o húmedo y revisar si la estación está actualizando datos. \\
+\hline
+Usuario técnico & Verificar lecturas, revisar estado de conexión, comprobar eventos de sistema, analizar histórico y detectar posibles problemas de sensores, comunicación o backend. \\
+\hline
+\end{tabular}
+\caption{Perfiles de usuario previstos para TierraViva.}
+\label{tab:perfiles_usuario_tierraviva}
+\end{table}
+
+\section{Acceso al dashboard}
+
+Una vez arrancado el sistema en la Raspberry Pi, el usuario accede al dashboard desde un navegador web conectado a la misma red local.
+
+\begin{verbatim}
+http://<IP_RASPBERRY>:8000/
+\end{verbatim}
+
+Por ejemplo:
+
+\begin{verbatim}
+http://192.168.1.50:8000/
+\end{verbatim}
+
+La dirección exacta depende de la IP asignada a la Raspberry Pi en la red local. Si se accede desde la propia Raspberry Pi, también puede utilizarse:
+
+\begin{verbatim}
+http://127.0.0.1:8000/
+\end{verbatim}
+
+\section{Vista general del dashboard}
+
+El dashboard está organizado en bloques visuales para que el estado del sistema pueda interpretarse rápidamente. La Tabla \ref{tab:zonas_dashboard} resume las zonas principales de la interfaz.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.55\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Zona del dashboard} & \textbf{Información mostrada} \\
+\hline
+Cabecera & Nombre del sistema, estado de conexión y selector de estación. \\
+\hline
+Tarjetas de lectura actual & Humedad del suelo, temperatura, humedad ambiental, luminosidad y presión. \\
+\hline
+Estado de última lectura & Frescura del dato, hora de actualización y estado general. \\
+\hline
+Estado/evento & Código o evento de funcionamiento recibido desde la estación. \\
+\hline
+Debug/código & Código auxiliar de diagnóstico. \\
+\hline
+Gráficas & Evolución reciente de las variables almacenadas. \\
+\hline
+Resumen histórico & Estadísticas de las últimas 24 horas. \\
+\hline
+Tabla de últimas lecturas & Registros recientes almacenados en SQLite. \\
+\hline
+\end{tabular}
+\caption{Zonas principales del dashboard TierraViva.}
+\label{tab:zonas_dashboard}
+\end{table}
+
+\section{Selección de estación}
+
+Si el sistema tiene más de una estación configurada, el dashboard permite seleccionar la estación activa mediante un desplegable. En la configuración actual se contemplan las estaciones \texttt{A} y \texttt{B}.
+
+Al seleccionar una estación, el dashboard actualiza:
+
+\begin{itemize}
+    \item lectura actual;
+    \item estado de humedad;
+    \item gráficas;
+    \item resumen histórico;
+    \item tabla de últimas lecturas;
+    \item códigos de evento y diagnóstico.
+\end{itemize}
+
+Esta separación evita mezclar datos de distintas estaciones y permite comparar zonas diferentes de una parcela o distintos entornos de prueba.
+
+\section{Interpretación de lecturas actuales}
+
+Las tarjetas principales muestran la última lectura disponible para la estación seleccionada.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.26\textwidth}|p{0.22\textwidth}|p{0.38\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Variable} & \textbf{Unidad} & \textbf{Interpretación} \\
+\hline
+Humedad del suelo & \% & Variable principal para evaluar si el sustrato está seco, normal o húmedo. \\
+\hline
+Temperatura & $^\circ$C & Temperatura ambiente medida por la estación. \\
+\hline
+Humedad ambiental & \% & Humedad relativa del aire. \\
+\hline
+Luminosidad & lux & Intensidad luminosa recibida por el sensor BH1750. \\
+\hline
+Presión & hPa & Presión atmosférica medida por el sensor BME280. \\
+\hline
+\end{tabular}
+\caption{Lecturas actuales mostradas por el dashboard.}
+\label{tab:lecturas_actuales_dashboard}
+\end{table}
+
+Si una variable aparece como ``---'', significa que no existe dato disponible para esa lectura, que el sensor no ha enviado valor o que todavía no se ha almacenado ninguna lectura válida.
+
+\section{Estado de humedad del suelo}
+
+El dashboard clasifica la humedad del suelo en tres estados: seco, normal y húmedo. Esta clasificación se calcula utilizando los umbrales configurados en la API.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Estado} & \textbf{Condición} & \textbf{Interpretación} \\
+\hline
+Seco & Humedad inferior al umbral bajo & El sustrato puede requerir riego según la lógica configurada en la estación. \\
+\hline
+Normal & Humedad entre umbral bajo y alto & El suelo se encuentra en una zona intermedia. \\
+\hline
+Húmedo & Humedad superior al umbral alto & El suelo dispone de humedad suficiente. \\
+\hline
+Sin dato & No hay lectura válida & No se debe interpretar el estado hídrico hasta recibir una lectura correcta. \\
+\hline
+\end{tabular}
+\caption{Interpretación del estado de humedad del suelo.}
+\label{tab:estado_humedad_suelo}
+\end{table}
+
+En la configuración por defecto, los umbrales utilizados por el dashboard son 35\% para el límite bajo y 45\% para el límite alto. Estos valores pueden modificarse en el fichero de configuración \texttt{.env} mediante las variables \texttt{SOIL\_LOW\_THRESHOLD} y \texttt{SOIL\_HIGH\_THRESHOLD}.
+
+\section{Estado de conexión y frescura de datos}
+
+El dashboard no solo muestra la última lectura, sino también su antigüedad. Esto permite saber si la estación está actualizando datos de forma reciente o si se ha perdido continuidad en la telemetría.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.32\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Estado} & \textbf{Condición} & \textbf{Interpretación} \\
+\hline
+En vivo & Lectura reciente & La estación está enviando datos y la Raspberry Pi los está actualizando correctamente. \\
+\hline
+Datos recientes & Lectura algo antigua, pero dentro del margen permitido & El sistema tiene datos válidos, aunque conviene vigilar si continúa actualizando. \\
+\hline
+Sin actualización & Lectura antigua & Puede existir un problema de comunicación, publicación, ingesta o alimentación. \\
+\hline
+Sin datos & No existe ninguna lectura almacenada & La estación no ha publicado todavía o la Raspberry Pi no ha podido recuperar datos. \\
+\hline
+\end{tabular}
+\caption{Estados de conexión y frescura de datos.}
+\label{tab:estado_conexion_dashboard}
+\end{table}
+
+El tiempo utilizado para clasificar una lectura como reciente o antigua se controla mediante la variable \texttt{DATA\_STALE\_SECONDS}. En la configuración por defecto se utiliza un valor de 90 segundos.
+
+\section{Estado del relé}
+
+El dashboard muestra el estado del relé recibido desde la estación. Este valor procede de la telemetría publicada en ThingSpeak y permite saber si el sistema de actuación está apagado o activo en el momento de la lectura.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.20\textwidth}|p{0.28\textwidth}|p{0.38\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Valor} & \textbf{Estado mostrado} & \textbf{Interpretación} \\
+\hline
+0 & OFF & El relé está apagado y la bomba no debería estar activa. \\
+\hline
+1 & Activo & El relé está activo y el sistema de riego puede estar funcionando. \\
+\hline
+Sin dato & Sin dato & No se ha recibido información válida del relé. \\
+\hline
+\end{tabular}
+\caption{Interpretación del estado del relé.}
+\label{tab:estado_rele_dashboard}
+\end{table}
+
+El usuario debe tener en cuenta que el dashboard muestra el estado recibido en la última lectura almacenada. Si existe retraso de comunicación, el estado físico real puede haber cambiado antes de que el dashboard se actualice.
+
+\section{Eventos de sistema}
+
+El campo de evento permite interpretar el estado interno de la estación. La Tabla \ref{tab:eventos_sistema_usuario} recoge los códigos utilizados por el dashboard.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|c|p{0.28\textwidth}|p{0.42\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Evento} & \textbf{Interpretación} \\
+\hline
+100 & \texttt{idle} & Estación en reposo, sin riego activo. \\
+\hline
+206 & \texttt{safe mode} & La estación trabaja en modo seguro. \\
+\hline
+210 & \texttt{riego ON} & La estación ha activado el riego. \\
+\hline
+211 & \texttt{riego OFF} & La estación ha finalizado el riego. \\
+\hline
+400 & \texttt{error} & Existe un fallo relevante o una lectura no válida. \\
+\hline
+429 & \texttt{cooldown} & El riego está bloqueado temporalmente por periodo de seguridad. \\
+\hline
+\end{tabular}
+\caption{Eventos de sistema mostrados en el dashboard.}
+\label{tab:eventos_sistema_usuario}
+\end{table}
+
+Estos códigos ayudan a diferenciar una situación normal de reposo de un bloqueo por seguridad o de un error real del sistema.
+
+\section{Códigos de diagnóstico}
+
+El campo de diagnóstico aporta información auxiliar sobre el estado del ciclo de funcionamiento de la estación.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|c|p{0.28\textwidth}|p{0.42\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Código} & \textbf{Etiqueta} & \textbf{Interpretación} \\
+\hline
+200 & OK & Funcionamiento correcto. \\
+\hline
+204 & no riego & No se ha activado el riego en el ciclo actual. \\
+\hline
+206 & modo seguro & La estación se encuentra en modo seguro. \\
+\hline
+400 & error & Se ha detectado un error. \\
+\hline
+429 & cooldown & La estación evita un nuevo riego por seguridad temporal. \\
+\hline
+\end{tabular}
+\caption{Códigos de diagnóstico mostrados en el dashboard.}
+\label{tab:codigos_diagnostico_usuario}
+\end{table}
+
+\section{Gráficas}
+
+El dashboard incluye gráficas de evolución reciente para las variables almacenadas. Estas gráficas permiten detectar tendencias de forma rápida, por ejemplo:
+
+\begin{itemize}
+    \item descenso progresivo de humedad del suelo;
+    \item aumento de temperatura durante el día;
+    \item variación de luminosidad;
+    \item cambios de humedad ambiental;
+    \item activaciones puntuales del relé;
+    \item repetición de eventos de error o cooldown.
+\end{itemize}
+
+Las gráficas se construyen a partir de las últimas lecturas almacenadas en SQLite. Si no existen datos suficientes, la gráfica mostrará un mensaje indicando que todavía no hay información disponible.
+
+\section{Resumen histórico}
+
+El resumen histórico muestra estadísticas de las últimas 24 horas para la estación seleccionada. Incluye número de muestras, fecha inicial y final de la ventana temporal, valores medios, mínimos y máximos.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.30\textwidth}|p{0.55\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Dato histórico} & \textbf{Utilidad} \\
+\hline
+Número de muestras & Permite comprobar si la estación está enviando datos con regularidad. \\
+\hline
+Valor medio & Resume el comportamiento de una variable durante la ventana analizada. \\
+\hline
+Valor mínimo & Ayuda a detectar extremos, por ejemplo humedad mínima del suelo. \\
+\hline
+Valor máximo & Ayuda a detectar picos de temperatura, luminosidad o presión. \\
+\hline
+Primer y último registro & Permiten comprobar el intervalo real cubierto por los datos. \\
+\hline
+\end{tabular}
+\caption{Interpretación del resumen histórico.}
+\label{tab:resumen_historico_usuario}
+\end{table}
+
+\section{Tabla de últimas lecturas}
+
+La tabla de últimas lecturas muestra registros recientes almacenados en la base de datos local. Cada fila corresponde a una lectura recuperada desde ThingSpeak y guardada por la Raspberry Pi.
+
+La tabla permite revisar:
+
+\begin{itemize}
+    \item fecha y hora de cada lectura;
+    \item humedad del suelo;
+    \item temperatura;
+    \item humedad ambiental;
+    \item luminosidad;
+    \item presión atmosférica.
+\end{itemize}
+
+Esta vista es útil para verificar si los datos evolucionan de forma coherente o si aparecen valores repetidos, ausentes o fuera de rango.
+
+\section{Procedimiento de uso diario}
+
+Una vez instalado el sistema, el uso habitual puede resumirse en los siguientes pasos:
+
+\begin{enumerate}
+    \item encender la estación remota y comprobar que queda alimentada correctamente;
+    \item arrancar el sistema en Raspberry Pi mediante \texttt{./tierraviva.sh start};
+    \item abrir el dashboard desde un navegador;
+    \item seleccionar la estación que se desea consultar;
+    \item comprobar el estado de conexión;
+    \item revisar la humedad del suelo;
+    \item interpretar el estado del relé y los códigos de evento;
+    \item consultar las gráficas si se desea analizar evolución;
+    \item revisar la tabla de últimas lecturas ante cualquier valor anómalo;
+    \item detener el sistema con \texttt{Ctrl+C} o mediante el comando de parada correspondiente si se está ejecutando como proceso gestionado.
+\end{enumerate}
+
+\section{Situaciones habituales y actuación recomendada}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\scriptsize
+\begin{tabular}{|p{0.28\textwidth}|p{0.32\textwidth}|p{0.30\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Situación observada} & \textbf{Interpretación probable} & \textbf{Actuación recomendada} \\
+\hline
+El dashboard muestra ``Sin datos'' & No hay lecturas almacenadas para la estación seleccionada. & Comprobar que la estación publica en ThingSpeak y que \texttt{main.py} está ejecutándose. \\
+\hline
+El estado aparece como ``Sin actualización'' & La última lectura es demasiado antigua. & Revisar alimentación de la estación, cobertura LTE, canal ThingSpeak y logs de Raspberry Pi. \\
+\hline
+La humedad aparece como ``Seco'' & El valor está por debajo del umbral bajo. & Verificar si la estación ejecuta riego local o si se mantiene bloqueada por cooldown. \\
+\hline
+Aparece código 429 & La estación está en periodo de seguridad entre riegos. & Esperar a que finalice el cooldown y revisar si el valor de humedad sigue siendo bajo. \\
+\hline
+Aparece código 400 & Se ha detectado un error o lectura no válida. & Revisar sensores, cableado, alimentación y monitor serie de la estación. \\
+\hline
+El relé aparece activo & La última telemetría indica relé encendido. & Comprobar físicamente si la bomba está funcionando y verificar que se apaga al finalizar el tiempo programado. \\
+\hline
+Las gráficas no muestran datos & No hay histórico suficiente o la API no devuelve lecturas. & Esperar nuevas lecturas y comprobar \texttt{/api/readings}. \\
+\hline
+Los valores no cambian durante mucho tiempo & Puede no haber nuevas publicaciones o el ingestor está ignorando duplicados. & Revisar entry\_id en ThingSpeak, logs de \texttt{main.py} y estado de la estación. \\
+\hline
+\end{tabular}
+\caption{Situaciones habituales durante el uso de TierraViva.}
+\label{tab:situaciones_usuario_tierraviva}
+\end{table}
+
+\section{Buenas prácticas de uso}
+
+Para utilizar TierraViva de forma segura y fiable se recomienda:
+
+\begin{itemize}
+    \item verificar que la estación arranca con el relé apagado;
+    \item no dejar la bomba conectada durante pruebas iniciales sin supervisión;
+    \item revisar periódicamente el estado de conexión del dashboard;
+    \item comprobar que la humedad del suelo cambia de forma coherente;
+    \item no modificar umbrales sin registrar el cambio;
+    \item no compartir capturas que contengan claves API;
+    \item mantener la electrónica protegida frente a agua y salpicaduras;
+    \item revisar logs si aparecen estados de error o datos obsoletos;
+    \item contrastar el dashboard con una observación física durante pruebas de riego.
+\end{itemize}
+
+\section{Conclusión}
+
+El dashboard de TierraViva permite supervisar de forma sencilla el estado de una o varias estaciones de riego inteligente. La interfaz resume las variables principales, clasifica el estado de humedad, muestra la frescura de los datos, representa gráficas recientes y permite revisar histórico almacenado en la Raspberry Pi.
+
+El usuario debe interpretar el sistema como una herramienta de monitorización y apoyo a la validación del prototipo. La actuación sobre el riego se realiza en la estación Arduino mediante lógica local, mientras que el dashboard permite comprobar si las lecturas, eventos y estados publicados son coherentes con el funcionamiento esperado.
