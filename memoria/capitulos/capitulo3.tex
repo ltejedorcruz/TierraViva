@@ -56,7 +56,7 @@ RF-08 & Decisión local de riego & Cada estación debe evaluar localmente si las
 \hline
 RF-09 & Actuación local sobre el riego & La estación debe accionar físicamente el sistema de riego mediante relé y bomba de agua durante un tiempo limitado por firmware. & Prueba controlada con relé y bomba/carga de prueba. \\
 \hline
-RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé, el estado operativo del sistema y un código auxiliar de depuración o estado que permita conocer si se ha producido una actuación, una situación de reposo o una incidencia. & Verificación de relay\_state, system\_event y debug\_code en ThingSpeak. \\
+RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé, el evento de sistema y un código auxiliar de diagnóstico que permitan conocer si se ha producido una actuación, una situación de reposo, un error, un estado seguro o un bloqueo por cooldown. & Verificación de \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code} en ThingSpeak. \\
 \hline
 RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, cooldown activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
 \hline
@@ -73,7 +73,7 @@ Los requisitos RF-04, RF-05 y RF-06 cubren el flujo de datos desde la estación 
 
 El requisito RF-07 se centra en la interacción con el usuario. Aunque el sistema pueda funcionar internamente, su utilidad queda limitada si no existe una forma clara de consultar el estado de las estaciones. Por ello, el dashboard debe permitir revisar las medidas recientes, detectar si los datos llegan correctamente y comprobar el estado general del sistema sin recurrir a mensajes de consola o consultas manuales a la base de datos.
 
-Los requisitos RF-08, RF-09 y RF-10 introducen la parte de control. En la arquitectura final, la decisión de riego se ejecuta localmente en cada estación mediante reglas verificables, especialmente durante esta primera versión del prototipo. La estación no depende de una decisión externa para actuar: evalúa sus sensores, comprueba las condiciones de seguridad, activa la bomba si corresponde y publica después su estado. Esta publicación incluye las medidas ambientales, el estado del relé, el estado operativo del sistema y un código auxiliar de depuración o estado. Con esa información, la Raspberry Pi puede supervisar lo ocurrido y conservar un histórico sin convertirse en un punto único de decisión para el riego.
+Los requisitos RF-08, RF-09 y RF-10 introducen la parte de control. En la arquitectura final, la decisión de riego se ejecuta localmente en cada estación mediante reglas verificables, especialmente durante esta primera versión del prototipo. La estación no depende de una decisión externa para actuar: evalúa sus sensores, comprueba las condiciones de seguridad, activa la bomba si corresponde y publica después su estado. Esta publicación incluye las medidas ambientales, el estado del relé, el evento de sistema y el código auxiliar de diagnóstico. Con esa información, la Raspberry Pi puede supervisar lo ocurrido y conservar un histórico sin convertirse en un punto único de decisión para el riego.
 
 El requisito RF-11 se ha definido de forma explícita porque la actuación sobre riego implica un riesgo mayor que la simple monitorización. Un fallo de software, una lectura inválida, un reinicio inesperado o una comunicación incompleta no deben provocar una activación indefinida de la bomba. Por ese motivo, el sistema debe adoptar un comportamiento conservador: ante una situación no válida o no verificable, el estado seguro será mantener la bomba apagada.
 
@@ -172,19 +172,19 @@ En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales 
 \hline
 \textbf{Código} & \textbf{Parámetro} & \textbf{Valor inicial} & \textbf{Criterio operativo} \\
 \hline
-ET-01 & Periodo de lectura de sensores & 30 s & Las estaciones toman medidas periódicas del entorno sin necesidad de lectura continua. \\
+ET-01 & Periodo de lectura de sensores & Configurable & Las estaciones toman medidas periódicas del entorno. Durante pruebas pueden utilizarse intervalos reducidos para acelerar la validación. \\
 \hline
-ET-02 & Frecuencia de envío de telemetría & 30 s & Cada estación envía sus datos de forma periódica, evitando tráfico innecesario. \\
+ET-02 & Frecuencia de envío de telemetría & Configurable & Cada estación envía sus datos de forma periódica, evitando tráfico innecesario en funcionamiento normal. \\
 \hline
 ET-03 & Frecuencia de actualización del dashboard & 3--5 s & La interfaz consulta el estado con mayor frecuencia que la llegada real de nuevos datos. \\
 \hline
-ET-04 & Intervalo de evaluación local & 30 s & Cada estación evalúa periódicamente sus lecturas y comprueba si se cumplen las condiciones locales de riego. \\
+ET-04 & Intervalo de evaluación local & Configurable & Cada estación evalúa periódicamente sus lecturas y comprueba si se cumplen las condiciones locales de riego. \\
 \hline
-ET-05 & Tiempo máximo de bomba activa & 60 s & La activación de la bomba queda limitada para evitar riego indefinido ante errores de control. \\
+ET-05 & Tiempo máximo de bomba activa & Configurable & La activación de la bomba queda limitada por firmware para evitar riego indefinido ante errores de control. \\
 \hline
 ET-06 & Tiempo mínimo entre riegos & Configurable & Se aplica un periodo de espera para evitar actuaciones repetidas en poco tiempo. \\
 \hline
-ET-07 & Tiempo máximo sin publicación válida & 5 min & Si la estación no consigue publicar telemetría durante este periodo, registra la incidencia cuando sea posible y garantiza que una actuación en curso no permanezca activa sin control. \\
+ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & La Raspberry Pi y el dashboard deben identificar lecturas antiguas u offline cuando no se reciben publicaciones recientes de una estación. \\
 \hline
 ET-08 & Estado seguro por defecto & Bomba apagada & Al arrancar, ante error de lectura, fallo de comunicación o condición no verificable, la estación mantiene desactivado el riego. \\
 \hline
@@ -199,19 +199,11 @@ ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actua
 \label{cuadro:especificaciones_temporales}
 \end{table}
 
-El periodo de lectura y envío de telemetría se fija inicialmente en 30 segundos. Este valor permite observar la evolución de las variables medidas sin generar un volumen excesivo de comunicaciones. En un sistema de riego no resulta necesario enviar datos cada segundo, ya que la humedad del suelo y las condiciones ambientales no cambian con tanta rapidez como para justificar una frecuencia tan elevada. Para demostraciones o pruebas concretas, este intervalo podría reducirse temporalmente, pero no se considera necesario para el funcionamiento normal del prototipo.
+Los parámetros temporales se han definido como valores configurables del firmware. Durante las pruebas pueden emplearse intervalos reducidos para acelerar la validación del sistema, mientras que en un funcionamiento más estable conviene utilizar periodos más conservadores. Lo importante desde el punto de vista de diseño no es fijar un único valor definitivo, sino garantizar que la estación trabaja con ciclos controlados y que cualquier actuación sobre la bomba queda limitada temporalmente.
 
-La actualización del dashboard se plantea con una frecuencia mayor que la recepción de nuevos datos. Esto permite que la interfaz sea más dinámica y pueda mostrar información como la última actualización recibida, el estado de conexión o posibles avisos de datos obsoletos. No obstante, debe quedar claro que refrescar la interfaz cada pocos segundos no implica que la estación esté generando nuevas medidas con esa misma frecuencia.
+La actualización del dashboard puede realizarse con mayor frecuencia que la publicación de datos de las estaciones. Esto permite que la interfaz muestre de forma dinámica la última lectura recibida, la antigüedad del dato o posibles avisos de desconexión, sin asumir que cada refresco implica una nueva medida en campo.
 
-El intervalo de evaluación local se vincula al periodo de lectura y envío de telemetría. Como la decisión de riego se ejecuta en la propia estación, no es necesario mantener un mecanismo remoto de control para decidir la actuación. La estación lee sus sensores, actualiza su estado interno y comprueba si se cumplen las condiciones de riego en cada ciclo. Este enfoque reduce la dependencia de la conectividad externa y simplifica la lógica de actuación.
-
-La actuación sobre la bomba de agua se trata como el punto más crítico desde el punto de vista operativo. Cualquier activación debe estar limitada por un tiempo máximo, ya que un fallo software, una lectura errónea, un reinicio inesperado o un problema de comunicación no deben traducirse en un riego indefinido. Aunque la duración concreta pueda ajustarse durante las pruebas, el firmware debe impedir que la bomba permanezca activa más tiempo del permitido.
-
-Además, después de cada actuación debe aplicarse un tiempo mínimo entre riegos. Este periodo de espera evita activaciones continuas provocadas por lecturas inestables, reinicios, ruido en la medida o pequeñas oscilaciones alrededor del umbral de decisión. En una primera versión del prototipo, este parámetro puede configurarse de forma conservadora y ajustarse posteriormente a partir de las pruebas.
-
-El estado seguro por defecto del sistema es la bomba apagada. Esta decisión afecta tanto al arranque como a las situaciones de error. Si la estación se reinicia, si detecta una lectura inválida, si entra en cooldown, si pierde comunicación o si se supera el tiempo máximo de actuación, el sistema debe volver a un estado conservador. En este proyecto se considera preferible no regar ante una situación no verificable antes que mantener la bomba funcionando sin control.
-
-Finalmente, los datos inválidos no deben utilizarse para tomar decisiones automáticas. Una lectura fuera de rango, ausente o incoherente debe registrarse como incidencia o descartarse, pero no debe activar la bomba por sí sola. Esta especificación refuerza el criterio general del sistema: TierraViva debe poder actuar sobre el riego, pero solo cuando la información disponible y el estado operativo sean suficientemente fiables.
+La actuación sobre la bomba es el punto más crítico de estas especificaciones. Por ello, el firmware debe limitar siempre el tiempo de activación, aplicar un periodo mínimo entre riegos y mantener la bomba apagada ante lecturas inválidas, reinicios, pérdida de comunicación o estados no verificables. Esta lógica refuerza el criterio general del sistema: TierraViva puede actuar sobre el riego, pero solo cuando la información disponible y el estado operativo son suficientemente fiables.
 
 \section{Metodología de trabajo}
 \label{sec:metodologia_trabajo}
@@ -268,29 +260,11 @@ En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales segu
 \label{cuadro:metodologia_fases}
 \end{table}
 
-La primera fase consistió en analizar el problema desde el punto de vista funcional. No se trataba únicamente de medir humedad o mostrar datos, sino de diseñar un sistema capaz de observar el entorno, transmitir información, registrar un histórico, visualizar el estado y actuar sobre el riego de forma controlada. Esta fase permitió transformar una necesidad práctica en un conjunto de requisitos técnicos, descritos en los apartados anteriores.
+Las primeras fases permitieron transformar la necesidad inicial en requisitos técnicos y revisar las alternativas de sensorización, comunicaciones, plataformas embebidas, almacenamiento y visualización. A partir de esa revisión se definió una arquitectura por bloques, con estaciones autónomas de campo, plataforma intermedia, sistema de supervisión y actuación local.
 
-A continuación, se realizó una revisión tecnológica centrada en las áreas que condicionaban el diseño: sensores agrícolas, arquitecturas IoT, plataformas embebidas, comunicaciones para entornos rurales, plataformas cloud, protocolos de aplicación y mecanismos de automatización. Esta revisión no tuvo como objetivo elegir la tecnología más avanzada en términos absolutos, sino identificar qué opciones eran viables para un prototipo académico, reproducible y defendible.
+El prototipo local previo con Raspberry Pi permitió validar una primera cadena de adquisición, almacenamiento, API y dashboard antes de adoptar la arquitectura final con LTE y ThingSpeak. Posteriormente se validaron sensores, comunicaciones y actuación por separado, evitando mezclar problemas de cableado, alimentación, módem, backend o lógica de riego en una única fase de integración.
 
-La tercera fase fue el diseño conceptual de la arquitectura. En este punto se definieron los bloques principales del sistema: estaciones de campo, adquisición de datos, comunicación remota, plataforma intermedia, sistema de supervisión, almacenamiento, dashboard y actuación. Esta separación en bloques permitió trabajar de forma progresiva, validando cada parte antes de integrarla con el resto.
-
-Una fase especialmente útil fue el desarrollo de un prototipo local previo con Raspberry Pi. Esta etapa permitió validar, en un entorno controlado, que el sistema podía recibir datos, almacenarlos, exponerlos mediante una interfaz de consulta y visualizarlos desde un navegador. El prototipo no representa la arquitectura final de comunicaciones, pero sirvió como paso intermedio para reducir riesgos antes de trabajar con estaciones remotas, LTE y ThingSpeak. Su descripción técnica detallada se recoge en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
-
-La validación de sensores se realizó de forma independiente. Primero se comprobó el bus I2C y las direcciones de los sensores digitales, y después se integraron las lecturas de luminosidad, temperatura, humedad relativa, presión y humedad de suelo. Esta fase fue necesaria para evitar que un fallo de cableado, dirección I2C o librería se confundiera posteriormente con un problema de comunicación o de backend. En el caso del sensor de humedad de suelo, además, se trabajó inicialmente con valores brutos, dejando la calibración completa con suelo seco y húmedo como parte de la validación experimental.
-
-La validación de comunicaciones se planteó también de forma separada. Antes de integrar el módulo de comunicaciones con el firmware de estación, se comprobó su funcionamiento mediante comandos AT, verificando aspectos como identificación del módulo, estado de la SIM, nivel de señal, registro en red, dirección IP y capacidad de comunicación HTTP. Esta forma de trabajo permitió aislar los problemas propios del módem antes de mezclarlos con la lectura de sensores o la lógica de control.
-
-Tras estas pruebas, se valoró la plataforma cloud más adecuada para el prototipo. La decisión debía tener en cuenta que las estaciones de campo no estarían conectadas físicamente a la Raspberry Pi, por lo que la telemetría y el estado de funcionamiento debían publicarse en una plataforma accesible por red. Por este motivo, la plataforma intermedia debía permitir la escritura de datos desde las estaciones y la consulta posterior desde el sistema de supervisión, sin exigir una comunicación directa entre los nodos de campo y la Raspberry Pi.
-
-El diseño de actuación se abordó como un bloque crítico. A diferencia de la monitorización, la actuación sobre riego tiene consecuencias físicas: una bomba activa durante demasiado tiempo puede provocar consumo innecesario de agua o funcionamiento incorrecto del sistema. Por ello, el control mediante relé se diseñó con un criterio conservador: bomba apagada por defecto, tiempo máximo de activación, validación de lecturas, cooldown, bloqueo ante estados no verificables y publicación del estado de la actuación.
-
-La integración de subsistemas se realizó después de validar las partes principales. Esta integración incluyó la unión entre adquisición de datos, comunicación, almacenamiento, visualización, lógica local de decisión y actuación. El objetivo no era solo que cada bloque funcionara por separado, sino comprobar que la estación podía medir, decidir, actuar y publicar su estado, y que la Raspberry Pi podía supervisar ese comportamiento a partir de los datos disponibles en la plataforma intermedia.
-
-La validación experimental se planteó en varios niveles. En primer lugar, se realizaron pruebas unitarias de sensores y comunicación. Después, pruebas parciales de almacenamiento, API y dashboard. Finalmente, se prevén pruebas de integración para comprobar el flujo completo: adquisición de datos en estación, decisión local de riego, actuación sobre el relé, publicación de telemetría y estado, registro histórico y visualización desde la Raspberry Pi.
-
-Por último, durante el desarrollo se ha mantenido una documentación de incidencias y decisiones. Esta parte es relevante porque el proyecto ha requerido corregir supuestos iniciales, separar prototipos previos de arquitectura final y ajustar decisiones conforme se obtenían resultados reales. Registrar estos cambios no se considera una debilidad, sino una parte natural del proceso de ingeniería, ya que permite justificar por qué se adoptó una solución concreta y qué alternativas quedaron descartadas o reservadas para trabajos futuros.
-
-El cambio de enfoque más importante fue separar definitivamente supervisión y control local. En una versión inicial se valoró que la Raspberry Pi centralizara parte de la lógica de riego, pero finalmente se optó por desplazar esa responsabilidad al firmware de cada estación. Esta modificación simplificó el flujo de comunicación, eliminó la necesidad de transportar órdenes de riego por la nube y redujo la dependencia de la Raspberry como punto único de decisión.
+La integración final conectó adquisición, publicación de telemetría, almacenamiento local, visualización, decisión local y actuación sobre el relé. Durante este proceso se documentaron incidencias, alternativas descartadas y cambios de enfoque, especialmente la separación entre supervisión y control local. Esta decisión trasladó la lógica crítica de riego al firmware de cada estación y dejó la Raspberry Pi como sistema de consulta, histórico y visualización.
 
 \section{Arquitectura general planteada}
 \label{sec:arquitectura_general_planteada}
@@ -397,7 +371,7 @@ BH1750 / GY-302 & Luminosidad ambiente en lux. & Proporciona medida digital de l
 
 La elección de estos sensores responde también a criterios prácticos. Son módulos habituales en prototipos con Arduino, tienen bajo coste, disponen de documentación y librerías accesibles, y permiten validar el sistema sin recurrir a instrumentación industrial. Además, el uso de I2C para el BME280 y el BH1750 simplifica la integración, ya que ambos sensores pueden compartir las líneas SDA y SCL del Arduino UNO siempre que sus direcciones no coincidan.
 
-El detalle de los componentes empleados, las conexiones eléctricas de los sensores, las pruebas iniciales de lectura y los fragmentos de código utilizados durante la validación se recoge en los Anexos~\ref{anexo:materiales}, \ref{anexo:esquemas_conexion}, \ref{anexo:pruebas_sensores} y \ref{anexo:codigo}. De esta forma, el cuerpo principal mantiene la justificación técnica de la elección de variables y sensores, mientras que la información reproducible del montaje queda documentada como material complementario.
+El detalle de los componentes empleados se recoge en el Anexo~\ref{anexo:materiales}; el conexionado eléctrico, en el Anexo~\ref{anexo:esquemas_electricos}; y la estrategia de validación, en los Anexos~\ref{anexo:plan_pruebas} y \ref{anexo:trazabilidad_requisitos_pruebas}. De esta forma, el cuerpo principal mantiene la justificación técnica de la elección de variables y sensores, mientras que la información reproducible del montaje y de las pruebas queda documentada como material complementario.
 
 En conjunto, la combinación seleccionada cubre las variables mínimas necesarias para una primera versión funcional de TierraViva: una variable principal de decisión, la humedad del suelo, y varias variables ambientales de contexto. En fases posteriores podrían añadirse sensores más avanzados, como caudal, nivel de depósito, conductividad eléctrica o pH, pero incorporarlos en esta primera versión aumentaría la complejidad sin ser imprescindible para validar la arquitectura general del sistema.
 
@@ -546,7 +520,7 @@ ThingSpeak se ha seleccionado porque proporciona una estructura sencilla basada 
     \label{fig:cap3_thingspeak_capa_intermedia}
 \end{figure}
 
-El concepto de canal resulta especialmente útil para organizar la información del sistema. Cada canal puede agrupar varias variables relacionadas mediante campos numerados. En TierraViva, este modelo permite representar de forma clara las medidas y estados de una estación: humedad del suelo, temperatura, humedad relativa, luminosidad, presión atmosférica, estado del relé, código de estado o evento y un campo auxiliar reservado para depuración o ampliaciones. De esta forma, cada publicación de telemetría queda almacenada como una entrada temporal asociada a un conjunto de campos.
+El concepto de canal resulta especialmente útil para organizar la información del sistema. Cada canal puede agrupar varias variables relacionadas mediante campos numerados. En TierraViva, este modelo permite representar de forma clara las medidas y estados de una estación: humedad del suelo, temperatura, humedad relativa, luminosidad, presión atmosférica, estado del relé, evento de sistema y código auxiliar de diagnóstico. De esta forma, cada publicación de telemetría queda almacenada como una entrada temporal asociada a un conjunto de campos.
 
 \begin{table}[H]
 \centering
@@ -577,11 +551,11 @@ Field 4 & Luminosidad. & Permite interpretar exposición solar y condiciones de 
 \hline
 Field 5 & Presión atmosférica. & Dato ambiental adicional proporcionado por el sensor BME280. \\
 \hline
-Field 6 & Estado del relé, 0 apagado y 1 activo. & Permite supervisar si la estación está actuando sobre el riego. \\
+Field 6 & Estado del relé, 0 apagado y 1 activo. & Permite supervisar si la estación informa de relé apagado o activo en la última telemetría publicada. \\
 \hline
-Field 7 & Modo seguro. & Indica si la estación se encuentra en modo seguro: \texttt{0} para funcionamiento normal y \texttt{1} para modo seguro activo. \\
+Field 7 & Evento de sistema. & Código que representa el evento principal del ciclo: reposo, modo seguro, riego, error o cooldown. \\
 \hline
-Field 8 & Código de estado. & Código numérico publicado por la estación para indicar el resultado del ciclo de funcionamiento o una incidencia detectada. \\
+Field 8 & Código auxiliar de diagnóstico. & Código complementario que ayuda a interpretar el resultado del ciclo y facilita la depuración. \\
 \hline
 API HTTP & Escritura de telemetría desde las estaciones y lectura desde Raspberry Pi. & Reduce la complejidad de integración frente a soluciones que requieren infraestructura propia. \\
 \hline
@@ -606,7 +580,7 @@ En el caso de TierraViva, la latencia de ThingSpeak es aceptable porque su papel
 
 La elección de ThingSpeak, por tanto, responde a un criterio de equilibrio. No es la plataforma más completa ni la más flexible para un despliegue industrial, pero sí es adecuada para un prototipo académico donde se necesita integrar sensores, LTE, almacenamiento remoto, consulta desde Raspberry Pi y supervisión de estados publicados por estaciones autónomas. Su principal ventaja es que permite validar la arquitectura completa sin desplazar el esfuerzo hacia el mantenimiento de una infraestructura cloud propia.
 
-En conjunto, ThingSpeak actúa como punto de desacoplo entre las estaciones y la Raspberry Pi. Las estaciones no necesitan conocer la ubicación de la Raspberry ni mantener una conexión directa con ella; publican telemetría, estado del relé y códigos de evento en la nube. La Raspberry, por su parte, consulta esa información para construir el histórico, alimentar la API y servir el dashboard, sin intervenir en la decisión local de riego. Esta separación es coherente con el objetivo de TierraViva: construir un sistema modular, verificable y preparado para funcionar con estaciones remotas autónomas.
+En conjunto, ThingSpeak actúa como punto de desacoplo entre las estaciones y la Raspberry Pi. Las estaciones no necesitan conocer la ubicación de la Raspberry ni mantener una conexión directa con ella; publican telemetría, estado del relé, eventos de sistema y códigos auxiliares de diagnóstico en la nube. La Raspberry, por su parte, consulta esa información para construir el histórico, alimentar la API y servir el dashboard, sin intervenir en la decisión local de riego. Esta separación es coherente con el objetivo de TierraViva: construir un sistema modular, verificable y preparado para funcionar con estaciones remotas autónomas.
 
 La estructura concreta de canales utilizada en TierraViva se desarrolla con mayor detalle en el Capítulo~\ref{cap:capitulo4}, donde se documentan los canales TierraViva\_A y TierraViva\_B, así como la codificación de los campos empleados para telemetría, estado y eventos.
 
@@ -664,141 +638,73 @@ Con esta organización, la Raspberry Pi mantiene un papel claro dentro del siste
 \section{Materiales empleados}
 \label{sec:materiales_empleados}
 
-La selección de materiales se ha realizado buscando un equilibrio entre funcionalidad, coste, disponibilidad y facilidad de integración. Al tratarse de un prototipo de TFG, no se han empleado componentes industriales cerrados, sino módulos habituales en sistemas IoT y prototipos electrónicos que permiten validar la arquitectura de forma progresiva y reproducible.
+La selección de materiales se ha realizado buscando un equilibrio entre funcionalidad, coste, disponibilidad y facilidad de integración. Al tratarse de un prototipo de TFG, se han utilizado módulos habituales en sistemas IoT y prototipos electrónicos, evitando componentes industriales cerrados que aumentarían el coste y dificultarían la reproducción del montaje.
 
-Los materiales empleados no deben entenderse como una simple lista de compra, sino como el conjunto de bloques físicos necesarios para que TierraViva pueda medir, comunicar, almacenar, visualizar y actuar sobre el riego. Cada componente cumple una función concreta dentro de la arquitectura y se ha seleccionado en coherencia con los requisitos definidos anteriormente.
+En este capítulo no se incluye el inventario completo ni las referencias comerciales detalladas, ya que esa información se recoge en el Anexo~\ref{anexo:materiales}. Aquí se resume únicamente el papel funcional de cada bloque dentro de la arquitectura.
 
-La Tabla~\ref{cuadro:materiales_cap3} resume los componentes principales utilizados en TierraViva desde un punto de vista funcional. Con el fin de mantener la legibilidad del capítulo y separar la justificación técnica de la documentación auxiliar, las imágenes identificativas de los componentes y sus referencias correspondientes se recogen en el Anexo~\ref{anexo:materiales}.
 \begin{table}[H]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{0.92}
-
-\makebox[\textwidth][c]{%
-\hspace*{-0.7cm}%
-\begin{tabular}{|
->{\raggedright\arraybackslash}m{0.24\textwidth}|
->{\raggedright\arraybackslash}m{0.34\textwidth}|
->{\raggedright\arraybackslash}m{0.48\textwidth}|}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.34\textwidth}|}
 \hline
-\textbf{Componente} & \textbf{Función} & \textbf{Justificación} \\
+\textbf{Bloque} & \textbf{Componentes principales} & \textbf{Función en TierraViva} \\
 \hline
-
-\multicolumn{3}{|l|}{\textbf{Sensórica}} \\
+Sensórica & Sensor capacitivo de humedad del suelo, BME280 y BH1750/GY-302. & Medir humedad del sustrato, temperatura, humedad relativa, presión y luminosidad. \\
 \hline
-Sensor capacitivo de humedad de suelo & Medición de humedad del sustrato mediante lectura analógica. & Variable principal para la decisión de riego; menor degradación que sensores resistivos. \\
+Control local & Arduino UNO. & Leer sensores, ejecutar la regla local de riego, gestionar el módem LTE y controlar el relé. \\
 \hline
-BME280 & Medición de temperatura, humedad relativa y presión atmosférica. & Sensor ambiental integrado; reduce el número de módulos y simplifica el cableado. \\
+Comunicación & Módulo A7670E-LASA, antena y tarjeta SIM. & Publicar telemetría y estado en ThingSpeak mediante LTE/HTTP. \\
 \hline
-BH1750 / GY-302 & Medición de luminosidad ambiente. & Medida digital en lux mediante I2C; útil para interpretar exposición solar. \\
+Supervisión & Raspberry Pi 5. & Consultar ThingSpeak, almacenar histórico en SQLite, exponer la API y servir el dashboard. \\
 \hline
-
-\multicolumn{3}{|l|}{\textbf{Control y procesamiento}} \\
+Actuación & Módulo relé y bomba de agua de 12 V. & Ejecutar físicamente el riego cuando el firmware lo permite. \\
 \hline
-Arduino UNO & Adquisición de datos y control local de la estación. & Plataforma sencilla, disponible, documentada y suficiente para lectura de sensores y control de relé. \\
+Alimentación y montaje & Fuente o batería de 12 V, LM2596, cableado, protoboard, conectores y condensadores. & Alimentar el prototipo, adaptar tensiones, estabilizar el montaje y facilitar la integración. \\
 \hline
-Raspberry Pi 5 & Backend de supervisión, histórico local, API y dashboard. & Mayor capacidad software para ejecutar servicios, almacenar datos y visualizar el sistema. \\
-\hline
-
-\multicolumn{3}{|l|}{\textbf{Comunicación}} \\
-\hline
-A7670E-LASA & Conectividad LTE de la estación. & Permite envío HTTP mediante red móvil sin necesidad de gateway propio. \\
-\hline
-Tarjeta SIM de datos & Acceso a red móvil para el módulo LTE. & Necesaria para publicar telemetría y estado desde las estaciones. \\
-\hline
-
-\multicolumn{3}{|l|}{\textbf{Actuación}} \\
-\hline
-Relé + bomba de agua 12 V & Activación física del riego durante un tiempo controlado. & Permite cerrar el ciclo de monitorización y control, manteniendo la bomba apagada como estado seguro. \\
-\hline
-
-\multicolumn{3}{|l|}{\textbf{Alimentación y montaje}} \\
-\hline
-Alimentación 12 V + LM2596 (regulador) & Alimentación principal y adaptación de tensión a 5 V. & Permite alimentar la bomba y regular la tensión para Arduino, sensores y módulos compatibles. \\
-\hline
-Cableado, protoboard, conectores, resistencias y condensadores & Interconexión, adaptación eléctrica y estabilización del prototipo. & Facilitan pruebas, depuración, adaptación de niveles y reducción de inestabilidades en la alimentación. \\
-\hline
-
-\end{tabular}%
-}
-
-\caption{Resumen de materiales principales empleados en TierraViva}
+\end{tabular}
+\caption{Resumen funcional de materiales empleados en TierraViva}
 \label{cuadro:materiales_cap3}
 \end{table}
 
-El bloque de sensórica está formado por tres tipos de sensores. El sensor capacitivo de humedad de suelo se utiliza como entrada principal para la decisión de riego, ya que proporciona información directa sobre el estado del sustrato. El BME280 permite obtener temperatura, humedad relativa y presión atmosférica en un único módulo, aportando contexto ambiental sin aumentar demasiado la complejidad del montaje. Por último, el BH1750 mide la luminosidad ambiente en lux, lo que permite interpretar mejor la exposición solar de la zona monitorizada.
+La elección de estos materiales es coherente con la arquitectura distribuida del proyecto. Arduino UNO se reserva para las tareas cercanas al hardware; Raspberry Pi 5 se utiliza para supervisión y software local; el A7670E-LASA proporciona conectividad móvil; y el conjunto relé-bomba permite cerrar el ciclo de monitorización y actuación.
 
-La elección de Arduino UNO como plataforma de estación responde a una decisión de simplicidad y control local. La estación necesita leer sensores, comunicarse con el módulo LTE y accionar un relé, pero no ejecutar una base de datos ni servir una interfaz web. Para esas tareas, Arduino UNO resulta suficiente y facilita la depuración del prototipo. Además, permite trabajar de forma directa con entradas analógicas, bus I2C y salidas digitales.
-
-El módulo A7670E-LASA se incorpora como solución de comunicación remota mediante red móvil. Su función es permitir que cada estación publique telemetría y estado en la plataforma cloud. Esta elección evita desplegar un gateway propio y permite integrar la estación con servicios externos mediante peticiones HTTP, aunque introduce dependencia de cobertura móvil, tarjeta SIM y una alimentación adecuada para los picos de consumo del módulo.
-
-La Raspberry Pi 5 se utiliza como sistema de supervisión software. A diferencia de Arduino, su papel no es interactuar directamente con los sensores ni accionar la bomba mediante pines físicos, sino consultar datos, almacenarlos, exponer una API y servir el dashboard. Esta separación permite mantener una arquitectura distribuida: las estaciones trabajan en campo y la Raspberry actúa como nodo de supervisión e histórico.
-
-El bloque de actuación está formado por un módulo relé y una bomba de agua de 12 V. La bomba se controla desde la estación de campo, no desde la Raspberry Pi de forma directa. Esta decisión es importante porque el actuador debe encontrarse físicamente en el lugar donde se realiza el riego. La decisión y ejecución segura de la actuación corresponde al firmware de la estación, que aplica reglas locales y mantiene la bomba apagada ante cualquier estado no verificable.
-
-La alimentación se plantea a partir de una fuente o batería de 12 V, ya que la bomba requiere una tensión superior a la utilizada por la lógica de control. Para alimentar Arduino y los módulos compatibles se emplea un regulador LM2596 ajustado a 5 V. Esta separación entre alimentación de potencia y alimentación lógica permite integrar el actuador sin comprometer la estabilidad del resto de la electrónica, siempre que se mantenga una masa común y se verifiquen las tensiones antes de conectar los módulos.
-
-También se consideran materiales auxiliares como cableado Dupont (sin soldadura), protoboard, conectores, resistencias y condensadores. Aunque puedan parecer componentes secundarios, son relevantes durante la fase de prototipado porque permiten modificar conexiones, aislar fallos, adaptar niveles eléctricos y estabilizar la alimentación de los módulos. En particular, la adaptación de nivel entre Arduino y el módulo LTE debe cuidarse para evitar aplicar señales de 5 V a entradas que trabajen a niveles inferiores. Del mismo modo, el uso de condensadores de desacoplo y estabilización ayuda a reducir caídas puntuales de tensión y comportamientos erráticos asociados a módulos con consumo variable, como el A7670E-LASA o el bloque de actuación.
-
-Con estos materiales se puede construir una arquitectura completa sin recurrir a equipos industriales de alto coste.
+El detalle de referencias, cantidades, precios, imágenes y observaciones de compra se recoge en el Anexo~\ref{anexo:materiales}. El conexionado eléctrico se documenta en el Anexo~\ref{anexo:esquemas_electricos}, y la validación asociada a sensores, comunicación, actuación y flujo extremo a extremo se desarrolla en los Anexos~\ref{anexo:plan_pruebas} y \ref{anexo:trazabilidad_requisitos_pruebas}.
 
 \section{Riesgos técnicos y medidas de mitigación}
 \label{sec:riesgos_tecnicos_mitigacion}
 
-El diseño de TierraViva debe contemplar no solo el funcionamiento esperado del sistema, sino también los fallos que pueden aparecer durante la integración y el uso del prototipo. Esta consideración es especialmente importante porque el sistema incorpora actuación física sobre el riego mediante una bomba de agua. Una lectura incorrecta puede registrarse y descartarse, pero una actuación no controlada podría provocar consumo innecesario de agua, funcionamiento indebido de la bomba o pérdida de fiabilidad del prototipo.
+El diseño de TierraViva debe contemplar fallos de sensores, alimentación, comunicación, software y actuación. Esta consideración es especialmente importante porque el prototipo no se limita a monitorizar variables ambientales, sino que acciona físicamente una bomba de agua. Por ello, el criterio general adoptado es conservador: ante una lectura inválida, una condición no verificable o un fallo relevante, la estación debe mantener la bomba apagada.
 
-Por este motivo, se han identificado los principales riesgos técnicos del sistema y se han definido medidas de mitigación asociadas. Estas medidas no eliminan por completo la posibilidad de fallo, pero reducen su impacto y permiten que el sistema adopte un comportamiento conservador ante situaciones no verificables. La Tabla~\ref{cuadro:riesgos_mitigacion} resume los riesgos considerados.
+La Tabla~\ref{cuadro:riesgos_mitigacion} resume los riesgos técnicos principales considerados durante el diseño. El análisis completo de probabilidad, impacto, criticidad, riesgo residual y pruebas asociadas se desarrolla en el Anexo~\ref{anexo:gestion_riesgos}.
 
 \begin{table}[H]
 \begin{center}
 \small
-\begin{tabular}{|p{0.13\textwidth}|p{0.24\textwidth}|p{0.27\textwidth}|p{0.26\textwidth}|}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
 \hline
-\textbf{Código} & \textbf{Riesgo técnico} & \textbf{Impacto posible} & \textbf{Medidas de mitigación} \\
+\textbf{Riesgo} & \textbf{Impacto posible} & \textbf{Medida de mitigación} \\
 \hline
-RT-01 & Fallo de alimentación & Reinicios, lecturas erróneas, fallo de comunicación o activación inestable del relé. & Regulación mediante LM2596, comprobación de tensiones, masa común y estabilización de alimentación. \\
+Fallo de alimentación o picos de consumo & Reinicios, pérdida de comunicación o comportamiento inestable del relé. & Regulación con LM2596, comprobación de tensiones, masa común y condensadores de estabilización. \\
 \hline
-RT-02 & Picos de consumo del módulo LTE & Reinicio del A7670E-LASA o pérdida de conexión durante transmisión. & Fuente adecuada, condensadores de estabilización y pruebas previas del módulo por comandos AT. \\
+Lecturas erróneas o inestables & Decisiones de riego basadas en datos no fiables. & Validación de rangos, descarte de valores incoherentes, pruebas por bloques y calibración progresiva. \\
 \hline
-RT-03 & Regla local mal configurada & Activación del riego con umbral incorrecto o en condiciones no deseadas. & Umbrales configurables, pruebas controladas, histéresis/cooldown y validación progresiva antes de riego real. \\
+Regla local mal configurada & Activación del riego en condiciones no deseadas. & Umbrales configurables, cooldown, pruebas controladas y actuación limitada por firmware. \\
 \hline
-RT-04 & Lecturas inestables cerca del umbral & Activaciones repetidas o comportamiento oscilante de la bomba. & Tiempo mínimo entre riegos, filtrado básico, descarte de valores incoherentes y límites de seguridad. \\
+Activación prolongada de la bomba & Riego indefinido o consumo innecesario de agua. & Bomba apagada por defecto, tiempo máximo de actuación y apagado explícito al finalizar el riego. \\
 \hline
-RT-05 & Activación prolongada de la bomba & Riego indefinido o consumo innecesario de agua. & Tiempo máximo de activación, apagado forzado y estado seguro por defecto. \\
+Pérdida de comunicación & Ausencia de telemetría o supervisión remota incompleta. & Decisión local independiente, publicación de estados cuando sea posible y supervisión de datos obsoletos. \\
 \hline
-RT-06 & Pérdida de comunicación & Ausencia temporal de telemetría en la plataforma o imposibilidad de supervisión remota. & Decisión local independiente, registro de estado, reintentos de comunicación y conservación del estado seguro. \\
-\hline
-RT-07 & Pérdida de datos históricos & Imposibilidad de revisar pruebas, tendencias o eventos de riego. & Almacenamiento local en SQLite y consulta periódica de la plataforma cloud. \\
-\hline
-RT-08 & Lecturas erróneas de sensores & Decisiones de riego basadas en datos no fiables. & Validación de rangos, descarte de datos incoherentes y registro de errores. \\
-\hline
-RT-09 & Fallo de software en Raspberry Pi & Pérdida temporal de dashboard, API o histórico local. & Separación por módulos, logs, reinicio controlado de servicios y autonomía de decisión en las estaciones. \\
+Fallo del software en Raspberry Pi & Pérdida temporal de API, dashboard o histórico local. & Separación por módulos, logs, script de gestión y autonomía de las estaciones para la decisión de riego. \\
 \hline
 \end{tabular}
-\caption{Riesgos técnicos principales y medidas de mitigación}
+\caption{Resumen de riesgos técnicos principales y medidas de mitigación}
 \label{cuadro:riesgos_mitigacion}
 \end{center}
 \end{table}
 
-El fallo de alimentación es uno de los riesgos más importantes en sistemas con sensores, comunicaciones y actuación. La estación debe alimentar elementos con necesidades distintas: Arduino, sensores, módulo LTE, relé y bomba de agua. Por ello, se plantea una alimentación principal de 12 V y una regulación a 5 V mediante LM2596 para la electrónica compatible. Antes de conectar los módulos, es necesario ajustar y comprobar la tensión de salida del regulador. Además, todos los elementos deben compartir una referencia común de masa para evitar comportamientos erráticos en las señales de control.
+Estas medidas siguen un principio común: separar supervisión y control local. La Raspberry Pi permite registrar, consultar y visualizar el estado del sistema, pero la seguridad de la actuación reside en la estación de campo. De este modo, una caída del dashboard, una pérdida de comunicación o un dato no fiable no deben provocar una activación no controlada de la bomba.
 
-El módulo LTE introduce una dificultad adicional porque puede presentar picos de consumo durante el registro en red o el envío de datos. Si la alimentación no es suficientemente estable, el módulo puede reiniciarse o perder comunicación. Para mitigar este riesgo se han realizado pruebas previas del A7670E-LASA por USB mediante comandos AT, comprobando SIM, señal, registro en red, dirección IP y comunicación HTTP. En la integración final se incorporan condensadores de estabilización en la alimentación para reducir caídas puntuales de tensión y mejorar el comportamiento del sistema ante consumos variables durante la transmisión LTE.
-
-La lógica local de riego constituye otro punto crítico. Al estar implementada en la estación, debe diseñarse de forma conservadora: no debe actuar ante lecturas imposibles, debe limitar el tiempo máximo de bomba activa y debe aplicar un periodo mínimo entre riegos. Esta decisión reduce la dependencia de la Raspberry Pi, pero exige que el firmware de estación incorpore las comprobaciones de seguridad necesarias.
-
-La pérdida de comunicación se interpreta de forma distinta en esta arquitectura. Si una estación no puede publicar temporalmente en ThingSpeak, la supervisión remota se ve afectada, pero la estación no debe quedar bloqueada ni activar la bomba por esa causa. El comportamiento seguro debe seguir residiendo en el nodo de campo: ante una situación no verificable, la bomba permanece apagada y se registra el estado cuando la comunicación vuelve a estar disponible.
-
-La lógica local de riego constituye otro punto crítico. Al estar implementada en la estación, debe diseñarse de forma conservadora: no debe actuar ante lecturas imposibles, debe limitar el tiempo máximo de bomba activa y debe aplicar un periodo mínimo entre riegos. Esta decisión reduce la dependencia de la Raspberry Pi, pero exige que el firmware de estación incorpore las comprobaciones de seguridad necesarias.
-
-La activación de la bomba de agua se trata como el riesgo de mayor impacto físico. La regla de diseño es que la bomba debe permanecer apagada por defecto y solo activarse durante un tiempo limitado. Si la lectura de humedad no es válida, si el sistema está en cooldown, si se detecta una condición no verificable o si se supera el tiempo máximo permitido, la estación debe mantener o devolver el relé al estado apagado. Esta lógica evita que un fallo de lectura, un reinicio o un error interno puedan mantener el riego activo indefinidamente.
-
-Además, el bloque de actuación se ha tratado de forma separada respecto a la lógica de control. Durante las pruebas iniciales puede emplearse un LED o una carga de baja potencia para verificar el funcionamiento del relé sin accionar todavía la bomba real. En el montaje final, esa carga de prueba se sustituye por la bomba de agua de 12 V. Esta estrategia permite validar primero la lógica de activación y apagado, y después realizar la prueba con el actuador real en condiciones más controladas.
-
-La pérdida de comunicación también se aborda con un criterio conservador. Si la estación no puede publicar temporalmente en la plataforma cloud, la supervisión remota se ve afectada, pero la decisión de seguridad sigue residiendo en el firmware local. La pérdida de comunicación puede registrarse como incidencia cuando sea posible, pero no debe dejar la bomba activa ni provocar una actuación no controlada.
-
-El almacenamiento local en SQLite permite mitigar la pérdida de información operativa. Aunque ThingSpeak actúa como capa intermedia de telemetría y estado, la Raspberry conserva un histórico propio de lecturas, estados y eventos relevantes. Esto facilita revisar pruebas, detectar periodos sin comunicación y justificar posteriormente el comportamiento del sistema. Además, separar el almacenamiento local de la plataforma cloud reduce la dependencia de un único punto de consulta.
-
-Por último, los fallos de software se mitigan mediante una arquitectura modular. La lectura de datos, el almacenamiento, la validación de datos, la API y el dashboard se han planteado como bloques diferenciados. Esta separación permite probar cada parte de forma independiente, registrar errores y depurar el sistema sin mezclar todas las responsabilidades en un único programa. En cualquier caso, aunque la Raspberry Pi o el dashboard de supervisión dejen de funcionar temporalmente, la estación de campo debe mantener su lógica local de seguridad y conservar la bomba apagada ante estados no verificables.
-
-En conjunto, las medidas de mitigación adoptadas siguen un criterio común: ante un fallo, dato dudoso o estado no verificable, el sistema debe priorizar la seguridad frente a la actuación. Esta decisión puede provocar que el sistema no riegue en una situación ambigua, pero evita el escenario más peligroso para el prototipo: una activación no controlada de la bomba. De esta forma, TierraViva se plantea como un sistema funcional, pero también prudente y trazable.
+El desarrollo completo de esta gestión de riesgos se recoge en el Anexo~\ref{anexo:gestion_riesgos}. La relación entre riesgos, requisitos y pruebas se documenta además en el Anexo~\ref{anexo:trazabilidad_requisitos_pruebas}.
