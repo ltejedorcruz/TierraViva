@@ -19,64 +19,36 @@ El código asociado al proyecto se conserva en el repositorio público TierraViv
 \section{Prototipo local previo con MQTT}
 \label{sec:prototipo_local_mqtt}
 
-Antes de implantar la solución final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna.
+Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna. Esta fase no pretendía resolver todavía el despliegue en campo, sino validar de forma controlada la cadena software básica del sistema: adquisición de telemetría, transporte de mensajes, almacenamiento local, API y visualización web.
 
 \begin{wrapfigure}{l}{0.32\textwidth}
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.30\textwidth]{figs/mosquitto-logo.png}
-    \caption{Logo MQTT Mosquitto}
+    \caption{Logo MQTT Mosquitto, utilizado en el prototipo local previo.}
     \label{fig:logo_mqtt}
     \vspace{-8pt}
 \end{wrapfigure}
 
- El objetivo de esta fase no era resolver todavía el despliegue en campo, sino validar el comportamiento del bloque software en un entorno controlado: recepción de telemetría desde Arduino, publicación de mensajes, consumo por parte de un backend, almacenamiento en SQLite y visualización mediante una interfaz web sencilla.
+El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje, depuración y reducción de riesgos. En ese momento, la estación se encontraba conectada localmente a la Raspberry Pi mediante puerto serie, por lo que no existía aún la separación física propia de la arquitectura final.
 
-Este prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su importancia dentro del proyecto no reside en que represente la solución final, sino en que permitió comprobar de forma incremental una cadena de procesamiento completa antes de introducir la complejidad propia de la conectividad móvil. En esta primera versión, la estación se encontraba conectada localmente a la Raspberry Pi mediante puerto serie, por lo que no existía todavía la separación física propia de la arquitectura definitiva.
-
-La cadena de funcionamiento era la siguiente:
+La cadena funcional ensayada fue la siguiente:
 
 \begin{center}
-\texttt{Arduino} $\rightarrow$ \texttt{Serial} $\rightarrow$ \texttt{serial\_to\_mqtt.py} $\rightarrow$ \texttt{Mosquitto} $\rightarrow$ \texttt{main.py} $\rightarrow$ \texttt{SQLite} $\rightarrow$ \texttt{FastAPI} $\rightarrow$ \texttt{Dashboard}
+\texttt{Arduino} $\rightarrow$ \texttt{Serial} $\rightarrow$ \texttt{MQTT} $\rightarrow$ \texttt{SQLite} $\rightarrow$ \texttt{FastAPI} $\rightarrow$ \texttt{Dashboard}
 \end{center}
 
-Esta cadena se diseñó como una arquitectura por capas. Cada bloque tenía una responsabilidad concreta: el Arduino generaba las lecturas, el bridge serie--MQTT adaptaba el formato de entrada, Mosquitto actuaba como intermediario de mensajes, el backend procesaba y almacenaba los datos, SQLite conservaba el histórico, FastAPI exponía una interfaz de consulta y el dashboard presentaba la información al usuario. Esta separación resultó especialmente útil durante la depuración, ya que permitía probar cada capa de forma independiente antes de integrarla con el resto.
+Esta primera versión permitió comprobar que una arquitectura por capas facilitaba la depuración. Cada bloque tenía una responsabilidad concreta: Arduino generaba lecturas, el bridge serie--MQTT adaptaba la entrada, Mosquitto actuaba como intermediario de mensajes, el backend procesaba y almacenaba los datos, SQLite conservaba el histórico, FastAPI exponía la información y el dashboard permitía visualizar el estado del sistema.
 
-El primer componente software era el script \texttt{serial\_to\_mqtt.py}. Su responsabilidad consistía en leer del puerto serie de la Raspberry Pi las líneas emitidas por el Arduino, comprobar que cada línea tuviera formato JSON válido y publicarla en un topic MQTT. Para evitar que mensajes de arranque, trazas de depuración o líneas corruptas entrasen en el flujo principal, el script descartaba las líneas vacías, ignoraba comentarios de arranque y solo aceptaba mensajes que empezasen y terminasen con llaves. Esta decisión, aunque sencilla, fue importante para separar los datos de telemetría de los mensajes auxiliares del microcontrolador.
+A nivel técnico, el prototipo ayudó a validar tres decisiones que se mantuvieron en la arquitectura final. En primer lugar, confirmó la utilidad de separar adquisición, procesamiento, persistencia, API y visualización. En segundo lugar, mostró la importancia de trabajar con una telemetría bien estructurada, evitando formatos ambiguos entre capas. En tercer lugar, evidenció que disponer de una interfaz web simplificaba mucho la depuración frente a una validación basada únicamente en trazas de terminal.
 
-El formato esperado por el bridge era una lectura JSON en una sola línea, con campos como la estación de origen, temperatura, humedad ambiental, luminosidad, presión y lectura del sensor de suelo. A partir del campo \texttt{station}, el script construía el topic de publicación:
+Sin embargo, esta solución presentaba limitaciones importantes para el objetivo final de TierraViva. La dependencia de una conexión local entre Arduino y Raspberry Pi no era adecuada para estaciones situadas en una parcela o zona alejada. Además, la lógica provisional de actuación desde el backend desplazaba parte de la decisión hacia la Raspberry Pi, lo que introducía una dependencia no deseada en un sistema que debía mantener capacidad de actuación local y segura.
 
-\begin{center}
-\texttt{tierraviva/stations/\{station\}/telemetry}
-\end{center}
+Por estos motivos, el prototipo MQTT no se adoptó como arquitectura definitiva. La solución final sustituye la comunicación local Serial--MQTT por publicación remota LTE/HTTP en ThingSpeak. Asimismo, la decisión de riego pasa al firmware de cada estación, mientras que la Raspberry Pi queda como nodo de supervisión, ingesta, almacenamiento, API y dashboard.
 
-De este modo, una lectura procedente de la estación A se publicaba en \texttt{tierraviva/stations/A/telemetry}. Esta elección permitió ensayar desde el principio una organización multiestación, aunque el entorno de pruebas se realizara con una única placa conectada localmente. El uso de topics jerárquicos facilitaba que el backend pudiera suscribirse a una estación concreta o a todas las estaciones mediante comodines.
+La evolución desde el prototipo MQTT hasta la arquitectura final se recoge como una decisión técnica relevante en el Anexo~\ref{anexo:seguimiento_decisiones}. El flujo definitivo de funcionamiento se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}, mientras que la estructura de telemetría utilizada finalmente en ThingSpeak se documenta en el Anexo~\ref{anexo:estructura_thingspeak_estados}.
 
-El broker utilizado fue Mosquitto, desplegado localmente en la Raspberry Pi. Mosquitto actuaba como intermediario entre el proceso que leía el puerto serie y el backend que procesaba las lecturas. Esta decisión introdujo una separación clara entre adquisición y procesamiento: el script de entrada no necesitaba conocer la base de datos ni la lógica de visualización, y el backend no dependía directamente del puerto serie. En términos de diseño, esta separación fue útil porque permitió probar cada capa por separado mediante herramientas como \texttt{mosquitto\_sub} o \texttt{mosquitto\_pub}.
-
-El backend del prototipo, implementado en \texttt{backend/main.py}, se suscribía al topic:
-
-\begin{center}
-\texttt{tierraviva/stations/+/telemetry}
-\end{center}
-
-El comodín \texttt{+} permitía recibir telemetría de cualquier estación situada bajo la jerarquía \texttt{tierraviva/stations}. Al recibir un mensaje, el backend parseaba el JSON, extraía la estación, convertía las magnitudes principales a tipos numéricos y guardaba la lectura en SQLite mediante el módulo \texttt{database.py}. En esta fase se almacenaban variables como temperatura, humedad relativa, lectura bruta del sensor de suelo, luminosidad y presión. La base de datos local del prototipo utilizaba una tabla \texttt{lecturas} para conservar el histórico de medidas y una tabla \texttt{riego\_log} prevista para registrar actuaciones. Esta estructura corresponde a la fase local previa y no debe confundirse con el esquema posterior de la versión final, adaptado a la ingesta desde ThingSpeak y a la supervisión de estados de estación.
-
-Además del almacenamiento, el backend incluía una lógica provisional de actuación basada en la humedad ambiental. Si \texttt{hum\_pct} era inferior a un umbral de referencia, se publicaba un mensaje \texttt{ON}; en caso contrario, se publicaba \texttt{OFF}. Esta regla no se considera una regla agronómica final, ya que la decisión de riego debe depender principalmente de la humedad del suelo y de condiciones de seguridad. Sin embargo, resultó útil como mecanismo de validación: permitía comprobar que el sistema no solo recibía datos, sino que también podía generar una salida lógica en función de ellos. Por tanto, su valor fue experimental, no definitivo.
-
-La persistencia se implementó con SQLite por su simplicidad y adecuación a un prototipo ejecutado en Raspberry Pi. Al tratarse de una base de datos embebida, no era necesario desplegar un servidor adicional ni administrar usuarios, puertos o servicios externos. Esta elección permitió concentrar el esfuerzo en la lógica del sistema: validar que las lecturas llegaban, se almacenaban correctamente y podían recuperarse desde una API. Aunque en un sistema industrial podría ser razonable utilizar una base de datos más robusta, SQLite resultaba suficiente para el alcance del prototipo y para la fase de validación del TFG.
-
-Sobre esta base de datos se implementó una API REST con FastAPI. Una API REST puede entenderse como una capa de consulta basada en peticiones HTTP: el cliente solicita un recurso y el servidor devuelve una respuesta estructurada, en este caso en formato JSON. En el prototipo, la API ofrecía un endpoint principal para servir el dashboard web y un endpoint de consulta de lecturas, \texttt{/lecturas?limit=N}, que devolvía las últimas muestras almacenadas. Esta capa evitaba que el frontend accediera directamente a SQLite y separaba la visualización de la persistencia. El dashboard inicial, implementado en HTML y JavaScript, consultaba periódicamente la API y reconstruía una tabla con las últimas lecturas disponibles.
-
-Aunque este dashboard era mucho más simple que el panel final, cumplió una función importante: permitió comprobar visualmente que la cadena completa estaba viva. Frente a una validación basada solo en mensajes de consola, la interfaz web ayudaba a detectar rápidamente si las lecturas se estaban actualizando, si las columnas tenían sentido y si las variables llegaban con el formato esperado. Esta primera visualización también sirvió para fijar necesidades posteriores del dashboard final, como la selección de estación, la presentación de métricas recientes y el tratamiento de datos ausentes.
-
-El prototipo local con MQTT tuvo, por tanto, tres aportaciones principales. En primer lugar, validó la arquitectura por capas: adquisición, mensajería, procesamiento, almacenamiento, API y visualización. En segundo lugar, permitió comprobar que el formato de telemetría debía estar bien definido desde el Arduino, preferiblemente como JSON estructurado, para evitar ambigüedades en el backend. En tercer lugar, evidenció que la visualización del sistema era imprescindible para depurar y defender el proyecto, ya que una tabla o panel web facilita mucho más la interpretación del comportamiento que una sucesión de trazas en terminal.
-
-No obstante, esta solución presentaba limitaciones claras para el objetivo final de TierraViva. La principal era la dependencia de una conexión física o local entre Arduino y Raspberry Pi. En un escenario real de campo, las estaciones pueden estar alejadas de la vivienda, en zonas con disponibilidad eléctrica limitada y sin posibilidad de mantener un cable USB o una red local estable. Además, la regla provisional del backend desplazaba la decisión de actuación a la Raspberry Pi, lo que introducía un punto de dependencia que no encajaba con el diseño final buscado para un sistema agrícola distribuido.
-
-Por estos motivos, el prototipo MQTT no se adoptó como arquitectura definitiva. Su función fue la de prototipo de aprendizaje y validación. La arquitectura final sustituye la comunicación local Serial--MQTT por comunicación remota LTE y publicación en ThingSpeak. Asimismo, la decisión de riego deja de residir en la Raspberry Pi y pasa al firmware de cada estación, que aplica umbrales, modo seguro y cooldown de forma autónoma. La Raspberry Pi conserva las partes más útiles validadas en esta fase: ingesta de datos, almacenamiento local, API y dashboard, pero adaptadas a un origen de datos cloud en lugar de un broker MQTT local.
-
-Esta evolución no supone descartar el trabajo previo, sino aprovecharlo de forma selectiva. El prototipo local permitió construir una primera versión funcional y observable de la cadena software; la arquitectura final conserva esa experiencia, pero elimina las dependencias que no eran adecuadas para estaciones remotas. Así, el paso por MQTT queda documentado como una fase técnica real del desarrollo, útil para justificar la madurez progresiva del sistema y las decisiones que llevaron a la solución final.
+Esta fase previa no se considera un desvío del proyecto, sino una etapa útil de validación incremental. Permitió comprobar en pequeño una cadena software completa y conservar sus partes más sólidas en la versión final: ingesta de datos, almacenamiento local, API y dashboard.
 
 \section{Lectura de datos desde ThingSpeak}
 \label{sec:lectura_thingspeak}
@@ -102,7 +74,7 @@ Para obtener los datos, la Raspberry utiliza la API HTTP de ThingSpeak. En concr
 
 Cada respuesta recibida desde ThingSpeak conserva el formato propio de la plataforma: identificador de entrada, fecha de creación y campos \texttt{field1} a \texttt{field8}. Sin embargo, ese formato no es el más cómodo para el resto del software de TierraViva. Por ello, el módulo de ingesta aplica una fase de normalización que traduce los campos genéricos de ThingSpeak a nombres semánticos utilizados por el sistema.
 
-La correspondencia aplicada por la Raspberry sigue el contrato de datos definido para las estaciones. El campo \texttt{field1} se interpreta como humedad del suelo normalizada, \texttt{field2} como temperatura, \texttt{field3} como humedad relativa, \texttt{field4} como luminosidad, \texttt{field5} como presión, \texttt{field6} como estado del relé, \texttt{field7} como estado del sistema o evento, y \texttt{field8} como campo de depuración o código de estado.
+La correspondencia aplicada por la Raspberry sigue el contrato de datos definido para las estaciones. El campo \texttt{field1} se interpreta como humedad del suelo normalizada, \texttt{field2} como temperatura, \texttt{field3} como humedad relativa, \texttt{field4} como luminosidad, \texttt{field5} como presión, \texttt{field6} como estado del relé, \texttt{field7} como evento de sistema y \texttt{field8} como código auxiliar de diagnóstico.
 
 \begin{table}[H]
 \centering
@@ -123,9 +95,9 @@ La correspondencia aplicada por la Raspberry sigue el contrato de datos definido
 \hline
 \texttt{field6} & \texttt{relay\_state} & Estado del relé publicado por la estación: \texttt{0} apagado, \texttt{1} activo. \\
 \hline
-\texttt{field7} & \texttt{system\_event} & Estado del sistema o evento operativo publicado por la estación. \\
+\texttt{field7} & \texttt{system\_event} & Evento de sistema publicado por la estación. \\
 \hline
-\texttt{field8} & \texttt{debug\_code} & Código auxiliar de depuración o estado publicado por la estación. \\
+\texttt{field8} & \texttt{debug\_code} & Código auxiliar de diagnóstico publicado por la estación. \\
 \hline
 \end{tabular}
 \caption{Correspondencia entre campos ThingSpeak y nombres internos utilizados por la Raspberry Pi}
@@ -325,352 +297,320 @@ El módulo \texttt{database.py} incluye también una estrategia de migración su
 En conjunto, el modelo de datos local cumple una función doble. Por un lado, proporciona persistencia al sistema de supervisión, permitiendo consultar lecturas, eventos y estados aunque el dashboard no acceda directamente a ThingSpeak. Por otro lado, aporta trazabilidad técnica: cada lectura queda asociada a una estación, a un identificador de entrada, a una marca temporal y a la respuesta original de la plataforma. Esta trazabilidad es esencial para validar el prototipo, depurar errores y defender que TierraViva no se limita a mostrar datos puntuales, sino que mantiene un histórico estructurado del comportamiento del sistema.
 
 \section{Interpretación de estados publicados por las estaciones}
-\label{sec:motor_reglas}
+\label{sec:interpretacion_estados_estaciones}
 
-La lógica de decisión del riego se ejecuta en el firmware de cada estación, no en la Raspberry Pi. Sin embargo, el software de supervisión debe interpretar correctamente los estados que las estaciones publican en ThingSpeak para mostrarlos en el dashboard y conservar trazabilidad en el histórico. Por este motivo, esta sección no describe un motor de decisión en Raspberry, sino la forma en que el sistema de supervisión interpreta el estado del relé, el evento operativo y el código auxiliar publicados por cada estación.
+La Raspberry Pi no decide si una estación debe regar ni envía órdenes de actuación hacia Arduino. Su papel consiste en interpretar los datos que la estación ya ha publicado en ThingSpeak, almacenarlos de forma coherente y ofrecer una representación comprensible al dashboard.
 
-Esta separación es importante para la seguridad del prototipo. La estación dispone de la información más inmediata —lecturas de sensores, estado del relé, contador de ciclos, modo seguro y cooldown— y, por tanto, es el lugar adecuado para decidir si se permite o se bloquea el riego. Si la Raspberry Pi está apagada, si la API no responde o si el dashboard no se actualiza, la estación sigue siendo capaz de mantener la bomba apagada ante condiciones no verificables.
+Esta separación es importante para evitar confundir supervisión con control. La decisión local de riego se ejecuta en el firmware de la estación, como se ha descrito en el Capítulo~\ref{cap:implementacion_hardware_firmware}. La Raspberry Pi trabaja sobre el resultado publicado por la estación: lecturas físicas, estado del relé, evento principal y código auxiliar de diagnóstico. El flujo completo de responsabilidades se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
 
-La lógica local de decisión se basa en una automatización explícita y trazable, no en un modelo de inteligencia artificial. Esta elección es coherente con el alcance del TFG: las reglas son comprensibles, verificables y defendibles durante las pruebas. En lugar de entrenar un modelo con datos históricos todavía insuficientes, se aplican condiciones claras sobre validez de sensores, humedad del suelo, modo seguro, cooldown y tiempo máximo de actuación.
+\subsection{Campos de estado recibidos}
 
-La Figura~\ref{fig:cap6_motor_reglas_flujo} resume el flujo lógico seguido por la estación en cada ciclo. No se representa el firmware completo, sino la secuencia de decisión que permite entender cuándo se autoriza el riego y cuándo se publica un estado de bloqueo o reposo.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figs_png/motor_reglas_flujo.png}
-\caption{Flujo lógico simplificado de la lógica local de decisión. La estación decide localmente y la Raspberry Pi supervisa el resultado publicado.}
-\label{fig:cap6_motor_reglas_flujo}
-\end{figure}
-
-El primer filtro de la lógica de decisión es la validez de los sensores. Una lectura ausente, incoherente o no inicializada no debe activar la bomba. Si el firmware detecta un problema en las medidas necesarias para decidir, el sistema adopta una respuesta conservadora: no riega, mantiene el relé apagado y publica el código \texttt{400}. Este código permite que la Raspberry Pi y el dashboard distingan un estado de error de una situación normal sin riego.
-
-El segundo elemento es el modo de funcionamiento. En modo normal, la estación evalúa si la humedad del suelo está por debajo del umbral configurado y si esa condición se mantiene durante los ciclos necesarios. En modo seguro, la estación se comporta de forma más restrictiva: no basta con una lectura puntual de sequedad, sino que se exige una condición más clara antes de permitir la actuación. Si el sistema se encuentra en modo seguro y no se autoriza el riego, se publica el código \texttt{206}.
-
-El tercer elemento es el cooldown. Después de una actuación, la estación espera un tiempo mínimo antes de permitir otro riego. Esta regla evita activaciones repetidas por lecturas inestables o por la lenta estabilización del sensor después de aportar agua. En pruebas de demostración este valor puede configurarse con una duración reducida, por ejemplo decenas de segundos, mientras que en una instalación real debería utilizarse un valor más conservador. Si el cooldown está activo, el sistema no riega y publica el código \texttt{429}.
-
-La decisión de riego se basa principalmente en la humedad del suelo. En la versión actual del firmware, la estación compara el porcentaje de humedad con un umbral normal o con un umbral de modo seguro, según el estado interno. Además, mantiene un contador de ciclos secos consecutivos. Esta confirmación por ciclos evita que una única lectura anómala active la bomba. La Figura~\ref{fig:cap6_confirmacion_humedad} representa esta lógica de forma simplificada.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figs_png/cap6_confirmacion_humedad.png}
-\caption{Confirmación de sequedad mediante umbrales y ciclos consecutivos. El modo seguro utiliza una condición más restrictiva que el modo normal.}
-\label{fig:cap6_confirmacion_humedad}
-\end{figure}
-
-En este contexto, la histéresis no se implementa como un control continuo que mantenga la bomba encendida hasta alcanzar otro umbral. Esto sería menos seguro para el prototipo, porque dependería de que el sensor reaccionase inmediatamente al riego. En TierraViva, la histéresis se aplica de forma práctica mediante tres mecanismos: confirmación por ciclos secos, separación entre umbral normal y umbral de modo seguro, y cooldown después de cada actuación. Así se evita que pequeñas oscilaciones alrededor del umbral provoquen riegos repetidos o cambios de estado demasiado frecuentes.
-
-Cuando el riego se autoriza, la bomba no queda activa indefinidamente. La actuación se ejecuta mediante una función temporizada: se activa el relé, se espera la duración configurada y se desactiva siempre al finalizar. Este comportamiento es esencial porque el apagado de la bomba no depende de la Raspberry Pi, del dashboard ni de una nueva lectura de ThingSpeak. La estación cierra localmente el ciclo de actuación.
-
-La Tabla~\ref{cuadro:cap6_codigos_motor} resume los códigos actuales publicados por la estación. Estos códigos son los que deben interpretarse desde la Raspberry Pi y el dashboard para mostrar el estado operativo de cada estación.
+Además de las variables ambientales, cada publicación de ThingSpeak incluye tres campos de estado operativo. Estos campos permiten reconstruir qué estaba ocurriendo en la estación en el momento de la telemetría.
 
 \begin{table}[H]
 \centering
+\renewcommand{\arraystretch}{1.25}
 \small
-\begin{tabular}{|p{0.16\textwidth}|p{0.28\textwidth}|p{0.46\textwidth}|}
+\begin{tabular}{|p{0.20\textwidth}|p{0.26\textwidth}|p{0.42\textwidth}|}
 \hline
-\textbf{Código} & \textbf{Estado} & \textbf{Interpretación} \\
+\rowcolor{gray!20}
+\textbf{Campo ThingSpeak} & \textbf{Nombre interno} & \textbf{Función en Raspberry Pi} \\
 \hline
-\texttt{200} & Riego ejecutado / OK & La estación ha autorizado y completado una actuación de riego temporizada. \\
+\texttt{field6} & \texttt{relay\_state} & Indica si el relé estaba apagado o activo en la última publicación recibida. \\
 \hline
-\texttt{204} & Sin riego & Las lecturas son válidas, pero no se cumple la condición de sequedad confirmada. \\
+\texttt{field7} & \texttt{system\_event} & Describe el evento principal comunicado por la estación: reposo, modo seguro, riego, error o cooldown. \\
 \hline
-\texttt{206} & Modo seguro & La estación se encuentra en modo conservador y no autoriza riego salvo condición suficientemente clara. \\
-\hline
-\texttt{400} & Error de sensores & Una lectura necesaria no es válida o algún sensor crítico no responde correctamente. \\
-\hline
-\texttt{429} & Cooldown & Se bloquea una nueva actuación porque no ha transcurrido el tiempo mínimo desde el último riego. \\
+\texttt{field8} & \texttt{debug\_code} & Aporta un código auxiliar de diagnóstico que ayuda a interpretar el resultado del ciclo. \\
 \hline
 \end{tabular}
-\caption{Códigos actuales publicados por la estación.}
-\label{cuadro:cap6_codigos_motor}
+\caption{Campos de estado interpretados por la Raspberry Pi.}
+\label{tab:campos_estado_raspberry}
 \end{table}
 
-La lógica principal puede resumirse mediante el fragmento del Código~\ref{cod:motor_reglas_decision}. No se incluye el sketch completo, sino la parte esencial de la decisión. El orden de comprobación es relevante: primero se descartan errores de sensores, después se comprueba el cooldown, y solo entonces se evalúa la sequedad según el modo normal o seguro.
+La codificación completa de estos campos se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}. En este capítulo solo se describe cómo se utilizan dentro del software de supervisión para evitar repetir la referencia completa de códigos.
 
-\begin{code}[H]
-\begin{lstlisting}[language=C++]
-bool shouldIrrigate() {
-  if (!sensorOk) {
-    statusCode = 400;       // Error de sensores
-    return false;
-  }
+\subsection{Diferencia entre evento y diagnóstico}
 
-  if (cooldownActive()) {
-    statusCode = 429;       // Cooldown activo
-    return false;
-  }
+El campo \texttt{system\_event} y el campo \texttt{debug\_code} no cumplen la misma función. El primero resume el evento principal de la estación, mientras que el segundo proporciona información auxiliar sobre el resultado del ciclo.
 
-  if (safeMode) {
-    return (soilPercent <= SAFE_SOIL_THRESHOLD) &&
-           (dryCycleCount >= SAFE_CONFIRM_DRY_CYCLES);
-  }
+Por ejemplo, una estación puede publicar un evento de riego activado, de riego finalizado, de error o de cooldown. El diagnóstico permite complementar ese evento con un código de funcionamiento correcto, no riego, modo seguro, error o bloqueo por cooldown. Esta separación facilita que el dashboard no muestre únicamente si hay riego o no, sino una explicación mínima del motivo.
 
-  return (soilPercent <= NORMAL_SOIL_THRESHOLD) &&
-         (dryCycleCount >= NORMAL_CONFIRM_DRY_CYCLES);
-}
-\end{lstlisting}
-\caption{Resumen de la decisión local de riego}
-\label{cod:motor_reglas_decision}
-\end{code}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.36\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Campo} & \textbf{Pregunta que responde} & \textbf{Uso principal} \\
+\hline
+\texttt{relay\_state} & ¿El relé estaba activo? & Mostrar el estado físico publicado por la estación. \\
+\hline
+\texttt{system\_event} & ¿Qué evento principal ocurrió? & Identificar reposo, riego, modo seguro, error o cooldown. \\
+\hline
+\texttt{debug\_code} & ¿Cuál fue el resultado o condición auxiliar? & Apoyar diagnóstico y depuración del ciclo. \\
+\hline
+\end{tabular}
+\caption{Diferencia funcional entre estado de relé, evento y diagnóstico.}
+\label{tab:diferencia_evento_diagnostico}
+\end{table}
 
-El código anterior no asigna por sí solo todos los estados finales. Cuando \texttt{shouldIrrigate()} devuelve \texttt{true}, el bucle principal ejecuta el riego temporizado y publica \texttt{200}. Cuando devuelve \texttt{false}, el firmware distingue la causa: error de sensores, cooldown, modo seguro o ausencia de necesidad de riego. Esta separación permite que el dashboard no muestre simplemente ``riego/no riego'', sino el motivo de la decisión.
+Esta interpretación conjunta evita depender de un único campo. Un valor aislado puede ser insuficiente para comprender el estado real de la estación, especialmente si la última lectura es antigua o si el sistema está en una fase de transición entre riego activo y riego finalizado.
 
-\begin{code}[H]
-\begin{lstlisting}[language=C++]
-readSensors();
-updateSafetyState();
+\subsection{Normalización para almacenamiento y consulta}
 
-if (shouldIrrigate()) {
-  irrigateForSeconds(IRRIGATION_SECONDS);
-  statusCode = 200;      // Riego ejecutado
-} else {
-  if (!sensorOk) {
-    statusCode = 400;    // Error de sensores
-  } else if (cooldownActive()) {
-    statusCode = 429;    // Cooldown activo
-  } else if (safeMode) {
-    statusCode = 206;    // Modo seguro
-  } else {
-    statusCode = 204;    // Sin riego
-  }
-}
+Durante la ingesta, los campos genéricos de ThingSpeak se transforman en nombres internos más expresivos. Esta normalización permite que el resto del software trabaje con nombres semánticos, en lugar de depender directamente de \texttt{field1}, \texttt{field2} o \texttt{field8}.
 
-sendThingSpeak();
-\end{lstlisting}
-\caption{Asignación del código operativo antes de publicar en ThingSpeak}
-\label{cod:asignacion_codigos_motor}
-\end{code}
+El proceso de normalización también convierte los valores recibidos a tipos adecuados siempre que sea posible. ThingSpeak devuelve los campos como texto o como valores nulos, por lo que el software debe interpretar enteros, reales y valores ausentes antes de almacenarlos o servirlos mediante la API.
 
-La actuación sobre el relé se limita temporalmente. El firmware activa la salida de control, espera el número de segundos configurado y después apaga el relé. En el montaje real, esta salida controla el módulo de relé que alimenta la bomba de agua de 12 V. La decisión de apagar el relé desde el propio firmware reduce el riesgo de riego indefinido ante fallos de comunicación o pérdida de supervisión.
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.52\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Acción de Raspberry Pi} & \textbf{Finalidad} \\
+\hline
+Leer la última entrada de ThingSpeak & Obtener la telemetría más reciente publicada por cada estación. \\
+\hline
+Comprobar \texttt{entry\_id} & Evitar insertar varias veces la misma lectura. \\
+\hline
+Normalizar campos & Traducir \texttt{field1}--\texttt{field8} a nombres internos. \\
+\hline
+Convertir tipos & Transformar cadenas en números cuando procede. \\
+\hline
+Conservar \texttt{raw\_json} & Mantener trazabilidad de la respuesta original recibida. \\
+\hline
+Actualizar el estado de ingesta & Registrar qué entrada ha sido procesada para cada estación. \\
+\hline
+\end{tabular}
+\caption{Tratamiento de los estados publicados durante la ingesta.}
+\label{tab:tratamiento_estados_ingesta}
+\end{table}
 
-\begin{code}[H]
-\begin{lstlisting}[language=C++]
-void irrigateForSeconds(unsigned long seconds) {
-  relayActive = true;
-  digitalWrite(RELAY_PIN, RELAY_ON);
+El detalle completo de la correspondencia entre campos de ThingSpeak y nombres internos se documenta en el Anexo~\ref{anexo:estructura_thingspeak_estados}. El esquema de almacenamiento se desarrolla en la Sección~\ref{sec:base_datos_sqlite}.
 
-  delay(seconds * 1000UL);
+\subsection{Uso por parte de la API y el dashboard}
 
-  digitalWrite(RELAY_PIN, RELAY_OFF);
-  relayActive = false;
-  lastIrrigationEndMs = millis();
-}
-\end{lstlisting}
-\caption{Actuación temporizada sobre el relé}
-\label{cod:riego_temporizado}
-\end{code}
+Una vez almacenados los datos, la API expone la última lectura, el histórico reciente, las estadísticas y el estado básico del sistema. La API no consulta directamente sensores ni se comunica por puerto serie con Arduino; trabaja sobre los datos previamente ingeridos y almacenados en SQLite. La referencia completa de endpoints se incluye en el Anexo~\ref{anexo:manual_api}.
 
-El resultado de cada ciclo se publica en ThingSpeak junto con la telemetría. Los campos de sensores permiten interpretar el contexto físico de la estación, mientras que el estado del relé y el código operativo permiten conocer el resultado de la decisión. La Raspberry Pi consulta posteriormente esos datos, los almacena en SQLite y los expone al dashboard, pero no modifica la decisión local tomada por la estación.
+El dashboard consume esos endpoints para mostrar al usuario una interpretación visual del sistema. Desde el punto de vista de interfaz, los campos de estado permiten mostrar si la estación está en reposo, si ha regado, si se encuentra en modo seguro, si existe un error de lectura o si se ha bloqueado una actuación por cooldown. La interpretación orientada al usuario final se recoge en el Anexo~\ref{anexo:manual_usuario}.
 
-Este diseño hace que la lógica local sea simple, verificable y seguro. Simple, porque utiliza condiciones explícitas y parámetros configurables. Verificable, porque cada salida puede relacionarse con un código concreto publicado en ThingSpeak. Y seguro, porque ante lecturas inválidas, cooldown activo o modo seguro no confirmado, la respuesta por defecto es mantener la bomba apagada. De este modo, TierraViva cierra localmente el ciclo medir--decidir--actuar, mientras que la Raspberry Pi conserva el papel de supervisión e histórico.
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{|p{0.28\textwidth}|p{0.52\textwidth}|}
+\hline
+\rowcolor{gray!20}
+\textbf{Elemento software} & \textbf{Uso de los estados} \\
+\hline
+Ingestor \texttt{main.py} & Recupera y normaliza los campos publicados por ThingSpeak. \\
+\hline
+SQLite & Conserva lecturas y respuesta original para trazabilidad. \\
+\hline
+API FastAPI & Devuelve lecturas y estado al dashboard mediante endpoints HTTP. \\
+\hline
+Dashboard & Traduce los estados a información visual comprensible para el usuario. \\
+\hline
+Manual de usuario & Explica cómo interpretar estados, eventos y códigos de diagnóstico. \\
+\hline
+\end{tabular}
+\caption{Uso de los estados publicados en las capas software de supervisión.}
+\label{tab:uso_estados_capas_software}
+\end{table}
+
+\subsection{Límites de interpretación}
+
+El estado mostrado por la Raspberry Pi representa la última información publicada por la estación, no una lectura física en tiempo real del relé. Si la última entrada es antigua, el estado físico de la estación puede haber cambiado desde entonces. Por este motivo, la API y el dashboard deben interpretar los estados junto con la antigüedad de la lectura.
+
+Esta limitación es propia de una arquitectura basada en telemetría periódica. La estación sigue siendo la responsable de la actuación local, mientras que Raspberry Pi ofrece una vista de supervisión basada en los datos recibidos. Ante falta de datos recientes, el sistema debe mostrar una condición de dato antiguo u offline, no asumir que el estado publicado sigue siendo válido indefinidamente.
+
+\subsection{Conclusión}
+
+La interpretación de estados en Raspberry Pi permite convertir la telemetría publicada por las estaciones en información útil para almacenamiento, consulta y visualización. El punto clave es mantener una separación estricta entre control y supervisión: Arduino mide, decide y actúa localmente; ThingSpeak recibe la telemetría; Raspberry Pi ingiere, almacena y sirve los datos; y el dashboard presenta el estado al usuario.
+
+Con esta organización, el capítulo principal conserva la explicación software necesaria sin duplicar la lógica de firmware ni la referencia completa de códigos, que quedan documentadas en el Capítulo~\ref{cap:implementacion_hardware_firmware} y en el Anexo~\ref{anexo:estructura_thingspeak_estados}.
 
 \section{API FastAPI}
 \label{sec:api_fastapi}
 
-La API de TierraViva constituye la capa de servicio entre la base de datos local y el dashboard web. Su función no es comunicarse directamente con las estaciones ni decidir el riego, sino ofrecer una interfaz HTTP para consultar de forma estructurada la información ya almacenada en la Raspberry Pi. De este modo, el frontend no necesita acceder directamente a SQLite ni conocer los detalles internos del módulo de ingesta.
+La API local de TierraViva se implementa con FastAPI y actúa como capa de servicio entre la base de datos SQLite y el dashboard web. Su función principal es exponer los datos almacenados en la Raspberry Pi mediante peticiones HTTP, evitando que la interfaz acceda directamente a la base de datos o tenga que conocer los detalles internos del almacenamiento.
 
-\begin{wrapfigure}{r}{0.32\textwidth}
+\begin{wrapfigure}{r}{0.28\textwidth}
     \vspace{-12pt}
     \centering
-    \includegraphics[width=0.30\textwidth]{figs/fast_api_logo.png}
+    \includegraphics[width=0.24\textwidth]{figs/fast_api_logo.png}
     \caption{Logo FastAPI}
     \label{fig:logo_fastapi}
     \vspace{-8pt}
 \end{wrapfigure}
 
-La implementación se realiza con FastAPI, un framework Python orientado a la creación de APIs web. En el contexto de TierraViva, FastAPI permite definir endpoints claros, validar parámetros de consulta y devolver respuestas en formato JSON. Esta elección mantiene el código compacto, facilita la depuración y ofrece una documentación automática de la API durante la ejecución del servidor.
+La API se ejecuta localmente en la Raspberry Pi mediante Uvicorn. No se comunica con los sensores, no accede al puerto serie de Arduino y no envía órdenes de riego a las estaciones. Trabaja únicamente sobre la información ya ingerida desde ThingSpeak y almacenada en SQLite. Esta separación mantiene la coherencia de la arquitectura final: las estaciones miden y actúan localmente, mientras que la Raspberry Pi supervisa, almacena y sirve información.
 
-La API se ejecuta mediante Uvicorn, escuchando en el puerto \texttt{8000}. El script de gestión \texttt{tierraviva.sh} arranca por separado el proceso de ingesta y el servidor web, de modo que la lectura de ThingSpeak y la consulta desde el dashboard quedan desacopladas. Si el dashboard realiza varias peticiones seguidas, estas se atienden desde la base de datos local, sin forzar una consulta nueva a ThingSpeak en cada refresco de pantalla.
-
-La Figura~\ref{fig:cap6_api_flujo} resume el papel de la API dentro del software de la Raspberry Pi.
+La Figura~\ref{fig:fastapi_capa_servicio} representa el papel de FastAPI dentro del sistema software.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.80\textwidth]{figs_png/api_flujo.png}
+\includegraphics[width=0.92\textwidth]{figs_png/api_flujo.png}
 \caption{Papel de FastAPI como capa de servicio entre SQLite y los clientes de consulta.}
-\label{fig:cap6_api_flujo}
+\label{fig:fastapi_capa_servicio}
 \end{figure}
 
-El diseño de la API sigue una separación de responsabilidades sencilla. El módulo \texttt{database.py} conserva las funciones de acceso a datos; \texttt{api.py} se limita a validar parámetros, llamar a esas funciones y enriquecer algunas respuestas con información útil para la interfaz. Por ejemplo, una lectura puede completarse con su antigüedad en segundos, una etiqueta de frescura y una clasificación del estado del suelo.
+Desde el punto de vista de diseño, la API cumple cuatro responsabilidades principales:
 
-La Tabla~\ref{cuadro:cap6_endpoints_api} resume los endpoints principales de la API. 
+\begin{itemize}
+    \item consultar las funciones de acceso a datos definidas en \texttt{database.py};
+    \item validar parámetros básicos de entrada, como estación o límites de consulta;
+    \item enriquecer algunas respuestas con información útil para la interfaz;
+    \item devolver los datos en formato JSON para que puedan ser consumidos por el dashboard.
+\end{itemize}
 
-\begin{table}[H]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{|p{0.27\textwidth}|p{0.15\textwidth}|p{0.48\textwidth}|}
-\hline
-\textbf{Endpoint} & \textbf{Método} & \textbf{Función principal} \\
-\hline
-\texttt{/} & GET & Sirve el fichero \texttt{index.html} del dashboard. \\
-\hline
-\texttt{/api/config} & GET & Devuelve la configuración general del sistema: estación seleccionada, estaciones activas, umbrales, ruta de base de datos y últimas marcas de ingesta. \\
-\hline
-\texttt{/api/latest} & GET & Devuelve la última lectura almacenada para una estación, junto con antigüedad, frescura y estado interpretado del suelo. \\
-\hline
-\texttt{/api/readings} & GET & Devuelve el histórico reciente de lecturas de una estación, con un límite configurable de muestras. \\
-\hline
-\texttt{/api/stats} & GET & Calcula estadísticas agregadas para una ventana temporal configurable. \\
-\hline
-\texttt{/api/health} & GET & Comprueba el estado básico del servicio: base de datos, frontend y disponibilidad de lecturas. \\
-\hline
-\end{tabular}
-\caption{Endpoints implementados en la API FastAPI}
-\label{cuadro:cap6_endpoints_api}
-\end{table}
+El módulo \texttt{database.py} conserva la lógica de persistencia y consulta sobre SQLite. Por su parte, \texttt{api.py} se limita a actuar como capa de exposición HTTP. Esta división evita mezclar almacenamiento, lógica de consulta e interfaz, y facilita que el dashboard pueda evolucionar sin modificar la estructura interna de la base de datos.
 
-El endpoint \texttt{/api/latest} se utiliza para obtener la situación más reciente de una estación. Recibe como parámetro el identificador de estación, por ejemplo \texttt{station=A}, y devuelve la última lectura almacenada. Además de los datos originales, la API calcula campos derivados como \texttt{age\_seconds}, \texttt{freshness} y \texttt{soil\_state}. Estos campos evitan que el dashboard tenga que repetir lógica de interpretación en JavaScript.
-
-\begin{lstlisting}[language=Python, caption={Esquema simplificado del endpoint de última lectura}, label={cod:api_latest}]
-@app.get("/api/latest")
-def api_latest(station: Optional[str] = Query(None)):
-    selected_station = normalize_station(station)
-    reading = get_latest_reading(selected_station)
-
-    if reading is None:
-        return {
-            "ok": False,
-            "station": selected_station,
-            "reading": None,
-            "status": "sin_datos",
-        }
-
-    age_seconds = age_seconds_from_ts(reading["ts"])
-    soil = reading.get("soil_moisture_pct")
-
-    return {
-        "ok": True,
-        "station": selected_station,
-        "reading": reading,
-        "age_seconds": age_seconds,
-        "freshness": freshness_label(age_seconds),
-        "soil_state": soil_label(soil),
-    }
-\end{lstlisting}
-
-El endpoint \texttt{/api/readings} expone el histórico reciente. Su parámetro \texttt{limit} permite controlar cuántas muestras se devuelven, con límites internos para evitar respuestas excesivamente grandes. Esta consulta es la base de las gráficas temporales del dashboard, ya que permite recuperar las últimas medidas de humedad del suelo, temperatura, humedad relativa, luminosidad y presión.
-
-El endpoint \texttt{/api/stats} proporciona un resumen agregado para una ventana temporal expresada en horas. Con \texttt{hours=24} se obtiene un resumen diario; con \texttt{hours=168}, un resumen semanal. Esta decisión evita crear endpoints separados para día y semana, y permite reutilizar la misma función para diferentes escalas temporales. El resultado puede incluir valores medios, mínimos y máximos de las principales magnitudes registradas.
+La API expone un conjunto reducido de endpoints orientados a supervisión: configuración activa, última lectura, histórico reciente, estadísticas y estado básico del servicio. La Tabla~\ref{tab:cap6_resumen_api} resume su papel dentro de la arquitectura, sin entrar en parámetros ni ejemplos de respuesta, que se recogen de forma completa en el Anexo~\ref{anexo:manual_api}.
 
 \begin{table}[H]
 \centering
+\renewcommand{\arraystretch}{1.22}
 \small
-\begin{tabular}{|p{0.30\textwidth}|p{0.25\textwidth}|p{0.35\textwidth}|}
+\begin{tabular}{|p{0.28\textwidth}|p{0.54\textwidth}|}
 \hline
-\textbf{Consulta} & \textbf{Ejemplo} & \textbf{Uso en el sistema} \\
+\rowcolor{gray!20}
+\textbf{Endpoint} & \textbf{Uso dentro del sistema} \\
 \hline
-Última lectura de A & \texttt{/api/latest?station=A} & Tarjetas principales del dashboard. \\
+\texttt{/} & Sirve el dashboard web al navegador. \\
 \hline
-Histórico reciente de B & \texttt{/api/readings?station=B\&limit=120} & Gráficas de evolución temporal. \\
+\texttt{/api/config} & Proporciona configuración activa, estaciones disponibles y parámetros de visualización. \\
 \hline
-Resumen diario & \texttt{/api/stats?station=A\&hours=24} & Valores medios, mínimos y máximos del último día. \\
+\texttt{/api/latest} & Devuelve la última lectura almacenada y datos derivados para interpretar su estado. \\
 \hline
-Resumen semanal & \texttt{/api/stats?station=A\&hours=168} & Análisis de tendencia semanal. \\
+\texttt{/api/readings} & Recupera el histórico reciente utilizado por gráficas y tabla de lecturas. \\
 \hline
-Consulta de salud & \texttt{/api/health?station=A} & Diagnóstico básico del servicio, disponibilidad de datos y existencia del frontend. \\
+\texttt{/api/stats} & Calcula estadísticas agregadas para una ventana temporal. \\
 \hline
-Configuración de A & \texttt{/api/config?station=A} & Consulta de umbrales, estación activa, rutas locales y última ingesta registrada. \\
+\texttt{/api/health} & Comprueba el estado básico de API, base de datos y frontend. \\
 \hline
 \end{tabular}
-\caption{Ejemplos de consulta a la API}
-\label{cuadro:cap6_consultas_api}
+\caption{Resumen funcional de la API en la arquitectura software.}
+\label{tab:cap6_resumen_api}
 \end{table}
 
-La API pública se mantiene deliberadamente centrada en la consulta de lecturas, configuración, estadísticas y diagnóstico. Aunque la base de datos contiene una tabla preparada para eventos operativos, la versión actual del backend no expone endpoints de control ni de envío de órdenes hacia las estaciones. Esta decisión mantiene la coherencia con la arquitectura final: la Raspberry Pi consulta y muestra información, pero no participa en la actuación física sobre el riego.
+Uno de los aspectos más relevantes de la API es que no se limita a devolver registros crudos de la base de datos. Algunas respuestas incorporan información calculada que simplifica el trabajo del dashboard. Por ejemplo, a partir de la última lectura puede calcularse la antigüedad del dato, una etiqueta de frescura y una clasificación básica de humedad del suelo. De este modo, la interfaz no necesita repetir lógica de interpretación en JavaScript.
 
-Desde el punto de vista del dashboard, esta API permite construir una interfaz reactiva sin acoplarla a la base de datos. La web puede solicitar periódicamente \texttt{/api/latest}, \texttt{/api/readings} y \texttt{/api/stats}; si una estación deja de actualizarse, la antigüedad de la última lectura permite mostrar un estado \textit{fresh}, \textit{stale} u \textit{offline}. Esta lógica mejora la interpretación visual: no basta con enseñar el último valor recibido, también es necesario indicar si ese valor sigue siendo reciente.
+La API también ayuda a separar responsabilidades en la visualización. El dashboard solicita datos ya estructurados, mientras que la API concentra las reglas de consulta y preparación de respuesta. Esta decisión reduce acoplamiento entre frontend y base de datos, y facilita la depuración: si una lectura aparece incorrecta en la interfaz, puede comprobarse primero la respuesta JSON de la API antes de revisar la capa visual.
 
-El endpoint \texttt{/api/health} se reserva para diagnóstico. Devuelve información básica sobre el servicio, como la existencia del frontend, la ruta de la base de datos y si hay datos disponibles para alguna estación. Este tipo de endpoint es útil durante la instalación en Raspberry Pi, porque permite comprobar rápidamente si el servidor está levantado y si la API puede acceder a la información local.
+La referencia completa de endpoints, parámetros, ejemplos de respuesta, validaciones y códigos HTTP se incluye en el Anexo~\ref{anexo:manual_api}. El uso de estos endpoints desde el punto de vista del usuario final se describe en el Anexo~\ref{anexo:manual_usuario}.
 
-En conjunto, FastAPI actúa como una frontera clara entre almacenamiento y visualización. La base de datos conserva el histórico; la API lo transforma en respuestas JSON coherentes; y el dashboard consume esas respuestas sin conocer la estructura interna de SQLite. Esta separación hace que el software sea más mantenible y deja abierta la posibilidad de añadir otros clientes en el futuro, como una aplicación móvil, una herramienta de análisis o scripts de validación, reutilizando la misma interfaz HTTP.
+En resumen, FastAPI permite convertir la información almacenada localmente en una interfaz de consulta clara y reutilizable. Dentro de TierraViva no cumple una función de control físico, sino de supervisión: sirve datos al dashboard, facilita la consulta del histórico y permite comprobar el estado básico del sistema software.
 
 \section{Dashboard web de supervisión}
 \label{sec:dashboard_web_supervision}
 
-El último bloque software de la Raspberry Pi es el dashboard web de supervisión. Su función es presentar al usuario la información almacenada y servida por la API de forma comprensible, sin obligarle a consultar directamente ThingSpeak, SQLite o los logs del sistema. El dashboard no participa en la decisión de riego ni envía órdenes a las estaciones; actúa como interfaz de visualización del estado publicado por los nodos de campo.
+El dashboard web constituye la capa de presentación del sistema software de TierraViva. Su función es transformar los datos servidos por la API en una vista de supervisión accesible desde un navegador, sin que el usuario tenga que consultar directamente ThingSpeak, SQLite o los logs de ejecución.
 
-La interfaz principal se define en el fichero \texttt{dashboard/index.html}, mientras que la lógica de actualización se implementa en \texttt{dashboard/js/tierraviva.js}. El fichero HTML contiene la estructura visual del panel: cabecera, selector de estación, tarjetas de lectura actual, gráficas, resumen histórico y tabla de últimas lecturas. El fichero JavaScript se encarga de consultar periódicamente la API, interpretar las respuestas y actualizar los elementos de la página.
+Dentro de la arquitectura final, el dashboard no toma decisiones de riego, no accede al puerto serie, no escribe en la base de datos y no envía órdenes a las estaciones. Su papel se limita a consultar la API local, representar el estado del sistema y actualizar la información mostrada conforme llegan nuevos datos.
 
-El dashboard está organizado alrededor de una estación seleccionada. En la versión actual se contemplan las estaciones \texttt{A} y \texttt{B}, y el usuario puede alternar entre ellas mediante un selector. Esta decisión mantiene la coherencia con la arquitectura multiestación del sistema: la misma interfaz puede mostrar datos de distintas zonas sin duplicar el código del frontend.
+La implementación del frontend se organiza principalmente en dos bloques:
 
-La Tabla~\ref{cuadro:cap6_campos_dashboard} resume los principales campos mostrados en el dashboard.
+\begin{itemize}
+    \item \texttt{dashboard/index.html}, que define la estructura visual de la interfaz;
+    \item \texttt{dashboard/js/tierraviva.js}, que contiene la lógica de actualización, consulta a la API y refresco dinámico de los datos.
+\end{itemize}
+
+Esta separación permite mantener diferenciado el marcado visual de la lógica de comunicación con la API. El fichero HTML define las zonas principales del panel, mientras que el JavaScript se encarga de solicitar datos, procesar respuestas y actualizar los elementos de la página sin recargarla por completo.
+
+\subsection{Papel del dashboard dentro de la arquitectura}
+
+El dashboard se sitúa al final del flujo software de TierraViva. Las estaciones publican telemetría en ThingSpeak, la Raspberry Pi ingiere y almacena los datos en SQLite, FastAPI los expone mediante endpoints HTTP y el dashboard los presenta visualmente.
+
+\begin{center}
+\texttt{ThingSpeak} $\rightarrow$ \texttt{SQLite} $\rightarrow$ \texttt{FastAPI} $\rightarrow$ \texttt{Dashboard}
+\end{center}
+
+Esta organización evita que la interfaz web dependa directamente de la plataforma cloud o de la estructura interna de la base de datos. Si se modifica el almacenamiento local o el mecanismo de ingesta, el dashboard puede mantenerse estable siempre que la API conserve el mismo contrato de respuesta.
+
+El flujo completo de responsabilidades entre estación, plataforma IoT, Raspberry Pi, API y dashboard se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}. El uso de la interfaz desde el punto de vista del usuario final se documenta en el Anexo~\ref{anexo:manual_usuario}.
+
+\subsection{Consumo de datos desde la API}
+
+El dashboard consume únicamente los datos expuestos por FastAPI. En particular, utiliza endpoints de configuración, última lectura, histórico reciente y estadísticas agregadas. No se detallan aquí los parámetros ni las respuestas de cada endpoint, ya que la referencia completa se recoge en el Anexo~\ref{anexo:manual_api}.
+
+Desde el punto de vista del frontend, las consultas cumplen tres funciones principales:
+
+\begin{itemize}
+    \item obtener la configuración activa del sistema, incluyendo estaciones disponibles, umbrales y periodo de refresco;
+    \item recuperar la última lectura de la estación seleccionada;
+    \item solicitar datos históricos recientes para gráficas, tablas y resúmenes.
+\end{itemize}
+
+La estación activa se gestiona mediante un selector en la interfaz. Al cambiar de estación, el JavaScript actualiza las consultas realizadas a la API y reconstruye los elementos visuales con los datos correspondientes. Esto permite reutilizar la misma interfaz para varias estaciones sin duplicar páginas ni lógica de frontend.
+
+\subsection{Actualización periódica de la interfaz}
+
+La actualización de la interfaz se realiza mediante peticiones HTTP periódicas desde JavaScript. El intervalo de refresco se obtiene de la configuración devuelta por la API, de forma que el comportamiento del dashboard pueda ajustarse desde la configuración del sistema sin modificar el código visual.
+
+El dashboard no asume que cada consulta vaya a producir una lectura nueva. La estación publica datos con su propio intervalo y la Raspberry Pi puede consultar ThingSpeak con una frecuencia distinta. Por ello, el frontend trabaja con la última información servida por la API y utiliza los campos de frescura para distinguir entre datos recientes, antiguos u offline.
+
+Esta estrategia evita presentar una lectura antigua como si fuera necesariamente el estado actual del sistema. La interpretación completa de la frescura de datos desde el punto de vista del usuario se desarrolla en el Anexo~\ref{anexo:manual_usuario}.
+
+\subsection{Estructura visual}
+
+La interfaz se organiza en bloques funcionales: cabecera, selector de estación, tarjetas de lectura actual, indicadores de estado, gráficas, resumen histórico y tabla de últimas lecturas. En el capítulo principal no se desarrolla la interpretación de cada zona para evitar duplicar el manual de usuario. Aquí interesa destacar que cada bloque visual se alimenta de datos estructurados procedentes de la API.
 
 \begin{table}[H]
 \centering
+\renewcommand{\arraystretch}{1.22}
 \small
-\begin{tabular}{|p{0.28\textwidth}|p{0.30\textwidth}|p{0.32\textwidth}|}
+\begin{tabular}{|p{0.30\textwidth}|p{0.50\textwidth}|}
 \hline
-\textbf{Elemento mostrado} & \textbf{Origen en la API} & \textbf{Interpretación} \\
+\rowcolor{gray!20}
+\textbf{Bloque del dashboard} & \textbf{Función técnica} \\
 \hline
-Humedad del suelo & \texttt{soil\_moisture\_pct} & Valor normalizado de humedad utilizado para clasificar el suelo como seco, normal o húmedo. \\
+Cabecera y selector & Permiten identificar el sistema y seleccionar la estación consultada. \\
 \hline
-Temperatura & \texttt{temperature\_c} & Temperatura ambiente medida por la estación. \\
+Tarjetas de lectura actual & Presentan la última lectura normalizada devuelta por la API. \\
 \hline
-Humedad ambiental & \texttt{humidity\_pct} & Humedad relativa del aire. \\
+Indicadores de estado & Muestran frescura del dato, estado del relé, evento y diagnóstico recibidos. \\
 \hline
-Luminosidad & \texttt{light\_lux} & Nivel de luz ambiente medido en lux. \\
+Gráficas & Representan la evolución reciente de las variables almacenadas. \\
 \hline
-Presión & \texttt{pressure\_hpa} & Presión atmosférica medida por el sensor ambiental. \\
+Resumen histórico & Muestra agregados calculados por la API para una ventana temporal. \\
 \hline
-Última lectura & \texttt{ts}, \texttt{age\_seconds}, \texttt{freshness} & Información temporal para saber si los datos son recientes, antiguos u obsoletos. \\
-\hline
-Estado del relé & \texttt{relay\_state} & Indica si el bloque de actuación aparece como apagado o activo según la última publicación. \\
-\hline
-Estado/evento & \texttt{system\_event} & Estado operativo publicado por la estación. \\
-\hline
-Debug/código & \texttt{debug\_code} & Código auxiliar de diagnóstico o estado publicado por la estación. \\
+Tabla de lecturas & Facilita la revisión de registros recientes almacenados en SQLite. \\
 \hline
 \end{tabular}
-\caption{Campos principales mostrados en el dashboard web}
-\label{cuadro:cap6_campos_dashboard}
+\caption{Bloques funcionales del dashboard web.}
+\label{tab:bloques_funcionales_dashboard}
 \end{table}
 
-La pantalla inicial muestra tarjetas con las magnitudes más recientes: humedad del suelo, temperatura, humedad ambiental, luminosidad y presión. Estas tarjetas permiten comprobar rápidamente el estado de la estación seleccionada. Además, el panel incluye información de actualización, mostrando si la última lectura se considera reciente, retrasada u obsoleta. Esta distinción es importante porque un valor aparentemente correcto puede no ser útil si la estación lleva demasiado tiempo sin publicar datos nuevos.
+La descripción de uso, interpretación de estados, eventos, códigos de diagnóstico y situaciones habituales se mantiene en el Anexo~\ref{anexo:manual_usuario}.
 
-El dashboard también interpreta la humedad del suelo mediante umbrales configurados. En lugar de mostrar únicamente un número, el frontend clasifica el valor como \textit{seco}, \textit{normal} o \textit{húmedo}. Esta interpretación se realiza a partir de los umbrales recibidos desde \texttt{/api/config}. De esta forma, la interfaz puede adaptarse a cambios de configuración sin modificar manualmente el código HTML.
+\subsection{Separación entre presentación y lógica de control}
 
-La actualización de datos se realiza mediante peticiones HTTP periódicas a la API. El script \texttt{tierraviva.js} consulta los endpoints \texttt{/api/config}, \texttt{/api/latest}, \texttt{/api/readings} y \texttt{/api/stats} para obtener configuración, última lectura, histórico reciente y resumen estadístico. Estas peticiones se realizan para la estación seleccionada, utilizando el parámetro \texttt{station}. El intervalo de refresco se obtiene de la configuración del sistema mediante \texttt{web\_refresh\_seconds}; si no está disponible, se utiliza un valor por defecto de tres segundos.
+Una decisión relevante del diseño es que el dashboard no cierre el bucle de control del riego. Aunque muestra estados operativos como relé activo, evento de sistema o código de diagnóstico, estos valores proceden de la estación y han sido publicados previamente en ThingSpeak. La interfaz no modifica umbrales en Arduino, no activa la bomba y no confirma órdenes de actuación.
 
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{|p{0.42\textwidth}|p{0.50\textwidth}|}
-\hline
-\textbf{Consulta realizada por el dashboard} & \textbf{Uso en la interfaz} \\
-\hline
-\texttt{/api/config?station=A} & Obtener estación activa, lista de estaciones, umbrales y periodo de refresco. \\
-\hline
-\texttt{/api/latest?station=A} & Actualizar las tarjetas principales con la última lectura disponible. \\
-\hline
-\texttt{/api/readings?station=A\&limit=10} & Construir gráficas y tabla de lecturas recientes. \\
-\hline
-\texttt{/api/stats?station=A\&hours=24} & Mostrar el resumen histórico de las últimas 24 horas. \\
-\hline
-\end{tabular}
-\caption{Consultas principales realizadas por el dashboard a la API}
-\label{cuadro:cap6_consultas_dashboard}
-\end{table}
+Esta separación reduce el riesgo de que un fallo de navegador, una pérdida de conexión local o un error de JavaScript afecten al comportamiento físico de la estación. Si el dashboard deja de estar disponible, la estación puede seguir ejecutando su lógica local de medida, decisión y actuación.
 
-Además de las tarjetas principales, el dashboard incorpora gráficas de evolución temporal. Estas gráficas permiten observar la tendencia reciente de las variables ambientales y de suelo, en lugar de analizar únicamente la última muestra recibida. Esta visualización resulta útil durante las pruebas porque permite detectar comportamientos anómalos, valores constantes, saltos bruscos o ausencia de actualización.
+\subsection{Gestión visual de errores y datos ausentes}
 
-El panel incluye también un resumen histórico de las últimas 24 horas. Este resumen calcula valores agregados, como medias, mínimos y máximos, a partir de los datos devueltos por la API. En el caso de los campos operativos, como el estado del relé, el estado/evento y el código de depuración, el dashboard muestra información de frecuencia o último valor disponible. Así, el usuario puede distinguir no solo las condiciones ambientales, sino también el comportamiento operativo reciente de la estación.
+El dashboard debe representar también situaciones incompletas o anómalas. Si la API no devuelve datos para una estación, si una lectura es antigua o si algún campo aparece vacío, la interfaz debe reflejar esa condición en lugar de ocultarla. En un sistema de supervisión, la ausencia de datos también es información relevante.
 
-La tabla de últimas lecturas completa la visualización. En ella se muestran varias muestras recientes con fecha, humedad del suelo, temperatura, humedad relativa, luminosidad y presión. Esta tabla resulta especialmente útil durante la depuración, ya que permite comprobar si las lecturas se insertan en orden, si aparecen valores nulos o si la evolución de los datos es coherente con lo mostrado en las tarjetas y gráficas.
+Este comportamiento es especialmente importante en TierraViva porque el sistema trabaja con telemetría periódica. La última lectura almacenada no siempre equivale al estado físico instantáneo de la estación. Por ello, el dashboard combina valores medidos, marca temporal, frescura de datos y códigos de estado para ofrecer una vista más prudente del sistema.
 
-Desde el punto de vista de diseño, el dashboard se mantiene como una capa de presentación. No accede directamente a ThingSpeak ni a SQLite, sino que consume exclusivamente la API expuesta por FastAPI. Esta separación evita duplicar lógica de acceso a datos en el frontend y facilita que los cambios en la base de datos o en la ingesta no obliguen a modificar la estructura visual, siempre que la API mantenga el contrato de respuesta.
+\subsection{Conclusión}
 
-En caso de error, ausencia de datos o pérdida de actualización, el dashboard no debe ocultar la situación. Si la API no devuelve una lectura válida, la interfaz muestra valores vacíos o mensajes de espera. Si la lectura existe pero es antigua, el estado de frescura permite indicar que la estación no se está actualizando correctamente. Esta forma de visualización es importante en TierraViva porque la supervisión no consiste solo en mostrar números, sino en informar de si esos números siguen siendo fiables.
+El dashboard web completa la arquitectura software de TierraViva como capa de presentación. Su valor no reside en controlar directamente el riego, sino en hacer observable el sistema: muestra lecturas, evolución temporal, estado operativo y trazabilidad reciente a partir de los datos servidos por la API.
 
-En conjunto, el dashboard web convierte los datos técnicos del sistema en una vista útil para el usuario. Las estaciones siguen siendo responsables de medir, decidir y actuar localmente; la Raspberry conserva el histórico y sirve la API; y el dashboard permite supervisar el estado del sistema sin intervenir en la actuación física. Con ello se cierra el flujo software de TierraViva: ingesta desde ThingSpeak, almacenamiento en SQLite, exposición mediante FastAPI y visualización web.
+Con esta organización se mantiene una separación clara de responsabilidades: Arduino mide, decide y actúa; ThingSpeak recibe la telemetría; Raspberry Pi ingiere y almacena; FastAPI expone los datos; y el dashboard los presenta de forma accesible. El uso detallado de la interfaz se documenta en el Anexo~\ref{anexo:manual_usuario}.
 
 \section{Ejecución y gestión del sistema software}
 \label{sec:ejecucion_gestion_software}
 
 Para facilitar la puesta en marcha del software en la Raspberry Pi, el proyecto incluye el script \texttt{tierraviva.sh}. Este script agrupa las operaciones principales de despliegue y ejecución, evitando tener que lanzar manualmente cada componente desde la terminal.
 
-El script permite instalar dependencias, preparar el entorno virtual, copiar el dashboard al directorio esperado por FastAPI, arrancar el proceso de ingesta \texttt{main.py}, iniciar el servidor \texttt{api.py} mediante Uvicorn, consultar el estado de ejecución, detener los procesos y revisar los logs. Esta automatización resulta útil durante las pruebas porque reduce errores repetitivos de arranque y deja una forma reproducible de iniciar el sistema.
+El script permite instalar dependencias, preparar el entorno virtual, preparar el directorio del dashboard servido por FastAPI, arrancar el proceso de ingesta \texttt{main.py}, iniciar el servidor \texttt{api.py} mediante Uvicorn, consultar el estado de ejecución, detener los procesos y revisar los logs. Esta automatización resulta útil durante las pruebas porque reduce errores repetitivos de arranque y deja una forma reproducible de iniciar el sistema.
 
 \begin{table}[H]
 \centering
@@ -685,7 +625,7 @@ El script permite instalar dependencias, preparar el entorno virtual, copiar el 
 \hline
 \texttt{./tierraviva.sh stop} & Detiene los procesos asociados al sistema. \\
 \hline
-\texttt{./tierraviva.sh restart} & Reinicia los servicios del prototipo. \\
+\texttt{./tierraviva.sh restart} & Reinicia los procesos del prototipo. \\
 \hline
 \texttt{./tierraviva.sh status} & Muestra si \texttt{main.py} y \texttt{api.py} están en ejecución. \\
 \hline
