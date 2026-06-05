@@ -14,7 +14,7 @@ Tradicionalmente, muchos sistemas de riego se han basado en criterios fijos, com
 \begin{figure}[H]
     \centering
     \makebox[\textwidth][c]{%
-        \includegraphics[width=1.15\textwidth]{figs/riegoTrad_riegoInt.png}%
+        \includegraphics[width=1.15\textwidth]{figs_png/riegoTrad_riegoInt.png}%
     }
     \caption{Evolución conceptual desde un riego basado en rutinas fijas hacia un riego apoyado en medidas reales del entorno. Elaboración propia.}
     \label{fig:cap1_rutina_a_criterio}
@@ -37,9 +37,9 @@ Además, en muchos escenarios agrícolas o rurales existen limitaciones de infra
     \vspace{-8pt}
 \end{wrapfigure}
 
-Dentro de este contexto surge TierraViva, un proyecto orientado al diseño de un prototipo IoT para monitorización y control de riego. El objetivo principal no es construir un producto agrícola industrial cerrado, sino desarrollar una solución funcional que permita comprobar cómo diferentes tecnologías pueden integrarse para resolver un problema real. El proyecto parte de una idea sencilla, medir el estado del entorno y actuar sobre el riego cuando sea necesario, pero implica varias capas técnicas: adquisición de datos mediante sensores, comunicación remota, publicación de telemetría, almacenamiento, visualización, lógica local de decisión en las estaciones y actuación física sobre el sistema de riego.
+Dentro de este contexto surge TierraViva, un proyecto orientado al diseño de un prototipo IoT (Internet of Things) para monitorización y control de riego. El objetivo principal no es construir un producto agrícola industrial cerrado, sino desarrollar una solución funcional que permita comprobar cómo diferentes tecnologías pueden integrarse para resolver un problema real. El proyecto parte de una idea sencilla, medir el estado del entorno y actuar sobre el riego cuando sea necesario, pero implica varias capas técnicas: adquisición de datos mediante sensores, comunicación remota, publicación de telemetría, almacenamiento, visualización, lógica local de decisión en las estaciones y actuación física sobre el sistema de riego.
 
-Por tanto, este trabajo se sitúa en la intersección de varias disciplinas: agricultura de precisión, Internet de las Cosas, comunicaciones y sistemas embebidos. Esta combinación permite abordar un problema práctico desde una perspectiva propia de la ingeniería: analizar necesidades, estudiar alternativas, justificar decisiones, implementar un prototipo y validar su funcionamiento mediante pruebas. La finalidad última es demostrar que una arquitectura bien diseñada puede ayudar a mejorar la gestión del riego, aportando información objetiva y capacidad de actuación automática o supervisada.
+Por tanto, este trabajo se sitúa en la intersección de varias disciplinas: agricultura de precisión, IoT, comunicaciones y sistemas embebidos. Esta combinación permite abordar un problema práctico desde una perspectiva propia de la ingeniería: analizar necesidades, estudiar alternativas, justificar decisiones, implementar un prototipo y validar su funcionamiento mediante pruebas. La finalidad última es demostrar que una arquitectura bien diseñada puede ayudar a mejorar la gestión del riego, aportando información objetiva y capacidad de actuación automática o supervisada.
 
 \section{Motivación del proyecto}
 \label{sec:motivacion_origen}
@@ -55,6 +55,31 @@ La evolución natural de esta idea conduce hacia un sistema más completo de mon
 Otro aspecto importante en la motivación es que TierraViva permite aplicar conocimientos que normalmente se estudian por separado. En el proyecto intervienen electrónica, programación embebida, comunicaciones, bases de datos, desarrollo web, visualización de información y control de actuadores. Esta combinación hace que el trabajo sea más exigente, pero también más representativo de un sistema real, donde el valor no está solo en que cada parte funcione de manera aislada, sino en conseguir que todas trabajen coordinadamente.
 
 Además, el proyecto tiene una componente práctica y sostenible que lo hace especialmente atractivo. El objetivo no es desarrollar tecnología por sí misma, sino utilizarla para responder a una necesidad concreta: gestionar mejor el riego y reducir decisiones basadas únicamente en intuición, costumbre u horarios fijos. En este sentido, TierraViva conecta la ingeniería con una aplicación tangible, cercana y fácil de entender, pero con suficiente profundidad técnica como para justificar un desarrollo completo.
+
+Desde esta perspectiva, el proyecto se relaciona de forma directa con varios Objetivos de Desarrollo Sostenible. En primer lugar, se vincula con el ODS 2, especialmente con la meta 2.4 \cite{onu_ods2}, al plantear una herramienta tecnológica orientada a apoyar prácticas agrícolas más sostenibles y mejor adaptadas al estado real del entorno. También se relaciona con el ODS 6, en particular con la meta 6.4 \cite{onu_ods6}, ya que el riego basado en medidas de humedad del suelo puede contribuir a un uso más eficiente del agua frente a decisiones fijas o puramente manuales. De forma complementaria, TierraViva se alinea con el ODS 12, meta 12.2 \cite{onu_ods12}, al buscar un uso más eficiente de los recursos naturales, y con el ODS 13, meta 13.1 \cite{onu_ods13}, al favorecer sistemas agrícolas más observables y adaptables ante variaciones ambientales.
+
+No obstante, esta contribución debe entenderse dentro del alcance real del TFG. TierraViva no demuestra por sí solo una mejora agronómica a largo plazo ni cuantifica todavía un ahorro de agua en explotación real, pero sí desarrolla una arquitectura técnica que permite medir, registrar, actuar de forma controlada y sentar las bases para futuras validaciones de impacto social y ambiental.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.16\textwidth}|p{0.20\textwidth}|p{0.52\textwidth}|}
+\hline
+\textbf{ODS} & \textbf{Meta asociada} & \textbf{Relación con TierraViva} \\
+\hline
+ODS 2: Hambre cero & Meta 2.4 & El proyecto se orienta a apoyar prácticas agrícolas más sostenibles mediante monitorización ambiental, decisión basada en datos y riego más ajustado al estado del suelo. \\
+\hline
+ODS 6: Agua limpia y saneamiento & Meta 6.4 & La medición de humedad del suelo y la actuación controlada permiten plantear un uso más eficiente del agua frente a riegos fijos o no informados. \\
+\hline
+ODS 12: Producción y consumo responsables & Meta 12.2 & El sistema busca reducir el uso innecesario de recursos mediante una gestión más informada del riego y una arquitectura reproducible de bajo coste relativo. \\
+\hline
+ODS 13: Acción por el clima & Meta 13.1 & La supervisión de variables ambientales y la trazabilidad de datos pueden favorecer sistemas agrícolas más adaptables ante cambios de temperatura, humedad o disponibilidad hídrica. \\
+\hline
+\end{tabular}
+\caption{Relación entre TierraViva y los Objetivos de Desarrollo Sostenible.}
+\label{tab:ods_tierraviva}
+\end{table}
 
 Por todo ello, este TFG no se plantea simplemente como un ejercicio académico más, sino como una oportunidad para construir una solución con valor real. La idea nace de una necesidad cercana, pero se plantea con una visión modular y escalable, de forma que pueda servir como base para futuras ampliaciones, como nuevas estaciones de campo, autonomía energética mediante panel solar o mecanismos predictivos basados en datos históricos.
 
@@ -101,6 +126,8 @@ También se establece como limitación el uso de inteligencia artificial. Aunque
 
 El sistema se diseñará con una visión modular, de modo que pueda ampliarse posteriormente con nuevas estaciones, nuevas variables medidas, mejoras en la autonomía energética o mecanismos más avanzados de análisis. Sin embargo, dentro del alcance de esta memoria, la prioridad será demostrar que la arquitectura propuesta funciona de extremo a extremo: desde la adquisición de datos en campo hasta la visualización y actuación sobre el riego. Esta delimitación permite mantener un equilibrio entre ambición y viabilidad, evitando prometer funcionalidades que no puedan ser implementadas y validadas con suficiente solidez durante el desarrollo del TFG.
 
+Asimismo, en los capítulos finales de la memoria se incorporará una valoración del impacto social y ambiental del proyecto. Esta valoración analizará de qué forma TierraViva contribuye potencialmente a las metas ODS identificadas, especialmente en relación con agricultura sostenible, eficiencia en el uso del agua y gestión responsable de recursos. También se señalarán las limitaciones que impiden afirmar todavía un impacto cuantificado, así como posibles aspectos pendientes de mejora, como la optimización energética, la durabilidad del prototipo o la validación agronómica prolongada.
+
 En resumen, el alcance del proyecto es el de un prototipo funcional, documentado y validado, orientado a demostrar la viabilidad técnica de un sistema IoT para riego inteligente. Sus limitaciones no se consideran una debilidad del trabajo, sino una forma de definir con precisión qué se ha implementado, qué se ha probado y qué queda abierto para futuras fases de desarrollo.
 
 \section{Organización de la memoria}
@@ -112,6 +139,6 @@ En el Capítulo 1 se presenta el contexto del proyecto, la motivación, el plant
 
 El Capítulo 3 describe los métodos, materiales y decisiones de diseño, definiendo los requisitos del sistema, la metodología seguida, la arquitectura general planteada y la justificación de las principales elecciones tecnológicas. A continuación, el Capítulo 4 presenta la arquitectura final de TierraViva y explica cómo se integran las estaciones de campo, la plataforma cloud, la Raspberry Pi como sistema de supervisión y los mecanismos locales de actuación.
 
-Los Capítulos 5 y 6 se centran en la implementación del prototipo. El primero aborda la parte hardware y firmware de las estaciones, incluyendo la lectura de sensores, la publicación de telemetría y la decisión local de riego, mientras que el segundo describe la implementación software de supervisión en Raspberry Pi y nube. Posteriormente, el Capítulo 7 recoge la validación y las pruebas realizadas, y el Capítulo 8 analiza los resultados obtenidos y las limitaciones detectadas.
+Los Capítulos 5 y 6 se centran en la implementación del prototipo. El primero aborda la parte hardware y firmware de las estaciones, incluyendo la lectura de sensores, la publicación de telemetría y la decisión local de riego, mientras que el segundo describe la implementación software de supervisión en Raspberry Pi y nube. Posteriormente, el Capítulo 7 recoge la validación y las pruebas realizadas, y el Capítulo 8 analiza los resultados obtenidos, las limitaciones detectadas y la valoración del impacto social y ambiental del proyecto en relación con los ODS identificados.
 
 Finalmente, el Capítulo 9 presenta las conclusiones del trabajo, el grado de cumplimiento del alcance planteado, las competencias aplicadas y adquiridas, y las posibles líneas de trabajo futuro.
