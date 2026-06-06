@@ -3,7 +3,7 @@
 
 Una vez definidos los requisitos, los materiales y las principales decisiones de diseño, este capítulo presenta la arquitectura final de TierraViva. A diferencia del capítulo anterior, donde se justifican las alternativas valoradas y los criterios de elección, aquí se describe cómo queda organizado el sistema completo y cómo interactúan sus distintos bloques durante el funcionamiento.
 
-La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, una plataforma cloud intermedia basada en ThingSpeak y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema se ha diseñado para cubrir el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, actuación sobre la bomba, publicación de telemetría y estado, almacenamiento histórico, API y visualización mediante dashboard web.
+La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, una plataforma cloud intermedia basada en ThingSpeak y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema cubre el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, publicación de telemetría, almacenamiento histórico y visualización mediante dashboard web.
 
 El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi no actúa como elemento central de decisión del riego. La decisión crítica se desplaza al firmware de cada estación, que evalúa sus propias lecturas y aplica reglas locales de seguridad. La Raspberry conserva un papel importante, pero orientado a supervisión, histórico y visualización.
 
@@ -23,15 +23,11 @@ La Figura~\ref{fig:arquitectura_final_tierraviva} muestra la arquitectura final 
 \label{fig:arquitectura_final_tierraviva}
 \end{figure}
 
-El flujo de funcionamiento comienza en las estaciones de campo. Cada estación toma lecturas de sus sensores, evalúa localmente si se cumplen las condiciones de riego y, si procede, activa la bomba de agua mediante el relé durante un tiempo limitado. Después publica en ThingSpeak tanto las medidas ambientales como el estado del relé, el evento de sistema y el código auxiliar de diagnóstico correspondiente.
+El flujo de funcionamiento comienza en las estaciones de campo. Cada estación mide variables del suelo y del entorno, evalúa localmente si procede regar y, si corresponde, acciona la bomba mediante relé durante un tiempo limitado. Posteriormente publica en ThingSpeak las medidas, el estado del relé, el evento de sistema y el código auxiliar de diagnóstico.
 
-ThingSpeak actúa como punto de desacoplo entre los nodos de campo y el sistema de supervisión. Las estaciones no necesitan conocer la ubicación de la Raspberry ni mantener una conexión directa con ella; únicamente publican información en la nube. La Raspberry, por su parte, consulta periódicamente los canales de ThingSpeak y almacena los datos relevantes en su base de datos local.
+ThingSpeak desacopla las estaciones de la Raspberry Pi: los nodos de campo no necesitan conocer la ubicación del sistema de supervisión ni mantener una conexión directa con él. La Raspberry consulta los canales publicados, almacena un histórico local, expone una API y sirve el dashboard web.
 
-La Raspberry Pi 5 funciona como sistema de supervisión. Su papel no es accionar directamente la bomba, leer sensores por cable ni decidir cuándo debe regarse. Su función es consultar la telemetría disponible, registrar el histórico en SQLite, exponer los datos mediante una API y servir el dashboard web. Así, una caída de la Raspberry no impide que la estación mantenga su comportamiento local de seguridad.
-
-El dashboard web representa la capa de visualización. A partir de la información procesada por la Raspberry Pi, permite consultar las últimas lecturas, el estado de las estaciones, el estado del relé y los estados de funcionamiento publicados por cada nodo. No participa directamente en la actuación, pero resulta fundamental para supervisar el comportamiento del prototipo y detectar posibles incidencias.
-
-La arquitectura final puede resumirse de forma sencilla: las estaciones miden, deciden y actúan en campo; ThingSpeak comunica y almacena telemetría; la Raspberry registra y supervisa; y el dashboard permite visualizar. Esta organización facilita la validación por bloques, permite trabajar con más de una estación y mantiene una separación clara entre adquisición, comunicación, decisión local, actuación y supervisión.
+La arquitectura final puede resumirse en una separación clara de responsabilidades: las estaciones miden, deciden y actúan; ThingSpeak recibe la telemetría; la Raspberry registra y supervisa; y el dashboard presenta la información al usuario. El flujo completo de funcionamiento se representa de forma ampliada en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
 
 \section{Estaciones de campo A y B}
 \label{sec:estaciones_campo_ab}
@@ -69,9 +65,7 @@ Alimentación & 12 V con regulación a 5 V & 12 V con regulación a 5 V \\
 \end{center}
 \end{table}
 
-La Figura~\ref{fig:cap4_bloques_estacion_campo} resume esta configuración. El objetivo de mantener estaciones equivalentes es facilitar la reproducción y la validación cruzada del sistema. Las estaciones A y B comparten el mismo montaje base y se diferencian únicamente por los parámetros de identificación y comunicación. Esta decisión simplifica la depuración, ya que cualquier diferencia de comportamiento entre estaciones puede analizarse a partir de una base hardware común. Esta decisión también simplifica la depuración, ya que cualquier diferencia de comportamiento entre estaciones puede analizarse a partir de una base hardware común.
-
-Desde el punto de vista interno, cada estación se organiza en cuatro bloques funcionales. El primero es el bloque de adquisición, formado por el sensor capacitivo de humedad del suelo, el BME280 y el BH1750. El segundo es el bloque de decisión local, ejecutado en el firmware del Arduino. El tercero es el bloque de comunicación, formado por el A7670E-LASA y la lógica de publicación mediante HTTP. El cuarto es el bloque de actuación, formado por la salida digital del Arduino, el módulo relé y la bomba de agua de 12 V.
+La Figura~\ref{fig:cap4_bloques_estacion_campo} resume esta configuración. El objetivo de mantener estaciones equivalentes es facilitar la reproducción y la validación cruzada del sistema. Las estaciones A y B comparten el mismo montaje base y se diferencian únicamente por los parámetros de identificación y comunicación.
 
 \begin{figure}[H]
     \centering
@@ -80,46 +74,27 @@ Desde el punto de vista interno, cada estación se organiza en cuatro bloques fu
     \label{fig:cap4_bloques_estacion_campo}
 \end{figure}
 
-El firmware de estación debe mantener esta separación de responsabilidades. En primer lugar, realiza la lectura de sensores y genera una estructura de datos con las variables medidas. Después, comprueba si las lecturas son válidas y evalúa la regla local de riego. Si la humedad del suelo indica sequedad, no existe cooldown activo y no se detecta una condición de error, la estación puede activar el relé durante el tiempo máximo configurado.
+Desde el punto de vista arquitectónico, cada estación se organiza en cuatro bloques: adquisición de datos, decisión local, comunicación LTE/HTTP y actuación mediante relé y bomba. La estación conserva la responsabilidad sobre la ejecución segura del riego: valida lecturas, aplica cooldown, limita el tiempo de actuación y mantiene la bomba apagada ante condiciones no verificables.
 
-La actuación se ejecuta siempre de forma local. Cuando una estación decide regar, activa el relé durante un tiempo limitado y posteriormente vuelve a dejar la bomba apagada. Durante las pruebas iniciales puede utilizarse una carga de baja potencia, como un LED, para comprobar la lógica de activación sin accionar todavía la bomba real. En el montaje final, esa carga de prueba se sustituye por la bomba de agua de 12 V.
-
-La estación conserva la responsabilidad última sobre la ejecución segura. Antes de activar el relé debe comprobar que la lectura de humedad es válida, que la duración máxima no se supera, que no existe un error crítico y que no se está dentro del periodo mínimo entre riegos. Si alguna de estas comprobaciones falla, la estación mantiene la bomba apagada y publica un código de estado que permita diagnosticar la situación desde la Raspberry Pi.
-
-La alimentación de cada estación parte de una tensión principal de 12 V, necesaria para el bloque de actuación. A partir de esa tensión se obtiene una línea de 5 V mediante el regulador LM2596 para alimentar la electrónica compatible. En el montaje se incorporan condensadores de estabilización para reducir inestabilidades asociadas a consumos variables, especialmente durante la comunicación LTE o los cambios de estado del bloque de actuación. El detalle de conexiones eléctricas se recoge en el \ref{anexo:esquemas_electricos}.
-
-En resumen, las estaciones A y B son nodos de campo equivalentes desde el punto de vista hardware, pero diferenciados por configuración. Esta organización permite escalar el sistema sin rediseñar la arquitectura: añadir una nueva estación implicaría replicar el montaje, asignar un nuevo identificador, crear un nuevo canal de ThingSpeak y ajustar la lógica de supervisión para consultar ese nuevo origen de datos.
+El detalle de firmware y control del relé se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}. El conexionado eléctrico, la alimentación y la integración física de sensores, módem, relé y bomba se documentan en el Anexo~\ref{anexo:esquemas_electricos}. Los materiales empleados se recogen en el Anexo~\ref{anexo:materiales}.
 
 \section{Arquitectura de comunicaciones LTE/HTTP}
 \label{sec:arquitectura_comunicaciones_lte_http}
 
-La comunicación de las estaciones de campo se basa en el módulo LTE A7670E-LASA y en el uso de peticiones HTTP hacia ThingSpeak. Esta arquitectura permite que cada estación publique telemetría y estado desde una ubicación remota sin depender de una red WiFi local ni de una conexión física con la Raspberry Pi. Desde el punto de vista funcional, el módulo LTE actúa como interfaz de salida a Internet de la estación.
+La comunicación de las estaciones de campo se basa en el módulo LTE A7670E-LASA y en el uso de peticiones HTTP hacia ThingSpeak. Esta arquitectura permite que cada estación publique telemetría y estado desde una ubicación remota sin depender de una red WiFi local ni de una conexión física con la Raspberry Pi.
 
-El Arduino UNO no accede directamente a la red móvil. Su papel es comunicarse por UART con el A7670E-LASA mediante comandos AT. A través de esa interfaz serie, el firmware comprueba el estado del módulo, verifica la SIM, confirma el registro en red, configura el contexto de datos y lanza las peticiones HTTP necesarias para enviar información a la nube. Esta separación permite que el Arduino mantenga una lógica relativamente sencilla: preparar datos, aplicar la decisión local, enviarlos al módem y analizar la respuesta obtenida.
-
-El flujo de comunicación se organiza en varias fases. La primera corresponde a la inicialización del módulo. En esta fase, la estación comprueba que el A7670E-LASA responde a comandos básicos y que la comunicación serie funciona correctamente. Después, se verifica el estado de la SIM y el registro en la red móvil. Una estación no debería intentar enviar telemetría si el módulo no responde, si la SIM no está preparada o si no existe registro válido en red.
-
-A continuación, se configura el contexto de datos. Para ello, el módulo debe disponer de un APN válido asociado a la tarjeta SIM utilizada. Este paso es necesario para que el módem pueda obtener conectividad IP. Una vez configurado el contexto y obtenida una dirección IP, la estación puede iniciar la secuencia HTTP.
-
-La fase de envío consiste en construir una URL de actualización de ThingSpeak con los campos de telemetría correspondientes. Cada estación incluye sus medidas y estados en los campos definidos para su canal: humedad de suelo, temperatura, humedad relativa, luminosidad, presión, estado del relé, evento de sistema y código auxiliar de diagnóstico. El A7670E-LASA realiza entonces una petición HTTP hacia la API de ThingSpeak.
+El Arduino UNO se comunica con el A7670E-LASA mediante UART y comandos AT. Desde el punto de vista arquitectónico, el módem actúa como interfaz de salida a Internet de la estación: permite comprobar conectividad móvil, establecer el contexto de datos y enviar la actualización HTTP al canal ThingSpeak correspondiente.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_4_3_secuencia_lte_http.jpeg}
-    \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA. La estación verifica el módem, la SIM, el registro en red, el contexto de datos, la petición HTTP y la respuesta antes de considerar válida la publicación.}
+    \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA.}
     \label{fig:cap4_secuencia_lte_http}
 \end{figure}
-La Figura~\ref{fig:cap4_secuencia_lte_http} resume el flujo seguido por la estación. Esta secuencia no se ejecuta únicamente como una lista fija de comandos AT, sino como una lógica de comunicación con comprobaciones intermedias. Si una fase falla, el firmware debe evitar continuar como si el envío hubiera sido correcto. Por ejemplo, no tiene sentido construir una petición HTTP si el módulo no está registrado en red o si no dispone de dirección IP.
 
-En la comunicación con ThingSpeak se utiliza el modelo HTTP de petición-respuesta. La estación envía una petición de escritura al canal correspondiente y espera una respuesta de la plataforma. En un envío correcto, ThingSpeak devuelve una confirmación que permite interpretar que la entrada ha sido registrada. Si la respuesta indica error, si no llega respuesta o si se agota el tiempo de espera, la estación debe tratar el envío como fallido.
+La comunicación se utiliza en sentido ascendente: las estaciones publican medidas, estado del relé, evento de sistema y código auxiliar de diagnóstico. La Raspberry Pi consulta posteriormente esa información desde ThingSpeak, pero no envía órdenes de riego a las estaciones. Esta decisión simplifica el sistema y evita que una orden remota antigua o duplicada pueda condicionar una actuación física.
 
-La gestión de errores forma parte de la propia arquitectura de comunicaciones. Los fallos posibles no se limitan a una ausencia total de cobertura. También pueden aparecer reinicios del módulo por alimentación insuficiente, errores de APN, pérdida temporal de red, fallo de resolución o respuesta HTTP no válida. Por ello, el firmware debe diferenciar entre un dato no enviado y una actuación física sobre el riego. La pérdida temporal de comunicación puede impedir la supervisión remota, pero no debe dejar la bomba activa ni provocar una actuación no controlada.
-
-La comunicación LTE/HTTP se emplea únicamente en sentido ascendente desde el punto de vista operativo de la estación: publicación de telemetría, estado y eventos. La Raspberry Pi realiza después lecturas de esos datos desde ThingSpeak, pero no envía órdenes de riego a las estaciones. Esta decisión simplifica el firmware, evita un flujo descendente de control y reduce el riesgo de que información antigua en la nube condicione una actuación física.
-
-Esta arquitectura no proporciona comunicación en tiempo real estricto. La estación publica información de forma periódica, por lo que existe una latencia asociada a los intervalos de muestreo y envío. Sin embargo, para supervisión de riego esta latencia es aceptable. La decisión crítica no depende de la llegada inmediata de una orden externa, sino de la evaluación local realizada en la propia estación.
-
-En conjunto, la arquitectura LTE/HTTP permite que las estaciones funcionen como nodos remotos independientes del sistema de supervisión físico. Cada estación puede publicar sus datos en la nube, mantener una lógica local de riego y permitir que la Raspberry Pi consulte posteriormente el estado del sistema sin conexión directa con el hardware de campo.
+La arquitectura LTE/HTTP no proporciona comunicación en tiempo real estricto, pero resulta adecuada para supervisión. La decisión crítica de riego no depende de la respuesta inmediata de un sistema externo, sino de la evaluación local realizada por la estación. El detalle de inicialización del módem, pruebas con comandos AT e integración en firmware se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
 \section{ThingSpeak como capa intermedia}
 \label{sec:thingspeak_capa_intermedia}
@@ -128,8 +103,6 @@ ThingSpeak actúa en TierraViva como capa intermedia entre las estaciones de cam
 
 La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt{TierraViva\_A} y \texttt{TierraViva\_B}. Cada canal corresponde a una estación de campo y contiene tanto las variables medidas como la información de estado generada por el firmware. En la arquitectura final no se utilizan canales de comandos, ya que la decisión de riego se realiza localmente en cada estación.
 
-La Figura~\ref{fig:thingspeak_canales_tierraviva} muestra los canales creados en ThingSpeak para el prototipo.
-
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.90\textwidth]{figs/thingspeak_canales_tierraviva.png}
@@ -137,144 +110,64 @@ La Figura~\ref{fig:thingspeak_canales_tierraviva} muestra los canales creados en
 \label{fig:thingspeak_canales_tierraviva}
 \end{figure}
 
-\subsection{Canales de estación}
-\label{subsec:canales_estacion}
+Cada publicación incluye humedad del suelo, variables ambientales, estado del relé, evento de sistema y código auxiliar de diagnóstico. Mantener la misma estructura en ambos canales simplifica el firmware y la lógica de supervisión, ya que la Raspberry puede aplicar el mismo proceso de lectura para las estaciones A y B.
 
-Los canales \texttt{TierraViva\_A} y \texttt{TierraViva\_B} almacenan la telemetría generada por las estaciones A y B, respectivamente. Cada actualización enviada por una estación incluye medidas del entorno y datos de estado, lo que permite a la Raspberry Pi supervisar tanto las variables ambientales como el comportamiento operativo del nodo.
+En fases anteriores se valoró utilizar ThingSpeak también como mecanismo de control descendente desde la Raspberry hacia las estaciones. Esta opción se descartó porque obligaba a gestionar órdenes remotas, evitar repeticiones, descartar información obsoleta y garantizar que una entrada antigua no provocase una actuación no deseada. En la arquitectura final, ThingSpeak se reserva para telemetría y estado, no para transportar órdenes de riego.
 
-\begin{table}[H]
-\begin{center}
-\small
-\begin{tabular}{|p{0.18\textwidth}|p{0.28\textwidth}|p{0.44\textwidth}|}
-\hline
-\textbf{Campo} & \textbf{Dato} & \textbf{Descripción} \\
-\hline
-\texttt{field1} & Humedad del suelo normalizada (\%) & Valor calculado por el firmware a partir de la lectura bruta del sensor capacitivo. Se utiliza como entrada principal de la regla local de riego. \\
-\hline
-\texttt{field2} & Temperatura (\textdegree C) & Temperatura ambiente medida por el BME280. \\
-\hline
-\texttt{field3} & Humedad ambiente (\%) & Humedad relativa medida por el BME280. \\
-\hline
-\texttt{field4} & Luminosidad (lux) & Nivel de luz ambiente medido por el BH1750. \\
-\hline
-\texttt{field5} & Presión (hPa) & Presión atmosférica medida por el BME280. \\
-\hline
-\texttt{field6} & Estado del relé & Estado del relé asociado al bloque de actuación: \texttt{0} para apagado y \texttt{1} para activo. \\
-\hline
-\texttt{field7} & Evento de sistema & Código que representa el evento principal del ciclo: reposo, modo seguro, riego, error o cooldown. \\
-\hline
-\texttt{field8} & Código auxiliar de diagnóstico & Código que complementa al evento principal y facilita la depuración del ciclo. \\
-\hline
-\end{tabular}
-\caption{Asignación de campos en los canales ThingSpeak de estación}
-\label{cuadro:canales_thingspeak_estacion}
-\end{center}
-\end{table}
-
-La Tabla~\ref{cuadro:canales_thingspeak_estacion} define el contrato de datos utilizado por las estaciones. Mantener la misma estructura en ambos canales simplifica el firmware y la lógica de supervisión, ya que la Raspberry puede aplicar el mismo proceso de lectura para la estación A y para la estación B, cambiando únicamente el identificador del canal y la clave de lectura correspondiente.
-
-Esta estructura permite que el canal no se limite a representar medidas ambientales. En particular, los campos \texttt{field6}, \texttt{field7} y \texttt{field8} aportan información operativa sobre el estado del relé, el evento principal del sistema y el diagnóstico auxiliar publicado por la estación. Gracias a ello, la Raspberry puede interpretar si una estación está en reposo, ha regado, ha entrado en modo seguro, ha detectado un error o ha bloqueado una actuación por cooldown.
-
-La codificación completa de estos campos se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}.
-
-\subsection{Descartes del control descendente desde la nube}
-\label{subsec:decision_no_canales_comandos}
-
-En fases anteriores del diseño se valoró utilizar ThingSpeak también como mecanismo de control descendente desde la Raspberry hacia las estaciones. En ese planteamiento, el sistema de supervisión publicaría instrucciones en la nube y cada estación tendría que consultarlas periódicamente. Aunque la solución era viable, añadía complejidad: obligaba a gestionar identificadores, evitar repeticiones, descartar información obsoleta y garantizar que una entrada antigua no provocase una actuación no deseada.
-
-En la arquitectura final se descarta ese flujo descendente de control. Cada estación decide localmente si debe regar a partir de sus propias lecturas, umbrales, cooldown y condiciones de seguridad. Esta decisión simplifica el sistema y reduce la dependencia de la Raspberry Pi. Si la Raspberry se apaga o pierde conectividad, la estación no queda esperando una orden externa para mantener su comportamiento seguro.
-
-ThingSpeak se mantiene, por tanto, como plataforma de telemetría y estado. Su papel no es transportar órdenes de riego, sino permitir que las estaciones publiquen su información y que la Raspberry pueda consultarla posteriormente. Esta separación hace que la nube sea importante para la supervisión, pero no imprescindible para que la estación ejecute sus reglas locales de seguridad.
-
-En conjunto, ThingSpeak se utiliza en TierraViva como una capa intermedia sencilla pero suficiente para sostener el flujo de información del sistema. Los canales de estación permiten almacenar medidas y estados, la API HTTP facilita la integración con el A7670E-LASA y la lectura desde Raspberry Pi permite construir un histórico propio y un dashboard de supervisión.
+La estructura completa de campos, nombres internos y códigos publicados se documenta en el Anexo~\ref{anexo:estructura_thingspeak_estados}. La lectura e interpretación de esos datos desde Raspberry Pi se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
 
 \section{Raspberry Pi como sistema de supervisión}
 \label{sec:raspberry_sistema_supervision}
 
-La Raspberry Pi 5 actúa como sistema de supervisión de TierraViva. Su papel dentro de la arquitectura final no es sustituir a las estaciones de campo, conectarse físicamente a los sensores ni decidir la activación de la bomba, sino consultar la información disponible en la nube, mantener un histórico local, exponer una API y servir el dashboard web.
+La Raspberry Pi 5 actúa como sistema de supervisión de TierraViva. Su papel dentro de la arquitectura final no es sustituir a las estaciones de campo, conectarse físicamente a los sensores ni decidir la activación de la bomba, sino consultar la información disponible en ThingSpeak, mantener un histórico local, exponer una API y servir el dashboard web.
 
-Esta separación es importante para mantener la coherencia del sistema distribuido. Las estaciones se encuentran en campo y se comunican mediante LTE/HTTP con ThingSpeak. La Raspberry, por tanto, no recibe datos por USB ni por puerto serie desde las estaciones, sino que consulta periódicamente los canales publicados en la plataforma cloud. A partir de esos datos, construye una visión actualizada del estado de cada estación.
-
-El primer bloque funcional de la Raspberry es la lectura de datos desde ThingSpeak. Para cada estación, el sistema de supervisión consulta su canal correspondiente y obtiene la última publicación disponible. La implementación concreta de este proceso, incluyendo la normalización de campos, la detección de entradas nuevas y el tratamiento de errores de lectura, se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
-
-Una vez recuperados los datos, la Raspberry debe validarlos antes de almacenarlos o mostrarlos. No todas las respuestas recibidas tienen por qué ser válidas: puede haber campos vacíos, valores fuera de rango, lecturas antiguas o errores de comunicación. Por ello, el sistema de supervisión debe comprobar que los datos recibidos son coherentes y que la marca temporal de la última lectura se encuentra dentro de un intervalo razonable. Si una estación no actualiza datos durante demasiado tiempo, el dashboard puede mostrarla como no disponible u obsoleta.
-
-El segundo bloque funcional es el almacenamiento local en SQLite. Aunque ThingSpeak conserva las entradas publicadas en sus canales, TierraViva mantiene un histórico propio en la Raspberry Pi. Este histórico permite registrar las lecturas recibidas y conservar la respuesta original de ThingSpeak, incluyendo los campos de estado publicados por las estaciones. Además, la base de datos está preparada para almacenar de forma normalizada el estado del relé, el evento de sistema y el código auxiliar de diagnóstico.
+Esta separación mantiene la coherencia del sistema distribuido. Las estaciones publican su información mediante LTE/HTTP y la Raspberry trabaja sobre los datos ya disponibles en la plataforma cloud. A partir de esos datos, construye una vista de supervisión del estado de cada estación.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_4_5_pipeline_raspberry_supervision.png}
-    \caption{Pipeline software de supervisión en Raspberry Pi. El sistema consulta ThingSpeak, valida los datos, almacena histórico en SQLite, expone la información mediante FastAPI y actualiza el dashboard web.}
+    \caption{Pipeline software de supervisión en Raspberry Pi.}
     \label{fig:cap4_pipeline_raspberry_supervision}
 \end{figure}
 
-La API actúa como capa intermedia entre el histórico local y el dashboard web. En lugar de acoplar la interfaz a la base de datos o a ThingSpeak, la Raspberry ofrece una capa de consulta que separa la visualización de la lógica de almacenamiento. La implementación concreta de esta API y de los endpoints utilizados se describe en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
+El pipeline software se organiza en cuatro responsabilidades: consulta de ThingSpeak, almacenamiento local en SQLite, exposición de datos mediante FastAPI y visualización en el dashboard. La API evita que la interfaz acceda directamente a la base de datos o a ThingSpeak, y permite separar almacenamiento, consulta y presentación.
 
-El dashboard web constituye la parte visible del sistema de supervisión. A través de él se pueden consultar las últimas medidas recibidas, comprobar el estado de cada estación, observar si existe comunicación reciente y revisar el estado del relé o los eventos de sistema y códigos de diagnóstico publicados por las estaciones. Su función no es ejecutar directamente acciones sobre el hardware, sino permitir la supervisión del sistema de forma clara. Esto resulta útil tanto durante las pruebas como en una posible utilización real del prototipo.
+La Raspberry puede detectar datos antiguos, campos ausentes o pérdida de publicaciones, pero esas incidencias pertenecen a la supervisión. La seguridad de la actuación sigue residiendo en la estación de campo, que es quien controla físicamente el relé y la bomba.
 
-Además de almacenar lecturas, la Raspberry puede registrar incidencias de supervisión. Por ejemplo, puede detectar que una estación lleva demasiado tiempo sin publicar datos, que un campo llega vacío, que una lectura está fuera de rango o que el estado del relé no cambia durante un periodo esperado. Estos eventos no sustituyen a la lógica de seguridad local, pero ayudan a documentar el comportamiento del sistema y facilitan la validación experimental.
-
-El ciclo completo de funcionamiento de la Raspberry puede resumirse en cuatro pasos. Primero, consulta los canales de ThingSpeak. Después, valida y almacena los datos recibidos en SQLite. A continuación, expone esa información mediante FastAPI. Finalmente, el dashboard web consulta la API y actualiza la visualización para el usuario.
-
-Con esta organización, la Raspberry Pi queda como plataforma software de supervisión de TierraViva. Su valor no está en decidir cuándo se riega, sino en integrar datos, histórico, API y visualización. Esta decisión reduce la dependencia del sistema respecto a un único equipo central y deja la actuación física bajo control de la estación de campo, que es donde se encuentran los sensores, el relé y la bomba.
+La implementación detallada de la ingesta, la base de datos, la API y el dashboard se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}. La referencia completa de endpoints se recoge en el Anexo~\ref{anexo:manual_api}, y el uso de la interfaz por parte del usuario se documenta en el Anexo~\ref{anexo:manual_usuario}.
 
 \section{Decisión local de riego y eventos}
 \label{sec:decision_local_eventos}
 
-La decisión de riego en TierraViva se ejecuta localmente en cada estación de campo. Esta elección elimina la necesidad de enviar comandos remotos desde la Raspberry Pi y desplaza la responsabilidad crítica al nodo que está físicamente conectado al sistema de riego. La estación dispone de las lecturas de sensores, controla el relé y puede actuar de forma inmediata sin depender de una comunicación continua con el exterior.
+La decisión de riego en TierraViva se ejecuta localmente en cada estación de campo. Esta elección elimina la necesidad de enviar comandos remotos desde la Raspberry Pi y desplaza la responsabilidad crítica al nodo que está físicamente conectado al sistema de riego.
 
-El criterio de decisión inicial se basa en una regla verificable de humedad del suelo. Si la lectura indica una condición de sequedad, no existe un periodo de espera activo y no se ha detectado ninguna incidencia, la estación puede activar el relé durante un tiempo limitado. Esta lógica no se plantea como inteligencia artificial, sino como automatización basada en reglas, adecuada para una primera versión del prototipo.
-
-De forma conceptual, la decisión local puede resumirse así:
-
-\begin{itemize}
-    \item si la lectura de humedad del suelo cumple la condición de sequedad definida para el prototipo;
-    \item si no existe un periodo de \textit{cooldown} activo;
-    \item si la lectura de sensores es válida;
-    \item si no se ha detectado un error crítico que afecte a los sensores, la alimentación o el estado seguro del relé;
-    \item entonces la estación activa el relé durante un tiempo limitado y registra o publica el evento cuando la comunicación está disponible.
-\end{itemize}
+El criterio inicial se basa en una regla verificable de humedad del suelo. La estación solo puede activar el relé si la lectura es válida, se cumple la condición de sequedad, no existe cooldown activo y no se detecta ningún error crítico. La actuación se limita siempre por firmware para evitar activaciones indefinidas.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_4_6_decision_local_riego.jpeg}
-    \caption{Lógica conceptual de decisión local de riego en cada estación. La bomba solo se activa si la lectura es válida, se cumple la condición de sequedad, no existe cooldown activo y no se detecta ningún error crítico.}
+    \caption{Lógica conceptual de decisión local de riego en cada estación.}
     \label{fig:cap4_decision_local_riego}
 \end{figure}
 
-El uso de un \textit{cooldown} evita activaciones repetidas en poco tiempo. Esta medida es necesaria porque las lecturas de humedad pueden oscilar alrededor del umbral o variar lentamente tras una actuación. Sin un periodo mínimo entre riegos, la estación podría activar la bomba varias veces de forma consecutiva. Por tanto, el firmware debe registrar el instante de la última actuación y bloquear nuevos riegos hasta que se supere el tiempo mínimo configurado.
+Tras cada ciclo, la estación publica en ThingSpeak las medidas ambientales y la información operativa necesaria para supervisar lo ocurrido: estado del relé, evento de sistema y código auxiliar de diagnóstico. De este modo, la Raspberry Pi puede reconstruir el comportamiento de la estación sin participar en la decisión local.
 
-La duración del riego se controla también desde el firmware. La estación no debe mantener el relé activo de forma indefinida ni depender de una orden externa de parada. El comportamiento seguro consiste en activar el relé, esperar como máximo el tiempo permitido y desactivarlo siempre al finalizar la actuación. Si durante ese proceso se detecta una condición anómala, el relé debe apagarse de forma inmediata.
-
-Tras cada ciclo, la estación publica en ThingSpeak no solo las medidas ambientales, sino también información operativa. Esta información se separa en tres campos: estado del relé, evento principal del sistema y código auxiliar de diagnóstico. De este modo, la Raspberry Pi puede supervisar lo ocurrido sin participar en la decisión local.
-
-El evento principal permite distinguir situaciones como reposo, riego activo, riego finalizado, modo seguro, error o cooldown. El código auxiliar de diagnóstico complementa esa información y facilita la depuración durante las pruebas. La codificación completa de estos valores se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}, mientras que el flujo visual de decisión local se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
-
-Esta forma de funcionamiento ofrece trazabilidad sin necesidad de comandos remotos. La Raspberry Pi puede reconstruir qué ha ocurrido observando las lecturas, el estado del relé, el evento de sistema y el código de diagnóstico publicado por cada estación. Así se mantiene una separación clara entre decisión local y supervisión: la estación decide y actúa, mientras que la Raspberry registra, interpreta y muestra.
+La codificación completa de eventos y diagnósticos se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}. El flujo visual de decisión local se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}, y la implementación concreta en firmware se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
 \section{Modo seguro}
 \label{sec:modo_seguro}
 
-El modo seguro de TierraViva define el comportamiento que debe adoptar la estación cuando no puede garantizar que una actuación sobre el riego sea correcta. Este punto es especialmente importante porque el prototipo no se limita a monitorizar variables ambientales, sino que incorpora actuación física mediante relé y bomba de agua. Por tanto, un fallo en sensores, alimentación, comunicación o lógica interna no debe traducirse en una activación indefinida del riego.
-
-El criterio general adoptado es conservador: ante una situación no verificable, la bomba debe permanecer apagada. Esta decisión puede provocar que el sistema no riegue en un caso dudoso, pero evita el escenario de mayor riesgo para el prototipo, que sería mantener el riego activo sin control. En este proyecto se considera preferible perder una actuación puntual antes que activar la bomba de forma repetida o indefinida.
-
-El modo seguro se aplica tanto en el arranque de la estación como durante el funcionamiento normal. Al iniciar el firmware, el pin de control del relé debe configurarse en estado desactivado antes de procesar sensores o comunicaciones. De esta forma, un reinicio de la placa no provoca una activación accidental de la bomba. El estado inicial del sistema es, por tanto, relé desactivado y bomba apagada.
+El modo seguro define el comportamiento que debe adoptar la estación cuando no puede garantizar que una actuación sobre el riego sea correcta. Dado que TierraViva acciona físicamente una bomba de agua, el criterio adoptado es conservador: ante una lectura inválida, reinicio, fallo de comunicación, cooldown activo o estado no verificable, la bomba debe permanecer apagada.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_4_7_modo_seguro_estacion.png}
-    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, fallo de publicación, cooldown o finalización del tiempo de riego, el sistema prioriza mantener el relé desactivado y la bomba apagada.}    \label{fig:cap4_modo_seguro_estacion}
+    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, fallo de publicación, cooldown o finalización del tiempo de riego, el sistema prioriza mantener el relé desactivado y la bomba apagada.}
+    \label{fig:cap4_modo_seguro_estacion}
 \end{figure}
 
-La Figura~\ref{fig:cap4_modo_seguro_estacion} resume las situaciones principales contempladas. Todas las respuestas siguen el mismo criterio: si el sistema no puede verificar que la actuación sea correcta, no debe activar la bomba.
+El modo seguro se aplica tanto en el arranque como durante el funcionamiento normal. El firmware debe configurar el relé en estado desactivado al iniciar la estación, descartar lecturas incoherentes para la actuación, limitar siempre el tiempo de riego y aplicar un periodo mínimo entre activaciones.
 
-La pérdida de comunicación se interpreta de forma distinta a como ocurriría en una arquitectura centralizada. En TierraViva, la estación no necesita recibir una orden externa para decidir el riego, por lo que una caída temporal de la Raspberry o de la supervisión remota no bloquea necesariamente la lógica local. Sin embargo, si el módulo LTE no puede publicar datos durante un periodo prolongado, el firmware debe registrar la incidencia cuando la comunicación vuelva a estar disponible y mantener siempre el relé bajo control local. La pérdida de supervisión remota no debe dejar la bomba activa ni provocar una actuación no controlada; en caso de duda sobre el estado interno de la estación, se mantiene la bomba apagada.
+La pérdida de comunicación no debe interpretarse como una orden de riego ni como una condición que deje la bomba activa. En la arquitectura final, la comunicación se utiliza para supervisión y trazabilidad, mientras que la seguridad de la actuación permanece bajo control local de la estación.
 
-Las lecturas inválidas constituyen otro caso crítico. Si el sensor de humedad devuelve un valor ausente, imposible o fuera del rango esperado, la estación no debe utilizar ese dato para activar la bomba. En su lugar, debe publicar un código de error o conservar el estado seguro hasta que las lecturas vuelvan a ser coherentes. Esta medida evita que una desconexión del sensor o una lectura corrupta se interprete como necesidad real de riego.
-
-El tiempo máximo de actuación es una barrera de seguridad esencial. Aunque la regla local determine que el suelo está seco, la bomba solo puede permanecer activa durante el intervalo permitido. Finalizado ese tiempo, el relé debe desactivarse siempre. Esta desactivación no debe depender de la Raspberry Pi ni de ThingSpeak, sino del propio firmware de la estación.
-
-El cooldown complementa al tiempo máximo. Tras una actuación, la estación debe esperar un periodo mínimo antes de volver a regar. Esto reduce el riesgo de activaciones repetidas provocadas por ruido, histéresis insuficiente o lenta estabilización de la humedad del suelo después del riego.
-
-El modo seguro actúa, por tanto, como una capa local de protección. La Raspberry Pi puede supervisar, registrar y mostrar el estado del sistema, pero la estación conserva la responsabilidad última sobre la decisión y la ejecución segura de la actuación. Esta decisión es coherente con la arquitectura final de TierraViva: autonomía en campo, comunicación para supervisión y seguridad prioritaria frente a cualquier estado dudoso.
+El análisis completo de riesgos se desarrolla en el Anexo~\ref{anexo:gestion_riesgos}. Las pruebas asociadas al modo seguro, actuación, sensores y comunicación se recogen en el Anexo~\ref{anexo:plan_pruebas}, y los flujos de fallo se resumen en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
