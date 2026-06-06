@@ -58,12 +58,14 @@ Antes de cargarlo en Arduino UNO deben revisarse, como mínimo, los siguientes p
 
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 \small
+
 \begin{tabular}{|p{0.34\textwidth}|p{0.48\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Parámetro} & \textbf{Función} \\
+\rowcolor{URJCRed}
+\TVHead{Parámetro} & \TVHead{Función} \\
 \hline
 \texttt{APN} & APN del operador móvil utilizado por la SIM. \\
 \hline
@@ -88,16 +90,58 @@ Antes de cargarlo en Arduino UNO deben revisarse, como mínimo, los siguientes p
 \label{tab:parametros_firmware_instalacion}
 \end{table}
 
+\subsection{Librerías empleadas por el firmware}
+\label{subsec:librerias_firmware_estacion}
+
+El firmware de la estación remota utiliza varias librerías de Arduino y de C/C++ para gestionar la comunicación con sensores, el módem LTE y el tratamiento de cadenas. Estas dependencias no añaden funcionalidad aislada, sino que permiten implementar de forma ordenada los bloques principales del sketch: lectura I2C, comunicación serie con el A7670E-LASA, adquisición de medidas ambientales y construcción de peticiones HTTP.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
+\small
+\begin{tabular}{|p{0.25\textwidth}|p{0.31\textwidth}|p{0.34\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{Librería} & \TVHead{Uso en TierraViva} & \TVHead{Motivo de utilización} \\
+\hline
+\texttt{SoftwareSerial} & Comunicación UART entre Arduino UNO y el módem A7670E-LASA mediante los pines \texttt{D10} y \texttt{D11}. & Permite disponer de un puerto serie adicional, manteniendo el puerto serie hardware para programación y depuración por USB. \\
+\hline
+\texttt{Wire} & Comunicación I2C con los sensores digitales BME280 y BH1750. & Proporciona las funciones necesarias para usar el bus I2C del Arduino UNO, asociado a los pines \texttt{A4/SDA} y \texttt{A5/SCL}. \\
+\hline
+\texttt{BH1750} & Lectura del sensor de luminosidad BH1750/GY-302. & Permite obtener directamente la iluminancia en lux, evitando trabajar con una lectura analógica sin escala física directa. \\
+\hline
+\texttt{Adafruit\_Sensor} & Capa común utilizada por sensores de la familia Adafruit. & Proporciona estructuras y tipos comunes requeridos por la librería del BME280. \\
+\hline
+\texttt{Adafruit\_BME280} & Lectura del sensor ambiental BME280. & Permite obtener temperatura, humedad relativa y presión atmosférica mediante I2C. \\
+\hline
+\texttt{string.h} & Tratamiento de cadenas en C, como búsqueda de respuestas y construcción de mensajes. & Permite usar funciones como \texttt{strstr()} y \texttt{snprintf()}, útiles para interpretar respuestas del módem y construir peticiones HTTP con buffers controlados. \\
+\hline
+\end{tabular}
+\caption{Librerías principales utilizadas por el firmware de estación.}
+\label{tab:librerias_firmware_estacion}
+\end{table}
+
+El uso de \texttt{SoftwareSerial} requiere una consideración específica. Arduino UNO solo dispone de un puerto serie hardware, utilizado normalmente para cargar el programa y depurar mediante el monitor serie. Por ello, la comunicación con el A7670E-LASA se implementa mediante un puerto serie software en los pines \texttt{D10} y \texttt{D11}. En el montaje de TierraViva, \texttt{D10} recibe datos desde \texttt{TXD} del módem y \texttt{D11} transmite hacia \texttt{RXD} del módem mediante divisor resistivo.
+
+Durante las pruebas se evitó utilizar velocidades elevadas en este puerto serie software. Aunque algunos módems pueden trabajar a baudios superiores, en Arduino UNO \texttt{SoftwareSerial} puede volverse inestable a velocidades altas. Por ese motivo, el firmware se estabilizó a \texttt{9600} baudios, priorizando fiabilidad frente a velocidad de transmisión.
+
+Las librerías \texttt{Wire}, \texttt{BH1750} y \texttt{Adafruit\_BME280} permiten integrar los sensores digitales sobre el mismo bus I2C. En la estación, el BH1750 se detectó en la dirección \texttt{0x23} y el BME280 en la dirección \texttt{0x76}, por lo que ambos pueden compartir las líneas \texttt{SDA} y \texttt{SCL} sin conflicto de direcciones.
+
+Por último, \texttt{string.h} se utiliza para trabajar con cadenas de caracteres de forma controlada. Esta decisión es relevante en Arduino UNO porque la memoria SRAM disponible es reducida. Funciones como \texttt{snprintf()} permiten construir cadenas dentro de buffers de tamaño definido, mientras que \texttt{strstr()} permite comprobar si una respuesta del módem contiene textos como \texttt{OK} o códigos HTTP esperados.
+
 La carga del firmware se realiza desde Arduino IDE:
 
 \begin{enumerate}
-    \item conectar Arduino UNO al ordenador mediante USB;
-    \item abrir el fichero \texttt{Estacion\_A\_final\_Plus.ino};
-    \item seleccionar la placa \textit{Arduino UNO};
-    \item seleccionar el puerto serie correspondiente;
-    \item compilar el programa;
-    \item cargar el firmware;
-    \item abrir el monitor serie para comprobar sensores, módem y publicación.
+    \item Conectar Arduino UNO al ordenador mediante USB;
+    \item Abrir el fichero \texttt{Estacion\_X\_final\_Plus.ino}, siendo \texttt{X} la letra de la estación correspondiente, por ejemplo \texttt{A} o \texttt{B};
+    \item Seleccionar la placa \textit{Arduino UNO};
+    \item Seleccionar el puerto serie correspondiente;
+    \item Comprobar que las librerías indicadas en la Tabla~\ref{tab:librerias_firmware_estacion} están disponibles en el entorno de Arduino;
+    \item Compilar el programa;
+    \item Cargar el firmware;
+    \item Abrir el monitor serie a \texttt{9600} baudios para comprobar sensores, módem, red LTE y publicación.
 \end{enumerate}
 
 La Figura \ref{fig:arduino_placa_uno} muestra el procedimiento para seleccionar la placa \textit{Arduino UNO} en Arduino IDE. A continuación, la Figura \ref{fig:arduino_puerto_usb} muestra la selección del puerto serie asociado a la placa conectada por USB.
@@ -317,12 +361,14 @@ La instalación se considera preparada cuando se completa la siguiente secuencia
 
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \small
 \begin{tabular}{|p{0.38\textwidth}|p{0.42\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Comprobación} & \textbf{Resultado esperado} \\
+\rowcolor{URJCRed}
+\TVHead{Comprobación} & \TVHead{Resultado esperado} \\
 \hline
 Estación encendida & Arduino, sensores y módem arrancan sin reinicios.\\
 \hline
@@ -353,12 +399,14 @@ Bomba temporizada & La bomba se activa y se apaga tras el tiempo configurado.\\
 
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \scriptsize
 \begin{tabular}{|p{0.30\textwidth}|p{0.30\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Problema} & \textbf{Causa probable} & \textbf{Acción recomendada} \\
+\rowcolor{URJCRed}
+\TVHead{Problema} & \TVHead{Causa probable} & \TVHead{Acción recomendada} \\
 \hline
 No aparecen datos en ThingSpeak & Clave de escritura incorrecta, APN incorrecto o fallo LTE. & Revisar firmware, SIM, antena, APN y monitor serie. \\
 \hline
