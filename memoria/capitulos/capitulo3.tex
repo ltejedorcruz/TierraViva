@@ -27,6 +27,7 @@ En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requi
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 
 \makebox[\textwidth][c]{%
 \hspace*{-0.7cm}%
@@ -36,7 +37,8 @@ En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requi
 >{\raggedright\arraybackslash}p{0.52\textwidth}|
 >{\raggedright\arraybackslash}p{0.24\textwidth}|}
 \hline
-\textbf{Código} & \textbf{Requisito} & \textbf{Descripción} & \textbf{Validación prevista} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Requisito} & \TVHead{Descripción} & \TVHead{Validación prevista} \\
 \hline
 RF-01 & Medición de humedad del suelo & El sistema debe obtener lecturas periódicas de la humedad del sustrato en la zona monitorizada. & Prueba con sensor capacitivo de humedad del suelo. \\
 \hline
@@ -90,9 +92,13 @@ El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No
 \begin{table}[H]
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \begin{tabular}{|p{0.13\textwidth}|p{0.25\textwidth}|p{0.50\textwidth}|}
 \hline
-\textbf{Código} & \textbf{Requisito} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Requisito} & \TVHead{Descripción} \\
 \hline
 RNF-01 & Modularidad & El sistema debe organizarse en bloques diferenciados: estación de campo autónoma, comunicación, almacenamiento, supervisión, visualización y actuación local. \\
 \hline
@@ -143,8 +149,8 @@ En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales 
 \begin{table}[H]
 \centering
 \footnotesize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.02}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 
 \makebox[\textwidth][c]{%
 \hspace*{-0.7cm}%
@@ -154,7 +160,8 @@ En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales 
 >{\raggedright\arraybackslash}p{0.17\textwidth}|
 >{\raggedright\arraybackslash}p{0.38\textwidth}|}
 \hline
-\textbf{Código} & \textbf{Parámetro} & \textbf{Valor inicial} & \textbf{Criterio operativo} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Parámetro} & \TVHead{Valor inicial} & \TVHead{Criterio operativo} \\
 \hline
 ET-01 & Periodo de lectura de sensores & Configurable & Las estaciones toman medidas periódicas del entorno. Durante pruebas pueden utilizarse intervalos reducidos para acelerar la validación. \\
 \hline
@@ -201,8 +208,8 @@ En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales segu
 \begin{table}[H]
 \centering
 \footnotesize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{0.95}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 
 \makebox[\textwidth][c]{%
 \hspace*{-0.7cm}%
@@ -211,7 +218,8 @@ En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales segu
 >{\raggedright\arraybackslash}p{0.24\textwidth}|
 >{\raggedright\arraybackslash}p{0.68\textwidth}|}
 \hline
-\textbf{Fase} & \textbf{Nombre} & \textbf{Objetivo principal} \\
+\rowcolor{URJCRed}
+\TVHead{Fase} & \TVHead{Nombre} & \TVHead{Objetivo principal} \\
 \hline
 1 & Análisis inicial del problema & Identificar la necesidad de monitorizar y controlar el riego en un entorno no supervisado de forma continua. \\
 \hline
@@ -299,9 +307,13 @@ Las variables ambientales se incorporan como información de contexto. La temper
 \begin{table}[H]
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \begin{tabular}{|p{0.26\textwidth}|p{0.26\textwidth}|p{0.36\textwidth}|}
 \hline
-\textbf{Sensor} & \textbf{Variable medida} & \textbf{Justificación de elección} \\
+\rowcolor{URJCRed}
+\TVHead{Sensor} & \TVHead{Variable medida} & \TVHead{Justificación de elección} \\
 \hline
 Sensor capacitivo de humedad de suelo V1.2 & Humedad del sustrato mediante lectura analógica. & Variable principal para riego; bajo coste; integración sencilla con Arduino; menor corrosión que sensores resistivos. \\
 \hline
@@ -340,9 +352,13 @@ La Tabla~\ref{cuadro:arduino_raspberry_tierraviva} resume esta división de resp
 \begin{table}[H]
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
 \hline
-\textbf{Aspecto} & \textbf{Arduino UNO} & \textbf{Raspberry Pi 5} \\
+\rowcolor{URJCRed}
+\TVHead{Aspecto} & \TVHead{Arduino UNO} & \TVHead{Raspberry Pi 5} \\
 \hline
 Rol en TierraViva & Controlador local autónomo de estación de campo. & Sistema de supervisión, almacenamiento y visualización. \\
 \hline
@@ -376,9 +392,13 @@ LTE con el módulo A7670E-LASA se eligió como alternativa más adecuada para va
 \begin{table}[H]
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
 \hline
-\textbf{Criterio} & \textbf{LoRa/LoRaWAN} & \textbf{LTE con A7670E-LASA} \\
+\rowcolor{URJCRed}
+\TVHead{Criterio} & \TVHead{LoRa/LoRaWAN} & \TVHead{LTE con A7670E-LASA} \\
 \hline
 Alcance & Muy adecuado para largas distancias con baja tasa de datos. & Depende de la cobertura de red móvil disponible. \\
 \hline
@@ -447,9 +467,13 @@ La implementación concreta de estos bloques, incluyendo la estructura de los sc
 \begin{table}[H]
 \begin{center}
 \small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \begin{tabular}{|p{0.25\textwidth}|p{0.34\textwidth}|p{0.29\textwidth}|}
 \hline
-\textbf{Bloque software} & \textbf{Función en TierraViva} & \textbf{Motivo de elección} \\
+\rowcolor{URJCRed}
+\TVHead{Bloque software} & \TVHead{Función en TierraViva} & \TVHead{Motivo de elección} \\
 \hline
 Prototipo MQTT local & Validación previa de la cadena software en Raspberry. & Permitió comprobar recepción, almacenamiento, API y visualización antes de adoptar la arquitectura final con ThingSpeak. \\
 \hline
@@ -490,10 +514,13 @@ La Tabla~\ref{cuadro:riesgos_mitigacion} resume los riesgos técnicos principale
 \begin{table}[H]
 \begin{center}
 \small
-\renewcommand{\arraystretch}{1.12}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
 \begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.34\textwidth}|}
 \hline
-\textbf{Riesgo} & \textbf{Impacto posible} & \textbf{Medida de mitigación} \\
+\rowcolor{URJCRed}
+\TVHead{Riesgo} & \TVHead{Impacto posible} & \TVHead{Medida de mitigación} \\
 \hline
 Fallo de alimentación o picos de consumo & Reinicios, pérdida de comunicación o comportamiento inestable del relé. & Regulación con LM2596, comprobación de tensiones, masa común y condensadores de estabilización. \\
 \hline

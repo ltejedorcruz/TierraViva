@@ -6,7 +6,6 @@
 \usepackage{makeidx}
 \usepackage{url}
 \usepackage{graphicx}
-\usepackage{color}
 \usepackage{caption}
 \usepackage{acronym}
 \usepackage{hyphenat}
@@ -24,11 +23,119 @@
 \usepackage{tikz}
 \usepackage{array}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc}
-\usepackage{xcolor}
 \usepackage{wrapfig}
 \usepackage{tabularx}
 \usepackage[table]{xcolor}
+\usepackage{booktabs}
 \usepackage{longtable}
+
+% ============================================================
+% Colores corporativos y estilos visuales TierraViva / URJC
+% ============================================================
+
+% Rojo corporativo URJC
+\definecolor{URJCRed}{HTML}{CB0017}
+\definecolor{URJCRedDark}{HTML}{9E0012}
+\definecolor{TableHeaderText}{HTML}{FFFFFF}
+\definecolor{TableRowSoft}{HTML}{F7F7F7}
+\definecolor{TableRule}{HTML}{B8B8B8}
+
+% Colores para código estilo Arduino IDE en modo oscuro
+\definecolor{ArduinoBg}{HTML}{1E1E1E}
+\definecolor{ArduinoText}{HTML}{DCDCDC}
+\definecolor{ArduinoComment}{HTML}{6A9955}
+\definecolor{ArduinoKeyword}{HTML}{569CD6}
+\definecolor{ArduinoFunction}{HTML}{DCDCAA}
+\definecolor{ArduinoString}{HTML}{CE9178}
+\definecolor{ArduinoNumber}{HTML}{B5CEA8}
+\definecolor{ArduinoLine}{HTML}{858585}
+\definecolor{ArduinoFrame}{HTML}{3C3C3C}
+
+% ============================================================
+% Estilo de tablas
+% ============================================================
+
+% Cabeceras de tabla: fila roja con texto blanco y negrita
+\newcommand{\TVTableHeader}{%
+    \rowcolor{URJCRed}%
+    \color{TableHeaderText}\bfseries%
+}
+
+% Celda individual de cabecera, útil para asegurar color blanco en todas las columnas
+\newcommand{\TVHead}[1]{\textcolor{TableHeaderText}{\textbf{#1}}}
+
+% Estilo de captions de tablas
+\captionsetup[table]{
+    labelfont={bf,color=URJCRed},
+    textfont=it,
+    justification=centering,
+    singlelinecheck=false,
+    skip=6pt
+}
+
+% Estilo de captions de códigos/listados
+\captionsetup[lstlisting]{
+    labelfont={bf,color=URJCRed},
+    textfont=it,
+    justification=centering,
+    singlelinecheck=false,
+    skip=6pt
+}
+
+% ============================================================
+% Lenguaje Arduino para listings
+% ============================================================
+
+\lstdefinelanguage{Arduino}{
+    language=C++,
+    morekeywords={
+        setup,loop,pinMode,digitalWrite,digitalRead,analogRead,analogWrite,
+        delay,delayMicroseconds,millis,micros,Serial,SoftwareSerial,Wire,
+        HIGH,LOW,INPUT,OUTPUT,INPUT_PULLUP,true,false,
+        String,byte,boolean,unsigned,long,uint8_t,uint16_t,uint32_t
+    },
+    sensitive=true,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]"
+}
+
+% ============================================================
+% Estilo de código oscuro tipo Arduino IDE
+% ============================================================
+
+\lstdefinestyle{arduinoDark}{
+    backgroundcolor=\color{ArduinoBg},
+    basicstyle=\small\ttfamily\color{ArduinoText},
+    keywordstyle=\color{ArduinoKeyword}\bfseries,
+    commentstyle=\color{ArduinoComment}\itshape,
+    stringstyle=\color{ArduinoString},
+    numberstyle=\tiny\color{ArduinoLine},
+    identifierstyle=\color{ArduinoText},
+    frame=single,
+    rulecolor=\color{ArduinoFrame},
+    framerule=0.4pt,
+    numbers=left,
+    numbersep=8pt,
+    showstringspaces=false,
+    columns=fullflexible,
+    keepspaces=true,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2,
+    captionpos=b,
+    xleftmargin=1.2em,
+    xrightmargin=0.5em,
+    framexleftmargin=1em,
+    aboveskip=3mm,
+    belowskip=3mm
+}
+
+% Estilo por defecto para todos los lstlisting
+\lstset{
+    style=arduinoDark,
+    language=Arduino
+}
 
 \newcommand{\imgmaterial}[2]{%
     \IfFileExists{#1}{%
@@ -58,56 +165,6 @@
 \definecolor{code_gray}{rgb}{0.5,0.5,0.5}
 \definecolor{code_mauve}{rgb}{0.58,0,0.82}
 
-\lstset{frame=tb,
-  language=C,
-  aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{code_gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{code_green},
-  stringstyle=\color{code_mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
-}
-
-\lstset{frame=tb,
-  language=C++,
-  aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{code_gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{code_green},
-  stringstyle=\color{code_mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
-}
-
-\lstset{frame=tb,
-  language=Python,
-  aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{code_gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{code_green},
-  stringstyle=\color{code_mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
-}
 
 % Definición de mis propios tipos: Códigos, Ecuaciones y Tablas
 \DeclareCaptionType{code}[Código][Listado de códigos]
