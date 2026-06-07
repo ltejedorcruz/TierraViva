@@ -447,7 +447,7 @@ La estructura concreta de canales, campos y códigos publicados se desarrolla en
 \section{Elección de arquitectura software de supervisión en Raspberry Pi}
 \label{sec:eleccion_arquitectura_software_raspberry}
 
-La Raspberry Pi se ha seleccionado como sistema de supervisión software de TierraViva. Su función no es sustituir a las estaciones de campo, leer directamente los sensores ni decidir la activación de la bomba, sino consultar la información publicada por las estaciones, registrar un histórico local y ofrecer una interfaz de consulta. Esta separación resulta importante porque las estaciones se encuentran en campo y se comunican de forma remota, mientras que la Raspberry actúa como nodo de supervisión e histórico.
+La Raspberry Pi se ha seleccionado como sistema de supervisión software de TierraViva. Su función no es sustituir a las estaciones de campo, leer directamente los sensores ni decidir la activación de la bomba, sino consultar la información publicada por las estaciones, registrar un histórico local y ofrecer una interfaz de consulta. En TierraViva, esta separación evita que un fallo del sistema de supervisión afecte directamente a la bomba.
 
 \begin{figure}[H]
     \centering

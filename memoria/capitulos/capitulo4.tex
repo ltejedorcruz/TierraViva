@@ -96,7 +96,7 @@ El Arduino UNO se comunica con el A7670E-LASA mediante UART y comandos AT. Desde
     \label{fig:cap4_secuencia_lte_http}
 \end{figure}
 
-La comunicación se utiliza en sentido ascendente: las estaciones publican medidas, estado del relé, evento de sistema y código auxiliar de diagnóstico. La Raspberry Pi consulta posteriormente esa información desde ThingSpeak, pero no envía órdenes de riego a las estaciones. Esta decisión simplifica el sistema y evita que una orden remota antigua o duplicada pueda condicionar una actuación física.
+La comunicación se utiliza en sentido ascendente: las estaciones publican medidas, estado del relé, evento de sistema y código auxiliar de diagnóstico. La Raspberry Pi consulta posteriormente esa información desde ThingSpeak, pero no envía órdenes de riego a las estaciones. Esta decisión simplifica el sistema y evita que información antigua en la nube pueda condicionar una actuación física.
 
 La arquitectura LTE/HTTP no proporciona comunicación en tiempo real estricto, pero resulta adecuada para supervisión. La decisión crítica de riego no depende de la respuesta inmediata de un sistema externo, sino de la evaluación local realizada por la estación. El detalle de inicialización del módem, pruebas con comandos AT e integración en firmware se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
