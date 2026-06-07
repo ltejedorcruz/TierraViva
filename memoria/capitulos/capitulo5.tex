@@ -25,7 +25,7 @@ El entorno de desarrollo utilizado fue Arduino IDE 2.3.8 sobre Windows 11. La pl
 
 Durante la primera conexión por USB, la placa recibía alimentación y encendía sus indicadores luminosos, pero no aparecía ningún puerto disponible en el menú \textit{Tools} $\rightarrow$ \textit{Port} del Arduino IDE. Esto indicaba que el ordenador detectaba alimentación eléctrica, pero no disponía todavía de una comunicación serie utilizable para programar la placa.
 
-La comprobación en el Administrador de dispositivos de Windows mostró el dispositivo como \texttt{USB2.0-Serial} dentro del apartado de otros dispositivos. Esta situación permitió identificar el problema: el sistema no tenía instalado el controlador correspondiente al conversor USB-serie de la placa. La inspección física del Arduino confirmó que el chip situado junto al conector USB era un \texttt{CH340G}, mientras que el microcontrolador principal era un \texttt{ATmega328P}.
+La comprobación en el Administrador de dispositivos de Windows mostró el dispositivo como \texttt{USB2.0-Serial} dentro del apartado de otros dispositivos. Esta situación permitió identificar el problema: el sistema no tenía instalado el controlador correspondiente al conversor USB-serie de la placa. La inspección física del Arduino confirmó que el chip situado junto al conector USB era un \texttt{CH340G} \cite{wch_ch340_driver}, mientras que el microcontrolador principal era un \texttt{ATmega328P}.
 
 \begin{table}[H]
 \begin{center}

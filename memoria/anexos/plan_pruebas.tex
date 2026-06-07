@@ -34,7 +34,7 @@ F7 & Pruebas de actuación con bomba & Comprobar activación temporizada y apaga
 \hline
 F8 & Pruebas de integración completa & Validar el flujo completo estación--ThingSpeak--Raspberry--dashboard--riego. \\
 \hline
-F9 & Pruebas en entorno real o controlado & Evaluar el comportamiento del prototipo en una parcela, maceta o entorno agrícola simulado. \\
+F9 & Prueba funcional en entorno real & Evaluar el comportamiento del prototipo en Agrolab Móstoles, comprobando el funcionamiento de la estación, la publicación de datos, la supervisión y la actuación controlada del riego. \\
 \hline
 \end{tabular}
 \caption{Estrategia general de pruebas del proyecto TierraViva.}
@@ -75,6 +75,8 @@ Raspberry Pi & Ejecución de scripts de consulta, almacenamiento SQLite, API y d
 SQLite & Registro histórico de lecturas, estados y eventos de riego. \\
 \hline
 Dashboard web & Visualización del estado del sistema y de las últimas lecturas. \\
+\hline
+Agrolab Móstoles & Entorno real de agricultura urbana/periurbana utilizado para la prueba funcional final del prototipo. \\
 \hline
 \end{tabular}
 \caption{Elementos empleados en el entorno de pruebas.}
@@ -164,12 +166,44 @@ P15 & Pérdida temporal de comunicación & Interrumpir temporalmente la publicac
 \hline
 P16 & Integración completa & Ejecutar estación, ThingSpeak, Raspberry, API, dashboard y actuación. & El flujo completo funciona de extremo a extremo. \\
 \hline
+P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, ejecutar la estación, comprobar telemetría, dashboard y actuación controlada, y registrar foto/vídeo como evidencia. & El sistema funciona en entorno real de cultivo y mantiene actuación segura. \\
+\hline
 \end{tabular}
 \caption{Casos de prueba principales definidos para TierraViva.}
 \label{tab:casos_prueba}
 \end{table}
 
-\section{Secuencia de validación recomendada}
+\subsection{P17. Prueba funcional en entorno real en Agrolab Móstoles}
+\label{subsec:p17_agrolab_mostoles}
+
+\textbf{Objetivo.} Validar el comportamiento del prototipo TierraViva en un entorno real de cultivo, comprobando adquisición de datos, publicación de telemetría, supervisión desde Raspberry Pi, visualización en dashboard y actuación controlada del riego.
+
+\textbf{Entorno de prueba.} La prueba se realiza en Agrolab Móstoles, espacio de agricultura urbana/periurbana situado en Móstoles, Madrid. Este entorno permite comprobar el funcionamiento del sistema en condiciones más próximas al uso previsto que las pruebas realizadas sobre mesa o en montaje controlado.
+
+\textbf{Procedimiento.}
+\begin{enumerate}
+    \item instalar la estación en la zona de prueba autorizada;
+    \item verificar alimentación, sensores, relé, bomba y conectividad LTE;
+    \item iniciar el firmware de estación y comprobar la lectura de sensores;
+    \item publicar telemetría en el canal ThingSpeak correspondiente;
+    \item comprobar la ingesta desde Raspberry Pi, el almacenamiento local y la visualización en dashboard;
+    \item ejecutar una actuación de riego controlada;
+    \item registrar fotografía del montaje y vídeo de funcionamiento como evidencia.
+\end{enumerate}
+
+\textbf{Criterios de aceptación.}
+\begin{itemize}
+    \item la estación obtiene lecturas coherentes de sensores;
+    \item la telemetría aparece en ThingSpeak;
+    \item la Raspberry Pi ingiere y almacena los datos;
+    \item el dashboard muestra el estado actualizado;
+    \item la bomba se activa únicamente durante el tiempo configurado;
+    \item ante cualquier condición no verificable, la bomba permanece apagada.
+\end{itemize}
+
+\textbf{Evidencias.} Vídeo de funcionamiento disponible en el repositorio del proyecto [url].
+
+\section{Secuencia de validación}
 
 Para reducir riesgos durante las pruebas, la validación se realiza de forma gradual. No se conecta la bomba real hasta haber comprobado previamente la lógica de control y el comportamiento del relé.
 
@@ -198,10 +232,10 @@ Para reducir riesgos durante las pruebas, la validación se realiza de forma gra
 \hline
 8 & Ejecutar prueba completa con sensores, comunicación, backend y riego. & Confirmar el funcionamiento integrado del prototipo. \\
 \hline
-9 & Repetir la prueba en entorno real o controlado. & Comprobar comportamiento fuera del entorno de laboratorio. \\
+9 & Realizar la prueba funcional en Agrolab Móstoles. & Comprobar el comportamiento del prototipo en un entorno real de cultivo y registrar evidencias fotográficas y audiovisuales. \\
 \hline
 \end{tabular}
-\caption{Secuencia recomendada de validación del prototipo.}
+\caption{Secuencia de validación del prototipo.}
 \label{tab:secuencia_validacion}
 \end{table}
 
@@ -262,7 +296,7 @@ R05 & Activación incorrecta o excesiva de la bomba. & P11, P12, P13 \\
 \hline
 R06 & Daño eléctrico por cableado o integración incorrecta. & P01, P11, P16 \\
 \hline
-R07 & Exposición ambiental del montaje. & P16 y prueba en entorno controlado \\
+R07 & Exposición ambiental del montaje. & P16, P17 \\
 \hline
 R08 & Exposición accidental de claves o credenciales. & Revisión de repositorio y ficheros de configuración \\
 \hline
@@ -272,23 +306,6 @@ R09 & Inconsistencias entre firmware, backend, API y dashboard. & P07, P08, P09,
 \caption{Trazabilidad entre riesgos y pruebas.}
 \label{tab:trazabilidad_riesgos_pruebas}
 \end{table}
-
-\section{Registro de resultados}
-
-Los resultados de cada prueba deben registrarse para facilitar la trazabilidad del proyecto. Para cada ensayo se recomienda anotar al menos:
-
-\begin{itemize}
-    \item identificador de la prueba;
-    \item fecha de ejecución;
-    \item versión del firmware o software utilizado;
-    \item configuración relevante;
-    \item resultado obtenido;
-    \item incidencias detectadas;
-    \item acciones correctivas aplicadas;
-    \item resultado de la repetición, si procede.
-\end{itemize}
-
-Este registro se desarrolla de forma complementaria en el anexo dedicado al diario de experimentos, donde se documentan las pruebas realizadas, los problemas encontrados y las modificaciones aplicadas durante el desarrollo.
 
 \section{Estados de una prueba}
 
