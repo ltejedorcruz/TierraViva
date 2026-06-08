@@ -529,7 +529,7 @@ void setup() {
   Serial.begin(9600);
   delay(2500);
 
-  Serial.println(F("=== TierraViva Estacion Remota ==="));
+  Serial.println(F("=== TierraViva Estacion Remota B ==="));
 
   // Relé OFF desde el primer instante
   pinMode(RELAY_PIN, OUTPUT);
