@@ -9,7 +9,6 @@
 #    ./tierraviva.sh stop       → Parar servicios systemd
 #    ./tierraviva.sh logs       → Ver logs de los servicios
 # ============================================================
-#!/usr/bin/env bash
 set -Eeuo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
