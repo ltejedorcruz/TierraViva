@@ -116,8 +116,8 @@ def normalize_feed(feed: Dict[str, Any]) -> Dict[str, Any]:
         "light_lux": safe_float(feed.get("field4")),
         "pressure_hpa": safe_float(feed.get("field5")),
         "relay_state": safe_int(feed.get("field6")),
-        "system_event": safe_text(feed.get("field7")),
-        "debug_code": safe_text(feed.get("field8")),
+        "system_event": safe_int(feed.get("field7")),
+        "debug_code": safe_int(feed.get("field8")),
     }
 
 
@@ -148,6 +148,9 @@ def ingest_station(cfg: StationConfig) -> bool:
         humidity_pct=normalized["humidity_pct"],
         light_lux=normalized["light_lux"],
         pressure_hpa=normalized["pressure_hpa"],
+        relay_state=normalized["relay_state"],
+        system_event=normalized["system_event"],
+        debug_code=normalized["debug_code"],
         source="thingspeak",
         raw_json=feed,
         ts=utc_now_iso(),
