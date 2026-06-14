@@ -1,7 +1,7 @@
 \chapter{Estado del arte y fundamentos tecnológicos}
 \label{cap:capitulo2}
 
-Este capítulo recoge los fundamentos tecnológicos que sirven de base para el diseño de TierraViva. La revisión se centra en las áreas que han condicionado decisiones reales del proyecto: arquitecturas IoT, agricultura de precisión, redes de sensores, plataformas embebidas, conectividad en campo, plataformas cloud y automatización aplicada al riego.
+Este capítulo recoge los fundamentos tecnológicos que sirven de base para el diseño de TierraViva. La revisión se centra en las áreas que han condicionado decisiones reales del proyecto: arquitecturas IoT, agricultura de precisión, redes de sensores, plataformas embebidas, conectividad en campo, protocolos de aplicación, plataformas cloud y automatización aplicada al riego.
 
 El capítulo no busca valorar cada tecnología de forma aislada, sino explicar qué aporta cada una dentro de una arquitectura de riego inteligente. Por eso se presta atención tanto a sus ventajas como a sus restricciones prácticas: consumo, cobertura, facilidad de integración, dependencia de infraestructura y capacidad de validación dentro del alcance del TFG.
 
@@ -19,7 +19,7 @@ Desde un punto de vista práctico, un sistema IoT conecta el mundo físico con e
     \label{fig:cap2_cadena_funcional_iot}
 \end{figure}
 
-En la práctica, IoT debe entenderse como una integración de componentes, no como una tecnología aislada. Sensores, actuadores, microcontroladores, redes de comunicación, plataformas cloud, bases de datos, servicios backend, APIs y dashboards deben encajar entre sí. En un proyecto de ingeniería, el funcionamiento individual de cada bloque no garantiza el funcionamiento del sistema completo. Un diseño puede tener sensores correctos o una interfaz clara, pero fallar si la comunicación, el almacenamiento o la lógica de actuación no se han planteado de forma coherente.
+En la práctica, IoT debe entenderse como una integración de componentes, no como una tecnología aislada. Sensores, actuadores, plataformas de cómputo embebido, redes de comunicación, plataformas de datos, bases de datos, servicios backend, interfaces programables y dashboards deben encajar entre sí. En un proyecto de ingeniería, el funcionamiento individual de cada bloque no garantiza el funcionamiento del sistema completo. Un diseño puede tener sensores correctos o una interfaz clara, pero fallar si la comunicación, el almacenamiento o la lógica de actuación no se han planteado de forma coherente.
 
 Uno de los elementos básicos de una arquitectura IoT es el nodo terminal o \textit{end-device}. Este dispositivo se sitúa cerca del fenómeno que se quiere observar o controlar y normalmente integra sensores, una unidad de procesamiento, un sistema de comunicación y una fuente de alimentación. En algunos casos solo mide y envía información; en otros también ejecuta decisiones sencillas o controla actuadores. Estos nodos terminales suelen estar limitados en memoria, capacidad de cálculo, consumo energético o ancho de banda disponible, por lo que sus restricciones deben considerarse desde el diseño inicial \cite{alFuqaha2015iot}.
 
@@ -31,7 +31,7 @@ La computación en el borde consiste precisamente en desplazar parte del procesa
 
 En aplicaciones de riego, esta aproximación resulta especialmente adecuada. La humedad del suelo no varía a escala de milisegundos y las reglas iniciales de actuación pueden implementarse de forma verificable en el microcontrolador de la estación. De este modo, la plataforma remota y el sistema de supervisión pueden centrarse en registrar, visualizar y analizar el comportamiento del sistema, mientras que la estación conserva la responsabilidad inmediata sobre la bomba o el actuador de riego.
 
-La nube o plataforma cloud constituye otra capa habitual. Su función es proporcionar almacenamiento, disponibilidad remota, APIs de acceso y, en muchos casos, herramientas de visualización o análisis. Esta capa facilita consultar los datos desde distintos lugares, pero introduce dependencias que deben valorarse: conectividad, latencia, límites de uso, disponibilidad del servicio y seguridad de la información.
+La nube o plataforma cloud constituye otra capa habitual. Su función es proporcionar almacenamiento, disponibilidad remota, interfaces programables de acceso y, en muchos casos, herramientas de visualización o análisis. Esta capa facilita consultar los datos desde distintos lugares, pero introduce dependencias que deben valorarse: conectividad, latencia, límites de uso, disponibilidad del servicio y seguridad de la información.
 
 El backend es la parte software encargada de recibir, transformar, validar y servir los datos. Puede ejecutarse en una plataforma cloud, en un servidor o en un equipo local con capacidad suficiente. Normalmente se comunica con una base de datos, donde se guardan medidas y eventos. Este almacenamiento permite analizar la evolución temporal del sistema, generar históricos y revisar decisiones tomadas a partir de datos previos.
 
@@ -145,47 +145,91 @@ Los nodos de campo suelen tener recursos limitados. Pueden funcionar con baterí
 
 La Figura~\ref{fig:cap2_nodo_iot_componentes} muestra los bloques habituales de un nodo de campo. En una aplicación agrícola real, la fiabilidad depende del conjunto formado por sensor, nodo, alimentación, comunicación, protección física y tratamiento de datos \cite{soussi2024smart}. Cuando el nodo incorpora un actuador, también debe asumir reglas mínimas de actuación segura, ya que es el elemento que se encuentra físicamente conectado al sistema de riego.
 
-\section{Controladores y plataformas embebidas para IoT}
-\label{sec:controladores_plataformas_embebidas}
+\section{Arquitectura de red IoT}
+\label{sec:arquitectura_red_iot}
 
-En una arquitectura IoT, los sensores y actuadores necesitan una plataforma capaz de leer señales, ejecutar lógica de control y comunicarse con el resto del sistema. Esta función puede recaer en microcontroladores, computadores de placa reducida o dispositivos embebidos específicos. La elección afecta al consumo energético, potencia de cálculo, interfaces disponibles, coste, facilidad de programación y capacidad de integración.
+Antes de comparar plataformas hardware concretas, conviene distinguir los elementos funcionales que forman una arquitectura de red IoT. Esta separación evita confundir el papel que cumple un elemento dentro del sistema con el tipo de dispositivo físico utilizado para implementarlo. Por ejemplo, un nodo de campo puede estar implementado con un microcontrolador, pero el concepto de nodo no equivale al concepto de microcontrolador; del mismo modo, una pasarela puede ejecutarse en un computador de placa única, en un router industrial o en otro dispositivo con capacidad de comunicación y procesamiento.
 
-Los microcontroladores son una opción habitual para nodos de campo. Son dispositivos de bajo coste y consumo reducido, pensados para ejecutar tareas concretas de forma repetitiva: leer sensores, activar salidas digitales, comunicarse mediante buses sencillos o enviar datos a través de un módulo externo. Plataformas como Arduino, ESP32, STM32 u otras equivalentes son frecuentes en prototipos IoT porque permiten trabajar directamente con entradas y salidas físicas, temporización, comunicaciones serie y buses como I2C o SPI \cite{alFuqaha2015iot}.
+De forma general, una arquitectura de red IoT se organiza alrededor de varios elementos funcionales. En el extremo físico se encuentran los nodos terminales o nodos de campo, que capturan información del entorno y, en algunos casos, actúan sobre él. Estos nodos se conectan mediante una red de acceso, que puede basarse en tecnologías de corto alcance, redes LPWAN, conectividad celular u otras soluciones inalámbricas o cableadas. Entre los nodos y los servicios de datos puede existir una pasarela o \textit{gateway}, encargada de agregar información, traducir protocolos, filtrar datos o proporcionar salida hacia Internet. Finalmente, la plataforma de datos, el backend y las aplicaciones de usuario permiten almacenar, procesar, consultar y visualizar la información.
 
-Arduino es una familia muy extendida en educación y prototipado. Su principal ventaja es el entorno accesible, la abundante documentación y la compatibilidad con muchos sensores y módulos. ESP32 incorpora WiFi y Bluetooth, además de mayor potencia de cálculo. Las familias STM32 ofrecen más control técnico y una gama amplia de prestaciones, aunque suelen exigir mayor conocimiento del entorno de desarrollo y de la configuración de periféricos.
-
-Los computadores de placa reducida, como Raspberry Pi u otras plataformas similares, cubren otro tipo de necesidades. Permiten ejecutar un sistema operativo completo, levantar servicios, gestionar bases de datos, servir aplicaciones web o coordinar varios procesos software. Su mayor potencia y flexibilidad los hace adecuados para almacenamiento, visualización, supervisión, análisis histórico o funciones de gateway. A cambio, consumen más, arrancan más lentamente y no son la opción natural para depender de ellos como único punto de decisión en una actuación física crítica.
-
-Esta separación ayuda a distinguir dos roles dentro de una arquitectura IoT. Un nodo de campo suele priorizar bajo consumo, robustez, lectura directa de sensores, control de salidas y funcionamiento desatendido. Un sistema de supervisión puede necesitar procesamiento, almacenamiento local, conectividad con servicios externos, backend e interfaz de usuario.
+La Tabla~\ref{tab:arquitectura_red_iot_elementos} resume estos elementos desde un punto de vista funcional.
 
 \begin{table}[H]
 \begin{center}
 \small
 \renewcommand{\arraystretch}{1.15}
 \rowcolors{2}{TableRowSoft}{white}
+\begin{tabular}{|p{0.24\textwidth}|p{0.42\textwidth}|p{0.24\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{Elemento funcional} & \TVHead{Responsabilidad dentro de la arquitectura} & \TVHead{Ejemplos de implementación} \\
+\hline
+Nodo terminal o nodo de campo & Mide variables físicas, genera telemetría y, si incorpora actuadores, puede ejecutar acciones locales. & Arduino, ESP32, STM32, módulos embebidos específicos. \\
+\hline
+Red de acceso & Proporciona conectividad entre los nodos de campo y el resto del sistema. & WiFi, LoRa/LoRaWAN, LTE, NB-IoT, Ethernet. \\
+\hline
+Pasarela o \textit{gateway} & Agrega datos, traduce protocolos, ejecuta procesamiento local o proporciona salida hacia redes externas. & Router, gateway LoRaWAN, Raspberry Pi, equipo embebido industrial. \\
+\hline
+Plataforma de datos & Recibe, almacena y hace accesible la telemetría publicada por los dispositivos. & ThingSpeak, ThingsBoard, broker MQTT, plataforma cloud propia. \\
+\hline
+Backend o sistema de supervisión & Valida, transforma, almacena y expone los datos mediante servicios o API. & Servidor local, Raspberry Pi, servicio cloud. \\
+\hline
+Aplicación de usuario & Permite consultar el estado del sistema, revisar históricos, visualizar alertas o analizar tendencias. & Dashboard web, aplicación móvil, panel cloud. \\
+\hline
+\end{tabular}
+\caption{Elementos funcionales habituales en una arquitectura de red IoT.}
+\label{tab:arquitectura_red_iot_elementos}
+\end{center}
+\end{table}
 
+Esta distinción permite analizar posteriormente qué plataforma resulta más adecuada para cada función. La arquitectura define primero qué elementos son necesarios y cómo se relacionan entre sí; después se decide con qué tecnología se implementa cada elemento. En sistemas agrícolas, esta separación es especialmente importante porque los nodos de campo suelen estar condicionados por consumo, conectividad, protección ambiental y autonomía, mientras que los sistemas de supervisión pueden requerir más capacidad de almacenamiento, servicios software e interfaces de consulta.
+
+En una arquitectura IoT con riego automático también debe diferenciarse entre flujo ascendente y flujo descendente. El flujo ascendente transporta medidas, estados y eventos desde los nodos de campo hacia la plataforma o sistema de supervisión. El flujo descendente, cuando existe, transporta órdenes, configuraciones o consignas hacia los dispositivos de campo. En sistemas con actuación física, el diseño debe decidir si la orden de actuación depende de una capa remota o si se ejecuta localmente en el nodo. Esta decisión afecta directamente a la seguridad, latencia y tolerancia a fallos del sistema. Esta distinción entre elemento funcional y tecnología de implementación se utilizará en el apartado siguiente para comparar microcontroladores y computadores de placa única sin confundirlos con los roles arquitectónicos que pueden desempeñar.
+
+\section{Controladores y plataformas embebidas para IoT}
+\label{sec:controladores_plataformas_embebidas}
+
+Una vez definidos los elementos funcionales de una arquitectura de red IoT, puede analizarse qué tipo de plataforma de cómputo resulta adecuada para implementar cada uno de ellos. Esta decisión pertenece al nivel de implementación: no define por sí misma la arquitectura, sino la tecnología concreta con la que se materializan sus bloques.
+
+En este contexto conviene diferenciar entre microcontroladores y computadores de placa única, también denominados \textit{single-board computers} (SBC) o sistemas en placa. Los primeros suelen emplearse en nodos terminales por su bajo consumo, arranque inmediato y facilidad para interactuar con sensores y actuadores. Los segundos ofrecen más capacidad software y pueden ejecutar sistemas operativos completos, por lo que resultan adecuados para funciones de pasarela, backend local, almacenamiento, API o visualización.
+
+Los microcontroladores son una opción habitual para nodos de campo. Son dispositivos de bajo coste y consumo reducido, pensados para ejecutar tareas concretas de forma repetitiva: leer sensores, activar salidas digitales, comunicarse mediante buses sencillos o enviar datos a través de un módulo externo. Plataformas como Arduino, ESP32, STM32 u otras equivalentes son frecuentes en prototipos IoT porque permiten trabajar directamente con entradas y salidas físicas, temporización, comunicaciones serie y buses como I2C o SPI \cite{alFuqaha2015iot}.
+
+Arduino es una familia muy extendida en educación y prototipado. Su principal ventaja es el entorno accesible, la abundante documentación y la compatibilidad con muchos sensores y módulos. ESP32 incorpora WiFi y Bluetooth, además de mayor potencia de cálculo. Las familias STM32 ofrecen más control técnico y una gama amplia de prestaciones, aunque suelen exigir mayor conocimiento del entorno de desarrollo y de la configuración de periféricos.
+
+Los computadores de placa única, o \textit{single-board computers} (SBC), como Raspberry Pi u otras plataformas similares, cubren otro tipo de necesidades. Permiten ejecutar un sistema operativo completo, levantar servicios, gestionar bases de datos, servir aplicaciones web o coordinar varios procesos software. Su mayor potencia y flexibilidad los hace adecuados para almacenamiento, visualización, supervisión, análisis histórico o funciones de gateway. A cambio, consumen más, arrancan más lentamente y no son la opción natural para depender de ellos como único punto de decisión en una actuación física crítica.
+
+La diferencia entre ambas familias no debe interpretarse como una equivalencia directa entre tecnología y elemento arquitectónico. Un microcontrolador no es una arquitectura, sino una forma habitual de implementar un nodo terminal sencillo. Del mismo modo, un computador de placa única no es necesariamente una pasarela, aunque puede desempeñar ese papel si se configura para agregar datos, ejecutar servicios o comunicar redes distintas. La elección depende de la función que deba cubrirse, del consumo admisible, de las interfaces necesarias y de la complejidad software requerida.
+
+\begin{table}[H]
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 \begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
 \hline
 \rowcolor{URJCRed}
-\TVHead{Aspecto} & \TVHead{Microcontroladores} & \TVHead{Computadores de placa reducida} \\
+\TVHead{Aspecto} & \TVHead{Microcontroladores} & \TVHead{Computadores de placa única o SBC} \\
 \hline
-Función & Sensado, decisión local sencilla, control de salidas y tareas embebidas. & Supervisión, almacenamiento, servicios y visualización. \\
+Naturaleza & Circuitos integrados o placas basadas en microcontrolador, orientadas a tareas embebidas concretas. & Placas completas capaces de ejecutar un sistema operativo y varios procesos software. \\
 \hline
-Consumo & Bajo o moderado, según diseño. & Superior, por sistema operativo y servicios. \\
+Uso habitual en IoT & Implementación de nodos terminales, lectura de sensores, control de salidas y lógica local sencilla. & Implementación de pasarelas, servidores locales, sistemas de supervisión, almacenamiento o visualización. \\
 \hline
-Cálculo & Suficiente para adquisición y lógica sencilla. & Adecuado para procesos software más complejos. \\
+Consumo & Bajo o moderado, adecuado para dispositivos alimentados por batería si el diseño lo permite. & Superior, debido al sistema operativo, periféricos y servicios en ejecución. \\
 \hline
-Interfaces & GPIO, ADC, PWM, UART, I2C o SPI. & GPIO, USB, red, almacenamiento y sistema operativo. \\
+Capacidad de cálculo & Suficiente para adquisición, temporización, comunicación básica y reglas simples. & Adecuada para bases de datos, APIs, interfaces web, procesamiento histórico y coordinación de servicios. \\
 \hline
-Uso típico & Nodo de campo autónomo o dispositivo final. & Gateway, servidor local o sistema de supervisión. \\
+Interfaces típicas & GPIO, ADC, PWM, UART, I2C, SPI y entradas/salidas cercanas al hardware. & GPIO, USB, Ethernet/WiFi, almacenamiento local, sistema operativo y servicios de red. \\
+\hline
+Limitaciones & Memoria reducida, menor capacidad de procesamiento y dificultad para ejecutar servicios complejos. & Mayor consumo, arranque más lento y dependencia de sistema operativo. \\
 \hline
 \end{tabular}
-\caption{Comparación general entre microcontroladores y computadores de placa reducida}
+\caption{Comparación general entre microcontroladores y computadores de placa única como plataformas de implementación en IoT}
 \label{cuadro:microcontroladores_sbc}
 \end{center}
 \end{table}
 
-La Tabla~\ref{cuadro:microcontroladores_sbc} resume esta diferencia. En un sistema IoT agrícola, una arquitectura híbrida puede aprovechar la eficiencia del microcontrolador en campo para la medida y actuación local, y la capacidad de procesamiento de un computador de placa reducida para supervisión, almacenamiento y visualización \cite{hanes2017iot,soussi2024smart}.
+La Tabla~\ref{cuadro:microcontroladores_sbc} resume las diferencias entre ambas plataformas como opciones de implementación. En un sistema IoT agrícola, una arquitectura híbrida puede combinar nodos terminales implementados con microcontroladores y sistemas de supervisión implementados con computadores de placa única. Lo importante no es asociar rígidamente una tecnología a un elemento arquitectónico, sino asignar cada función al dispositivo que mejor responda a sus restricciones de consumo, interfaces, robustez y capacidad software \cite{hanes2017iot,soussi2024smart}.
 
 \section{Comunicaciones LPWAN y conectividad en entornos rurales}
 \label{sec:comunicaciones_lpwan}
@@ -203,13 +247,15 @@ El tráfico típico de estos sistemas suele ser reducido. Normalmente se envían
 
 Las redes LPWAN, del inglés \textit{Low Power Wide Area Networks}, se diseñan para ese tipo de escenario. Proporcionan comunicaciones de largo alcance y bajo consumo para dispositivos distribuidos que envían pequeñas cantidades de datos. A cambio, aceptan bajo caudal, mayor latencia o mensajes poco frecuentes \cite{raza2017lpwan}. Este compromiso encaja con muchas aplicaciones agrícolas, donde las variables del entorno no requieren actualización continua a escala de milisegundos.
 
-WiFi y Bluetooth son tecnologías conocidas, pero su utilidad en campo abierto es limitada. WiFi ofrece alta capacidad, aunque depende de una red local y su alcance es reducido. Bluetooth y BLE tienen bajo consumo y pueden ser útiles para configuración cercana, pero no conectan por sí solos estaciones separadas por cientos de metros o varios kilómetros.
+WiFi y Bluetooth son tecnologías conocidas, pero su utilidad en campo abierto es limitada. WiFi ofrece alta capacidad, aunque depende de una red local y su alcance es reducido. Bluetooth, y sobre todo BLE (Bluetooth Low Energy), tienen bajo consumo y pueden ser útiles para configuración cercana, pero no conectan por sí solos estaciones separadas por cientos de metros o varios kilómetros.
 
-Entre las tecnologías de largo alcance destaca LoRa, una modulación de capa física desarrollada por Semtech y basada en espectro ensanchado mediante chirps. Permite alcanzar largas distancias con potencias reducidas, a costa de tasas de transmisión bajas. Al aumentar el factor de ensanchamiento mejora la sensibilidad, pero crece el tiempo de transmisión y disminuye el caudal disponible \cite{semtech2015lora_modulation,augustin2016lora}.
+Entre las tecnologías de largo alcance destaca LoRa, una modulación de capa física desarrollada por Semtech y basada en espectro ensanchado mediante \textit{chirps}. Un \textit{chirp} es una señal cuya frecuencia varía progresivamente durante un intervalo de tiempo, normalmente realizando un barrido ascendente o descendente dentro de un ancho de banda determinado. Esta forma de modulación permite que el receptor distinga señales débiles incluso en presencia de ruido, lo que favorece comunicaciones de largo alcance con potencias reducidas. Como contrapartida, las tasas de transmisión son bajas. Al aumentar el factor de ensanchamiento mejora la sensibilidad, pero crece el tiempo de transmisión y disminuye el caudal disponible \cite{semtech2015lora_modulation,augustin2016lora}.
 
-LoRa y LoRaWAN no son equivalentes. LoRa hace referencia a la modulación radio. LoRaWAN define una arquitectura de red sobre LoRa, con dispositivos finales, pasarelas, servidor de red y servidor de aplicación \cite{lora_alliance_104}. Usar LoRaWAN implica trabajar con una infraestructura completa, no solo con módulos de radio.
+Sobre la modulación LoRa se construye LoRaWAN, una especificación de red LPWAN orientada a conectar dispositivos de bajo consumo con aplicaciones remotas. LoRaWAN define una arquitectura completa formada por dispositivos finales, pasarelas, servidor de red y servidor de aplicación. Los dispositivos finales envían tramas de radio mediante LoRa hacia una o varias pasarelas; estas pasarelas reenvían la información hacia los servidores, donde se gestionan la red, la seguridad, el encaminamiento y la entrega de los datos a la aplicación correspondiente \cite{lora_alliance_104}.
 
-LoRaWAN resulta atractivo en entornos rurales por su alcance, bajo consumo y uso de bandas no licenciadas. Sus restricciones también son claras: bajo caudal, límites regulatorios de uso del canal, dependencia de gateways, configuración más compleja y limitaciones en tráfico descendente. Adelantado et al. analizan precisamente estos límites de capacidad, latencia y escalabilidad \cite{adelantado2017limits}.
+Por tanto, LoRa y LoRaWAN no son equivalentes. LoRa hace referencia a la modulación radio de capa física, mientras que LoRaWAN define el protocolo y la arquitectura de red que permiten organizar una red de dispositivos sobre esa modulación. Usar LoRaWAN implica trabajar con una infraestructura completa, no solo con módulos de radio punto a punto.
+
+LoRaWAN resulta atractivo en entornos rurales por su alcance, bajo consumo y uso de bandas no licenciadas. Sus restricciones también son claras: bajo caudal, límites regulatorios de uso del canal, dependencia de pasarelas, configuración más compleja y limitaciones en tráfico descendente. Adelantado et al. analizan precisamente estos límites de capacidad, latencia y escalabilidad \cite{adelantado2017limits}.
 
 Las redes móviles LTE/4G ofrecen otro enfoque. Frente a LoRaWAN, LTE utiliza infraestructura ya desplegada por operadores, proporciona mayor caudal y permite una integración directa con servicios de Internet. Si hay cobertura, evita instalar un gateway propio. Como contrapartida, exige tarjeta SIM, depende del operador, consume más energía y puede implicar coste asociado al plan de datos.
 
@@ -236,7 +282,7 @@ Bluetooth/BLE & Corto & Bajo & Dispositivo o pasarela cercana & Alcance insufici
 \hline
 LoRa & Largo & Bajo & Enlace radio propio & Bajo caudal y diseño propio \\
 \hline
-LoRaWAN & Largo & Bajo & Gateways y servidores LoRaWAN & Más complejidad de despliegue \\
+LoRaWAN & Largo & Bajo & Pasarelas y servidores LoRaWAN & Más complejidad de despliegue \\
 \hline
 LTE/4G / LTE Cat 1 & Según cobertura & Medio/alto & Red de operador, SIM y módem celular & Consumo, SIM y dependencia de cobertura \\
 \hline
@@ -256,44 +302,14 @@ La decisión de conectividad exige elegir compromisos. LoRaWAN puede encajar cua
 
 En el contexto de TierraViva, esta revisión permite distinguir entre tecnologías atractivas desde el punto de vista teórico y tecnologías asumibles dentro de un prototipo validable. La conectividad no se valora únicamente por su alcance, sino también por la disponibilidad de hardware, la facilidad de depuración, la integración con plataformas cloud y la posibilidad de demostrar el funcionamiento extremo a extremo dentro del alcance temporal del TFG.
 
-Esta distinción fue relevante durante el desarrollo, porque una tecnología técnicamente interesante puede no ser la más adecuada si obliga a dedicar la mayor parte del TFG a desplegar infraestructura de comunicaciones en lugar de validar el sistema completo.
-
-\section{Plataformas cloud para IoT}
-\label{sec:plataformas_cloud_iot}
-
-En una arquitectura IoT, la plataforma cloud actúa como punto intermedio entre los dispositivos de campo y las aplicaciones que consumen la información. Recibe datos de los nodos, los almacena, los organiza y permite consultarlos desde otros sistemas o interfaces de usuario. Esta capa aporta acceso remoto y reduce la infraestructura inicial necesaria. En arquitecturas con control local, su papel principal no es decidir la actuación, sino facilitar la publicación de telemetría, la consulta remota y la supervisión del sistema.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{figs/figura_2_6_edge_fog_cloud.png}
-    \caption{Distribución del procesamiento en arquitecturas IoT. El procesamiento puede situarse cerca del dispositivo, en el borde de la red, en capas intermedias tipo fog o en plataformas cloud, según los requisitos de latencia, ancho de banda, autonomía, disponibilidad de conectividad y capacidad de análisis.}
-    \label{fig:cap2_edge_fog_cloud}
-\end{figure}
-
-Una función habitual es el almacenamiento de telemetría. La telemetría incluye medidas de sensores, estados de funcionamiento, eventos o errores. Las plataformas IoT suelen organizar esta información como series temporales asociadas a un dispositivo, canal, variable o identificador. Así puede consultarse tanto el último valor recibido como la evolución de una magnitud.
-
-Muchas plataformas cloud incorporan herramientas de visualización. Gráficas, paneles de control e indicadores de estado permiten comprobar rápidamente si los datos llegan correctamente y si las variables evolucionan de forma coherente. En prototipos, esta capacidad acelera la validación inicial.
-
-Las APIs permiten que otros programas lean o escriban datos en la plataforma de forma controlada. En IoT son necesarias para enviar telemetría desde los dispositivos y para que otros sistemas puedan recuperar esa información, almacenarla, analizarla o mostrarla. Dependiendo de la plataforma, estas APIs pueden utilizar HTTP, MQTT u otros mecanismos de integración.
-
-La organización de datos cambia según la herramienta: canales, dispositivos, variables, feeds o datastreams. La idea común es agrupar datos relacionados y asociarlos a una fuente concreta. Esta estructura evita mezclar flujos de distintas estaciones y facilita la visualización posterior.
-
-ThingSpeak es una plataforma de análisis IoT que permite agregar, visualizar y analizar flujos de datos en la nube \cite{thingspeak_docs}. Su estructura se basa en canales y campos, de forma que un dispositivo puede escribir datos mediante HTTP o MQTT y otros sistemas pueden leerlos mediante su API \cite{thingspeak_write_data,thingspeak_read_data}. Por su sencillez, se utiliza con frecuencia en prototipos académicos y sistemas de monitorización sencilla.
-
-En TierraViva, esta sencillez resulta especialmente útil: permite comprobar pronto si las estaciones publican datos correctamente, antes de invertir esfuerzo en un backend público propio o en una infraestructura cloud más compleja. Esto no elimina la necesidad de diseñar correctamente el sistema de supervisión, pero sí reduce la complejidad inicial y permite validar antes el flujo estación--plataforma--visualización.
-
-Existen otras alternativas relevantes. Ubidots organiza la información mediante dispositivos, variables, dashboards y eventos \cite{ubidots_basics}. Adafruit IO proporciona una API HTTP orientada a proyectos de electrónica conectada \cite{adafruit_io_api}. Blynk utiliza datastreams para estructurar los datos entre dispositivo y plataforma \cite{blynk_datastreams}. ThingsBoard permite recoger telemetría mediante distintos protocolos, almacenarla como series temporales y utilizarla en dashboards, reglas y APIs \cite{thingsboard_telemetry}. También puede construirse una plataforma propia con broker MQTT, base de datos y herramienta de visualización, asumiendo a cambio su instalación, mantenimiento y seguridad.
-
-El uso de una plataforma cloud introduce dependencias. Si el dispositivo no puede conectarse a Internet o si la plataforma no está disponible, el envío o la lectura de datos puede fallar. La latencia también debe valorarse, sobre todo si la plataforma participa en decisiones de control. Por este motivo, una arquitectura que mantiene la decisión crítica en el nodo de campo reduce la dependencia operativa de la nube: la pérdida temporal de conectividad puede afectar a la supervisión, pero no debe impedir que la estación mantenga un estado seguro. Además, cada servicio puede imponer límites de uso, frecuencia de actualización, volumen de datos, histórico disponible o funcionalidades incluidas en planes gratuitos.
-
-En este proyecto, esta idea se traduce en utilizar la plataforma cloud como apoyo para la telemetría y la supervisión, no como sustituto de la lógica local de seguridad.
+Esta distinción fue relevante durante el desarrollo, porque una tecnología técnicamente interesante puede no ser la más adecuada si obliga a dedicar la mayor parte del trabajo a desplegar infraestructura de comunicaciones en lugar de validar el sistema completo.
 
 \section{Protocolos de aplicación en IoT: HTTP, MQTT y CoAP}
 \label{sec:protocolos_iot}
 
 En un sistema IoT, la tecnología de comunicación transporta los datos, pero el protocolo de aplicación define cómo se intercambia la información entre dispositivos, plataformas, servidores y aplicaciones. HTTP, MQTT y CoAP representan tres enfoques habituales con modelos distintos.
 
-HTTP, del inglés \textit{Hypertext Transfer Protocol}, es uno de los protocolos de aplicación más extendidos en Internet. Funciona mediante un modelo de petición-respuesta: un cliente realiza una solicitud a un servidor y este devuelve una respuesta. La especificación RFC 9110 lo define como un protocolo de aplicación sin estado para sistemas de información distribuidos \cite{fielding2022http}. En IoT se utiliza con frecuencia para enviar datos a APIs mediante peticiones GET o POST, especialmente cuando la plataforma cloud ya ofrece este tipo de interfaz.
+HTTP, del inglés \textit{Hypertext Transfer Protocol}, es uno de los protocolos de aplicación más extendidos en Internet. Funciona mediante un modelo de petición-respuesta: un cliente realiza una solicitud a un servidor y este devuelve una respuesta. La especificación RFC 9110 lo define como un protocolo de aplicación sin estado para sistemas de información distribuidos \cite{fielding2022http}. En IoT se utiliza con frecuencia para enviar datos a servicios web o interfaces HTTP mediante peticiones GET o POST, especialmente cuando la plataforma de destino ya expone recursos accesibles mediante este protocolo.
 
 Su principal ventaja es la compatibilidad. Existen muchas herramientas, librerías, servidores y plataformas capaces de trabajar con HTTP, lo que facilita la depuración y la integración. Su limitación es conocida: no fue diseñado específicamente para dispositivos IoT restringidos, puede introducir más sobrecarga que otras opciones y su modelo petición-respuesta no siempre es el más eficiente para comunicación asíncrona o mensajes muy frecuentes.
 
@@ -318,7 +334,7 @@ CoAP es interesante para redes de sensores y dispositivos embebidos de bajo cons
 \rowcolor{URJCRed}
 \TVHead{Protocolo} & \TVHead{Modelo} & \TVHead{Ventaja principal} & \TVHead{Limitación principal} \\
 \hline
-HTTP & Petición-respuesta & Muy compatible con APIs web & Más sobrecarga; no específico de IoT \\
+HTTP & Petición-respuesta & Muy compatible con servicios web e interfaces HTTP & Más sobrecarga; no específico de IoT \\
 \hline
 MQTT & Publicación/suscripción & Ligero y desacoplado mediante broker & Requiere broker disponible \\
 \hline
@@ -330,9 +346,42 @@ CoAP & Petición-respuesta ligera & Diseñado para nodos restringidos & Menor di
 \end{center}
 \end{table}
 
-La Tabla~\ref{cuadro:http_mqtt_coap} resume las diferencias principales. MQTT encaja bien con mensajería ligera y comunicación asíncrona. CoAP es adecuado para nodos restringidos y redes de bajo consumo. HTTP puede ser razonable cuando la prioridad es integrarse con APIs existentes, plataformas cloud sencillas o servicios que ya exponen endpoints HTTP.
+La Tabla~\ref{cuadro:http_mqtt_coap} resume las diferencias principales. MQTT encaja bien con mensajería ligera y comunicación asíncrona. CoAP es adecuado para nodos restringidos y redes de bajo consumo. HTTP puede ser razonable cuando la prioridad es integrarse con servicios web, plataformas cloud sencillas o sistemas que ya exponen recursos accesibles mediante endpoints HTTP.
 
 La elección del protocolo debe considerar la arquitectura completa: plataforma cloud, librerías disponibles, frecuencia de envío, sentido de la comunicación, facilidad de depuración y tiempo disponible para validar el prototipo. En TierraViva, esta comparación permite justificar el uso de mecanismos compatibles con plataformas cloud sencillas y con módulos celulares controlados mediante comandos AT para publicar telemetría y estado, sin perder de vista que MQTT o CoAP podrían resultar adecuados en evoluciones futuras con una infraestructura diferente.
+
+
+\section{Plataformas cloud para IoT}
+\label{sec:plataformas_cloud_iot}
+
+En una arquitectura IoT, la plataforma cloud actúa como punto intermedio entre los dispositivos de campo y las aplicaciones que consumen la información. Recibe datos de los nodos, los almacena, los organiza y permite consultarlos desde otros sistemas o interfaces de usuario. Esta capa aporta acceso remoto y reduce la infraestructura inicial necesaria. En arquitecturas con control local, su papel principal no es decidir la actuación, sino facilitar la publicación de telemetría, la consulta remota y la supervisión del sistema.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/figura_2_6_edge_fog_cloud.png}
+    \caption{Distribución del procesamiento en arquitecturas IoT. El procesamiento puede situarse cerca del dispositivo, en el borde de la red, en capas intermedias tipo fog o en plataformas cloud, según los requisitos de latencia, ancho de banda, autonomía, disponibilidad de conectividad y capacidad de análisis.}
+    \label{fig:cap2_edge_fog_cloud}
+\end{figure}
+
+Una función habitual es el almacenamiento de telemetría. La telemetría incluye medidas de sensores, estados de funcionamiento, eventos o errores. Las plataformas IoT suelen organizar esta información como series temporales asociadas a un dispositivo, canal, variable o identificador. Así puede consultarse tanto el último valor recibido como la evolución de una magnitud.
+
+Muchas plataformas cloud incorporan herramientas de visualización. Gráficas, paneles de control e indicadores de estado permiten comprobar rápidamente si los datos llegan correctamente y si las variables evolucionan de forma coherente. En prototipos, esta capacidad acelera la validación inicial.
+
+Una API, del inglés \textit{Application Programming Interface}, es una interfaz programable que una plataforma ofrece para que otros desarrollos software puedan acceder a su funcionalidad de forma controlada. En una plataforma IoT, la API puede permitir escribir telemetría, consultar lecturas, recuperar históricos, gestionar dispositivos o integrar esos datos en aplicaciones propias.
+
+No debe confundirse la API con el protocolo de aplicación utilizado para acceder a ella: HTTP, MQTT o CoAP son mecanismos de comunicación, mientras que la API define qué operaciones ofrece la plataforma, con qué parámetros, formatos, autenticación y respuestas. En la práctica, muchas plataformas IoT exponen APIs documentadas sobre HTTP, especificando endpoints, métodos, formatos de datos y mecanismos de autenticación concretos. Otras incorporan también mecanismos de publicación/suscripción mediante MQTT para el envío de telemetría. Por tanto, el protocolo transporta la información, mientras que la API describe la interfaz programable disponible para que un sistema externo interactúe con la plataforma.
+
+La organización de datos cambia según la herramienta: canales, dispositivos, variables, feeds o datastreams. La idea común es agrupar datos relacionados y asociarlos a una fuente concreta. Esta estructura evita mezclar flujos de distintas estaciones y facilita la visualización posterior.
+
+ThingSpeak es una plataforma de análisis IoT que permite agregar, visualizar y analizar flujos de datos en la nube \cite{thingspeak_docs}. Su estructura se basa en canales y campos, y ofrece una interfaz programable documentada para escribir y leer datos. En la práctica, la escritura de telemetría puede realizarse mediante mecanismos soportados por la plataforma, como peticiones HTTP o publicación MQTT, mientras que la lectura de datos se realiza mediante recursos documentados de consulta \cite{thingspeak_write_data,thingspeak_read_data}. Por su sencillez, se utiliza con frecuencia en prototipos académicos y sistemas de monitorización sencilla.
+
+En TierraViva, esta sencillez resulta especialmente útil: permite comprobar pronto si las estaciones publican datos correctamente, antes de invertir esfuerzo en un backend público propio o en una infraestructura cloud más compleja. Esto no elimina la necesidad de diseñar correctamente el sistema de supervisión, pero sí reduce la complejidad inicial y permite validar antes el flujo estación--plataforma--visualización.
+
+Existen otras alternativas relevantes. Ubidots organiza la información mediante dispositivos, variables, dashboards y eventos \cite{ubidots_basics}. Adafruit IO proporciona una interfaz HTTP documentada orientada a proyectos de electrónica conectada \cite{adafruit_io_api}. Blynk utiliza datastreams para estructurar los datos entre dispositivo y plataforma \cite{blynk_datastreams}. ThingsBoard permite recoger telemetría mediante distintos mecanismos de integración, almacenarla como series temporales y utilizarla en dashboards, reglas e interfaces programables \cite{thingsboard_telemetry}. También puede construirse una plataforma propia con broker MQTT, base de datos y herramienta de visualización, asumiendo a cambio su instalación, mantenimiento y seguridad.
+
+El uso de una plataforma cloud introduce dependencias. Si el dispositivo no puede conectarse a Internet o si la plataforma no está disponible, el envío o la lectura de datos puede fallar. La latencia también debe valorarse, sobre todo si la plataforma participa en decisiones de control. Por este motivo, una arquitectura que mantiene la decisión crítica en el nodo de campo reduce la dependencia operativa de la nube: la pérdida temporal de conectividad puede afectar a la supervisión, pero no debe impedir que la estación mantenga un estado seguro. Además, cada servicio puede imponer límites de uso, frecuencia de actualización, volumen de datos, histórico disponible o funcionalidades incluidas en planes gratuitos.
+
+En este proyecto, esta idea se traduce en utilizar la plataforma cloud como apoyo para la telemetría y la supervisión, no como sustituto de la lógica local de seguridad.
 
 \section{Automatización, reglas e inteligencia artificial en riego}
 \label{sec:automatizacion_reglas_ia_riego}

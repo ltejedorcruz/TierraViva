@@ -20,6 +20,8 @@ El sistema se plantea a partir de estaciones de campo capaces de obtener medidas
     \label{fig:cap3_requisitos_funcionales}
 \end{figure}
 
+El término \textit{dashboard} se refiere a un panel web de supervisión que integra, en una misma interfaz, lecturas recientes, estado del sistema, históricos y eventos relevantes del prototipo.
+
 En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requisitos funcionales considerados para el diseño del prototipo.
 
 \begin{table}[H]
@@ -46,21 +48,21 @@ RF-02 & Medición ambiental & El sistema debe medir variables ambientales releva
 \hline
 RF-03 & Medición de luminosidad & El sistema debe registrar la luminosidad o nivel de luz ambiente para contextualizar las condiciones del entorno. & Prueba con variación de luz. \\
 \hline
-RF-04 & Envío remoto de telemetría & Las estaciones de campo deben enviar sus medidas a una plataforma remota para que puedan ser consultadas posteriormente. & Prueba de comunicación remota y recepción en plataforma cloud. \\
+RF-04 & Envío remoto de telemetría & Las estaciones de campo deben enviar sus medidas a una plataforma remota para que puedan ser consultadas posteriormente. & Prueba de comunicación remota y recepción en plataforma \textit{cloud}. \\
 \hline
 RF-05 & Identificación de estación & Cada lectura debe poder asociarse a la estación de origen, permitiendo distinguir los datos de distintas zonas o nodos. & Comprobación de registros diferenciados por estación. \\
 \hline
 RF-06 & Almacenamiento histórico & El sistema debe registrar las lecturas recibidas para conservar un histórico de funcionamiento. & Verificación de inserciones en SQLite. \\
 \hline
-RF-07 & Visualización del estado & El sistema debe ofrecer una interfaz de consulta que permita ver las últimas lecturas y el estado general del prototipo. & Prueba de dashboard web en navegador. \\
+RF-07 & Visualización del estado & El sistema debe ofrecer una interfaz de consulta que permita ver las últimas lecturas y el estado general del prototipo. & Prueba de \textit{dashboard} web en navegador. \\
 \hline
-RF-08 & Decisión local de riego & Cada estación debe evaluar localmente si las condiciones medidas justifican una actuación sobre el riego. & Prueba de regla local de humedad, cooldown y estado seguro. \\
+RF-08 & Decisión local de riego & Cada estación debe evaluar localmente si las condiciones medidas justifican una actuación sobre el riego. & Prueba de regla local de humedad, \textit{cooldown} y estado seguro. \\
 \hline
-RF-09 & Actuación local sobre el riego & La estación debe accionar físicamente el sistema de riego mediante relé y bomba de agua durante un tiempo limitado por firmware. & Prueba controlada con relé y bomba/carga de prueba. \\
+RF-09 & Actuación local sobre el riego & La estación debe accionar físicamente el sistema de riego mediante relé y bomba de agua durante un tiempo limitado por \textit{firmware}. & Prueba controlada con relé y bomba/carga de prueba. \\
 \hline
-RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé, el evento de sistema y un código auxiliar de diagnóstico que permitan conocer si se ha producido una actuación, una situación de reposo, un error, un estado seguro o un bloqueo por cooldown. & Verificación de \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code} en ThingSpeak. \\
+RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé, el evento de sistema y un código auxiliar de diagnóstico que permitan conocer si se ha producido una actuación, una situación de reposo, un error, un estado seguro o un bloqueo por \textit{cooldown}. & Verificación de \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code} en ThingSpeak. \\
 \hline
-RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, cooldown activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
+RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, \textit{cooldown} activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
 \hline
 \end{tabular}%
 }
@@ -124,7 +126,7 @@ RNF-09 & Adecuación académica & El alcance debe ser realizable dentro del tiem
 \end{center}
 \end{table}
 
-Estos requisitos no funcionales condicionan la arquitectura del proyecto. La modularidad, la reproducibilidad y la facilidad de depuración justifican la separación entre estación de campo, plataforma intermedia, Raspberry Pi, API y dashboard. Esta división permite probar cada bloque de forma independiente y reduce el riesgo de que un fallo en una capa impida validar el conjunto.
+Estos requisitos no funcionales condicionan la arquitectura del proyecto. La modularidad, la reproducibilidad y la facilidad de depuración justifican la separación entre estación de campo, plataforma intermedia, Raspberry Pi, API y \textit{dashboard}. Esta división permite probar cada bloque de forma independiente y reduce el riesgo de que un fallo en una capa impida validar el conjunto.
 
 El bajo coste y la adecuación académica orientan la selección de componentes hacia módulos accesibles, documentados y suficientes para demostrar el funcionamiento del sistema. La escalabilidad se plantea de forma limitada pero necesaria: el sistema debe poder trabajar con más de una estación sin rediseñar por completo la arquitectura.
 
@@ -167,15 +169,15 @@ ET-01 & Periodo de lectura de sensores & Configurable & Las estaciones toman med
 \hline
 ET-02 & Frecuencia de envío de telemetría & Configurable & Cada estación envía sus datos de forma periódica, evitando tráfico innecesario en funcionamiento normal. \\
 \hline
-ET-03 & Frecuencia de actualización del dashboard & 3--5 s & La interfaz consulta el estado con mayor frecuencia que la llegada real de nuevos datos. \\
+ET-03 & Frecuencia de actualización del \textit{dashboard} & 3--5 s & La interfaz consulta el estado con mayor frecuencia que la llegada real de nuevos datos. \\
 \hline
 ET-04 & Intervalo de evaluación local & Configurable & Cada estación evalúa periódicamente sus lecturas y comprueba si se cumplen las condiciones locales de riego. \\
 \hline
-ET-05 & Tiempo máximo de bomba activa & Configurable & La activación de la bomba queda limitada por firmware para evitar riego indefinido ante errores de control. \\
+ET-05 & Tiempo máximo de bomba activa & Limitado en pruebas; ajustable en \textit{firmware} & La activación de la bomba se limita a intervalos breves durante la validación del prototipo. Este valor no se plantea como una duración agronómica definitiva, sino como una medida de seguridad para evitar riego indefinido, sobrecarga del actuador o consumo innecesario de agua ante errores de control. En una instalación real debería ajustarse a partir del caudal de la bomba, el volumen de agua deseado, el tipo de sustrato y la respuesta observada de la humedad del suelo. \\
 \hline
 ET-06 & Tiempo mínimo entre riegos & Configurable & Se aplica un periodo de espera para evitar actuaciones repetidas en poco tiempo. \\
 \hline
-ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & La Raspberry Pi y el dashboard deben identificar lecturas antiguas u offline cuando no se reciben publicaciones recientes de una estación. \\
+ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & La Raspberry Pi y el \textit{dashboard} deben identificar lecturas antiguas u \textit{offline} cuando no se reciben publicaciones recientes de una estación. \\
 \hline
 ET-08 & Estado seguro por defecto & Bomba apagada & Al arrancar, ante error de lectura, fallo de comunicación o condición no verificable, la estación mantiene desactivado el riego. \\
 \hline
@@ -190,9 +192,9 @@ ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actua
 \label{cuadro:especificaciones_temporales}
 \end{table}
 
-Los parámetros temporales se definen como valores configurables del firmware. Durante las pruebas pueden emplearse intervalos reducidos para acelerar la validación, mientras que en un funcionamiento más estable conviene utilizar periodos más conservadores. Lo importante desde el punto de vista de diseño no es fijar un único valor definitivo, sino garantizar ciclos controlados, detección de datos antiguos en supervisión y actuación de la bomba siempre limitada temporalmente.
+Los parámetros temporales se definen como valores configurables del \textit{firmware}. Durante las pruebas pueden emplearse intervalos reducidos para acelerar la validación, mientras que en un funcionamiento más estable conviene utilizar periodos más conservadores. En particular, el tiempo máximo de bomba activa no debe interpretarse como una recomendación agronómica general, sino como un límite de seguridad del prototipo. Su valor debe ser deliberadamente conservador durante la validación y ajustarse posteriormente a partir de pruebas de caudal, tipo de cultivo, volumen de agua aplicado y evolución real de la humedad del suelo. Lo importante desde el punto de vista de diseño no es fijar un único valor definitivo, sino garantizar ciclos controlados, detección de datos antiguos en supervisión y actuación de la bomba siempre limitada temporalmente.
 
-La actualización del dashboard puede realizarse con mayor frecuencia que la publicación de las estaciones, pero no debe interpretarse como una nueva medida en cada refresco. La actuación física queda gobernada por el firmware de la estación, que debe mantener la bomba apagada ante lecturas inválidas, reinicios, pérdida de comunicación o estados no verificables.
+La actualización del \textit{dashboard} puede realizarse con mayor frecuencia que la publicación de las estaciones, pero no debe interpretarse como una nueva medida en cada refresco. La actuación física queda gobernada por el \textit{firmware} de la estación, que debe mantener la bomba apagada ante lecturas inválidas, reinicios, pérdida de comunicación o estados no verificables.
 
 \section{Metodología de trabajo}
 \label{sec:metodologia_trabajo}
@@ -227,15 +229,15 @@ En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales segu
 \hline
 3 & Diseño conceptual de la arquitectura & Definir los bloques principales del sistema y la relación entre estaciones autónomas de campo, plataforma intermedia, sistema de supervisión y actuador. \\
 \hline
-4 & Prototipo local con Raspberry & Validar una primera cadena de adquisición, mensajería, almacenamiento y visualización mediante Raspberry Pi, MQTT, SQLite, FastAPI y dashboard. \\
+4 & Prototipo local con Raspberry & Validar una primera cadena de adquisición, mensajería, almacenamiento y visualización mediante Raspberry Pi, MQTT, SQLite, FastAPI y \textit{dashboard}. \\
 \hline
 5 & Validación de sensores & Comprobar el funcionamiento de los sensores de humedad de suelo, luminosidad y variables ambientales antes de integrarlos en una estación. \\
 \hline
 6 & Validación de comunicaciones & Probar la comunicación remota necesaria para publicar telemetría y estado desde las estaciones. \\
 \hline
-7 & Elección de plataforma cloud & Seleccionar una plataforma intermedia que permitiera publicar telemetría, consultar datos remotos y supervisar el estado de las estaciones de forma sencilla y verificable. \\
+7 & Elección de plataforma \textit{cloud} & Seleccionar una plataforma intermedia que permitiera publicar telemetría, consultar datos remotos y supervisar el estado de las estaciones de forma sencilla y verificable. \\
 \hline
-8 & Diseño de actuación local & Definir el control autónomo de la bomba de agua mediante relé, incluyendo reglas locales, tiempos máximos, cooldown y estado seguro. \\
+8 & Diseño de actuación local & Definir el control autónomo de la bomba de agua mediante relé, incluyendo reglas locales, tiempos máximos, \textit{cooldown} y estado seguro. \\
 \hline
 9 & Integración de subsistemas & Conectar adquisición, comunicación, supervisión, almacenamiento, visualización, decisión local y actuación en una arquitectura coherente. \\
 \hline
@@ -252,9 +254,9 @@ En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales segu
 
 Las primeras fases permitieron transformar la necesidad inicial en requisitos técnicos y revisar las alternativas de sensorización, comunicaciones, plataformas embebidas, almacenamiento y visualización. A partir de esa revisión se definió una arquitectura por bloques, con estaciones autónomas de campo, plataforma intermedia, sistema de supervisión y actuación local.
 
-El prototipo local previo con Raspberry Pi permitió validar una primera cadena de adquisición, almacenamiento, API y dashboard antes de adoptar la arquitectura final con LTE y ThingSpeak. Posteriormente se validaron sensores, comunicaciones y actuación por separado, evitando mezclar problemas de cableado, alimentación, módem, backend o lógica de riego en una única fase de integración.
+El prototipo local previo con Raspberry Pi permitió validar una primera cadena de adquisición, almacenamiento, API y \textit{dashboard} antes de adoptar la arquitectura final con LTE y ThingSpeak. Posteriormente se validaron sensores, comunicaciones y actuación por separado, evitando mezclar problemas de cableado, alimentación, módem, \textit{backend} o lógica de riego en una única fase de integración.
 
-La integración final conectó adquisición, publicación de telemetría, almacenamiento local, visualización, decisión local y actuación sobre el relé. Durante este proceso se documentaron incidencias, alternativas descartadas y cambios de enfoque, especialmente la separación entre supervisión y control local. Esta decisión trasladó la lógica crítica de riego al firmware de cada estación y dejó la Raspberry Pi como sistema de consulta, histórico y visualización.
+La integración final conectó adquisición, publicación de telemetría, almacenamiento local, visualización, decisión local y actuación sobre el relé. Durante este proceso se documentaron incidencias, alternativas descartadas y cambios de enfoque, especialmente la separación entre supervisión y control local. Esta decisión trasladó la lógica crítica de riego al \textit{firmware} de cada estación y dejó la Raspberry Pi como sistema de consulta, histórico y visualización.
 
 \section{Arquitectura general planteada}
 \label{sec:arquitectura_general_planteada}
@@ -268,7 +270,7 @@ En términos generales, el sistema se divide en cuatro bloques principales:
 \begin{itemize}
     \item \textbf{Estaciones autónomas de campo}: encargadas de medir las variables del entorno, evaluar reglas locales de riego, accionar la bomba mediante relé y publicar telemetría y estado.
     \item \textbf{Capa de comunicaciones y plataforma intermedia}: responsable de recibir los datos publicados por las estaciones y hacerlos accesibles para consulta remota.
-    \item \textbf{Sistema de supervisión}: implementado sobre Raspberry Pi, encargado de consultar datos, almacenarlos, exponer una API y servir el dashboard.
+    \item \textbf{Sistema de supervisión}: implementado sobre Raspberry Pi, encargado de consultar datos, almacenarlos, exponer una API y servir el \textit{dashboard}.
     \item \textbf{Interfaz de usuario}: orientada a visualizar el estado del sistema, revisar el histórico y supervisar las actuaciones realizadas por las estaciones.
 \end{itemize}
 
@@ -280,7 +282,7 @@ La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general 
 \label{fig:arquitectura_general_tierraviva}
 \end{figure}
 
-La división de responsabilidades es el punto central de esta arquitectura. Las estaciones de campo interactúan con el entorno físico, toman la decisión local de riego y publican telemetría. ThingSpeak actúa como plataforma intermedia de comunicación. La Raspberry Pi consulta los datos, mantiene el histórico, expone la API y sirve el dashboard, sin convertirse en el elemento responsable de decidir la activación de la bomba.
+La división de responsabilidades es el punto central de esta arquitectura. Las estaciones de campo interactúan con el entorno físico, toman la decisión local de riego y publican telemetría. ThingSpeak actúa como plataforma intermedia de comunicación. La Raspberry Pi consulta los datos, mantiene el histórico, expone la API y sirve el \textit{dashboard}, sin convertirse en el elemento responsable de decidir la activación de la bomba.
 
 El detalle de la arquitectura final, incluyendo canales de ThingSpeak, flujo de telemetría y papel de cada bloque, se desarrolla en el Capítulo~\ref{cap:capitulo4}. Los flujos visuales de funcionamiento se recogen en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
 
@@ -334,7 +336,7 @@ En conjunto, la combinación seleccionada cubre una variable principal de decisi
 \section{Elección de plataforma de control local y supervisión}
 \label{sec:eleccion_plataformas_control}
 
-La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un lado, las estaciones de campo necesitan una plataforma sencilla y cercana al hardware, capaz de leer sensores, comunicarse con el módulo LTE, aplicar reglas locales de riego y controlar el relé de la bomba. Por otro lado, el sistema necesita una plataforma con mayor capacidad software para consultar datos, almacenarlos, exponer una API y servir el dashboard web. Esta segunda plataforma no actúa como cerebro del riego, sino como sistema de supervisión e histórico. Esta diferencia de funciones justifica el uso combinado de Arduino UNO y Raspberry Pi 5, en lugar de concentrar todo el sistema en una única plataforma.
+La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un lado, las estaciones de campo necesitan una plataforma sencilla y cercana al hardware, capaz de leer sensores, comunicarse con el módulo LTE, aplicar reglas locales de riego y controlar el relé de la bomba. Por otro lado, el sistema necesita una plataforma con mayor capacidad software para consultar datos, almacenarlos, exponer una API y servir el \textit{dashboard} web. Esta segunda plataforma no actúa como cerebro del riego, sino como sistema de supervisión e histórico. Esta diferencia de funciones justifica el uso combinado de Arduino UNO y Raspberry Pi 5, en lugar de concentrar todo el sistema en una única plataforma.
 
 \begin{figure}[H]
     \centering
@@ -345,7 +347,7 @@ La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un 
 
 Arduino UNO se ha seleccionado como plataforma principal de las estaciones de campo porque ofrece una integración directa con sensores, bus I2C, entrada analógica, comunicación serie con el módem LTE y control digital del relé. Sus prestaciones son limitadas frente a plataformas más modernas, pero suficientes para las tareas previstas en el nodo de campo: medir, aplicar reglas locales, comunicarse y actuar sobre la bomba \cite{arduino_uno_rev3_specs}.
 
-La Raspberry Pi 5 se utiliza como sistema de supervisión, no como controlador físico del riego. Su mayor capacidad permite ejecutar procesos software, mantener una base de datos local, servir una API y alojar el dashboard web \cite{raspberry_pi5_product_brief}. Esta separación evita concentrar en un único dispositivo tareas muy distintas y permite que la estación mantenga un comportamiento seguro aunque la Raspberry no esté disponible.
+La Raspberry Pi 5 se utiliza como sistema de supervisión, no como controlador físico del riego. Su mayor capacidad permite ejecutar procesos software, mantener una base de datos local, servir una API y alojar el \textit{dashboard} web \cite{raspberry_pi5_product_brief}. Esta separación evita concentrar en un único dispositivo tareas muy distintas y permite que la estación mantenga un comportamiento seguro aunque la Raspberry no esté disponible.
 
 La Tabla~\ref{cuadro:arduino_raspberry_tierraviva} resume esta división de responsabilidades.
 
@@ -366,7 +368,7 @@ Relación con sensores & Lectura directa de sensores analógicos y digitales. & 
 \hline
 Actuación & Decisión local y control del relé asociado a la bomba. & No participa en la actuación física ni genera órdenes de riego. \\
 \hline
-Capacidad software & Firmware sencillo y tareas embebidas. & Sistema operativo, API, base de datos y dashboard. \\
+Capacidad software & \textit{firmware} sencillo y tareas embebidas. & Sistema operativo, API, base de datos y \textit{dashboard}. \\
 \hline
 Consumo y arranque & Menor consumo y arranque inmediato. & Mayor consumo y arranque dependiente del sistema operativo. \\
 \hline
@@ -383,11 +385,11 @@ Durante el diseño también se consideraron alternativas como ESP32 o STM32. ESP
 \section{Selección de solución de comunicaciones para estaciones remotas}
 \label{sec:seleccion_comunicaciones_remotas}
 
-La comunicación entre las estaciones de campo y el sistema de supervisión es una decisión crítica en TierraViva. Las estaciones no se consideran conectadas físicamente a la Raspberry Pi, por lo que la telemetría debe enviarse de forma remota desde la parcela o zona de cultivo. La solución elegida debía funcionar sin depender de una red WiFi local, permitir integración con una plataforma cloud y ser verificable dentro del alcance temporal del TFG.
+La comunicación entre las estaciones de campo y el sistema de supervisión es una decisión crítica en TierraViva. Las estaciones no se consideran conectadas físicamente a la Raspberry Pi, por lo que la telemetría debe enviarse de forma remota desde la parcela o zona de cultivo. La solución elegida debía funcionar sin depender de una red WiFi local, permitir integración con una plataforma \textit{cloud} y ser verificable dentro del alcance temporal del TFG.
 
 Durante el diseño se valoraron principalmente dos enfoques: LoRa/LoRaWAN y conectividad móvil LTE. LoRa resulta especialmente atractivo en IoT agrícola por su largo alcance, bajo consumo y adecuación a mensajes pequeños \cite{semtech2015lora_modulation,augustin2016lora}. LoRaWAN añade una arquitectura de red con dispositivos finales, pasarelas y servidores de red \cite{lora_alliance_104}. Sin embargo, esta opción habría requerido resolver infraestructura adicional, selección de módulos, compatibilidad de banda, alimentación, niveles lógicos y configuración de red, desplazando una parte importante del esfuerzo hacia la propia comunicación.
 
-LTE con el módulo A7670E-LASA se eligió como alternativa más adecuada para validar el sistema completo. Esta opción permite que cada estación publique datos directamente en Internet mediante red móvil y peticiones HTTP, sin desplegar gateway propio. A cambio, introduce dependencia de cobertura móvil, tarjeta SIM, consumo energético superior y una alimentación más exigente para el módem.
+LTE con el módulo A7670E-LASA se eligió como alternativa más adecuada para validar el sistema completo. Esta opción permite que cada estación publique datos directamente en Internet mediante red móvil y peticiones HTTP, sin desplegar \textit{gateway} propio. A cambio, introduce dependencia de cobertura móvil, tarjeta SIM, consumo energético superior y una alimentación más exigente para el módem.
 
 \begin{table}[H]
 \begin{center}
@@ -404,9 +406,9 @@ Alcance & Muy adecuado para largas distancias con baja tasa de datos. & Depende 
 \hline
 Consumo & Bajo consumo, especialmente en envíos periódicos. & Mayor consumo y picos de corriente durante transmisión. \\
 \hline
-Infraestructura & Puede requerir gateway, servidor LoRaWAN o receptor propio. & No requiere gateway propio; usa red móvil existente. \\
+Infraestructura & Puede requerir \textit{gateway}, servidor LoRaWAN o receptor propio. & No requiere \textit{gateway} propio; usa red móvil existente. \\
 \hline
-Integración cloud & Necesita pasarela o backend intermedio. & Integración directa mediante HTTP. \\
+Integración \textit{cloud} & Necesita pasarela o \textit{backend} intermedio. & Integración directa mediante HTTP. \\
 \hline
 Complejidad inicial & Mayor si se despliega LoRaWAN completo. & Menor para validar telemetría HTTP. \\
 \hline
@@ -424,12 +426,12 @@ Adecuación al prototipo & Muy interesante como línea futura o alternativa avan
 
 La decisión final no implica que LoRa/LoRaWAN sea tecnológicamente inferior. De hecho, puede ser una línea futura adecuada para versiones orientadas a bajo consumo y despliegues con infraestructura propia. En este TFG se prioriza una solución funcional, verificable y defendible, capaz de completar el flujo de medida, publicación, almacenamiento, visualización y actuación local. La validación técnica del A7670E-LASA mediante comandos AT y su integración con Arduino se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
-\section{Elección de plataforma cloud: ThingSpeak}
+\section{Elección de plataforma \textit{cloud}: ThingSpeak}
 \label{sec:eleccion_plataforma_cloud}
 
-La plataforma cloud debía actuar como capa intermedia entre las estaciones remotas y la Raspberry Pi. Su función principal no es decidir el riego, sino permitir que las estaciones publiquen telemetría y que el sistema de supervisión pueda consultar esos datos sin conexión física con los nodos de campo.
+La plataforma \textit{cloud} debía actuar como capa intermedia entre las estaciones remotas y la Raspberry Pi. Su función principal no es decidir el riego, sino permitir que las estaciones publiquen telemetría y que el sistema de supervisión pueda consultar esos datos sin conexión física con los nodos de campo.
 
-Se valoraron alternativas como brokers MQTT accesibles desde Internet, Ubidots, Adafruit IO, Blynk, ThingsBoard o una plataforma propia. Sin embargo, para el alcance del TFG se buscaba una solución sencilla, verificable y compatible con dispositivos embebidos. ThingSpeak se seleccionó porque ofrece una estructura basada en canales y campos, permite escribir datos mediante API HTTP y facilita una primera visualización de las medidas publicadas \cite{thingspeak_docs,thingspeak_write_data}.
+Se valoraron alternativas como \textit{brokers} MQTT accesibles desde Internet, Ubidots, Adafruit IO, Blynk, ThingsBoard o una plataforma propia. Sin embargo, para el alcance del TFG se buscaba una solución sencilla, verificable y compatible con dispositivos embebidos. ThingSpeak se seleccionó porque ofrece una estructura basada en canales y campos, permite escribir datos mediante una API documentada sobre HTTP y facilita una primera visualización de las medidas publicadas \cite{thingspeak_docs,thingspeak_write_data}.
 
 \begin{figure}[H]
     \centering
@@ -452,17 +454,17 @@ La Raspberry Pi se ha seleccionado como sistema de supervisión software de Tier
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_10_arquitectura_software_raspberry.png}
-    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el dashboard web.}
+    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el \textit{dashboard} web.}
     \label{fig:cap3_arquitectura_software_raspberry}
 \end{figure}
 
-La arquitectura software de supervisión se apoya en tres bloques principales: almacenamiento local, API y dashboard. SQLite se selecciona como base de datos local por su sencillez de despliegue y por ser suficiente para conservar el histórico de lecturas, estados e incidencias del prototipo sin instalar un servidor de base de datos adicional \cite{sqlite_about}. Esta decisión permite que la Raspberry Pi mantenga una memoria propia del sistema, complementaria a los datos publicados en ThingSpeak.
+La arquitectura software de supervisión se apoya en tres bloques principales: almacenamiento local, API y \textit{dashboard}. SQLite se selecciona como base de datos local por su sencillez de despliegue y por ser suficiente para conservar el histórico de lecturas, estados e incidencias del prototipo sin instalar un servidor de base de datos adicional \cite{sqlite_about}. Esta decisión permite que la Raspberry Pi mantenga una memoria propia del sistema, complementaria a los datos publicados en ThingSpeak.
 
-FastAPI se selecciona como framework para construir la API de supervisión en Python \cite{fastapi_docs}. Su papel dentro de TierraViva es actuar como capa intermedia entre la base de datos y la interfaz web, evitando que el dashboard acceda directamente a SQLite o a los detalles internos de almacenamiento. La API permite consultar datos mediante peticiones HTTP y deja preparada la arquitectura para que otros clientes puedan reutilizar la misma información en futuras ampliaciones.
+FastAPI se selecciona como \textit{framework} para construir la API de supervisión en Python \cite{fastapi_docs}. Su papel dentro de TierraViva es actuar como capa intermedia entre la base de datos y la interfaz web, evitando que el \textit{dashboard} acceda directamente a SQLite o a los detalles internos de almacenamiento. La API permite consultar datos mediante peticiones HTTP y deja preparada la arquitectura para que otros clientes puedan reutilizar la misma información en futuras ampliaciones.
 
-El dashboard web constituye la capa de presentación del sistema. Su objetivo es mostrar de forma comprensible las últimas lecturas, el estado de las estaciones y la información operativa publicada por cada nodo. De esta manera, la Raspberry Pi no se limita a almacenar datos, sino que los transforma en información útil para supervisar el comportamiento del prototipo.
+El \textit{dashboard} web constituye la capa de presentación del sistema. Su objetivo es mostrar de forma comprensible las últimas lecturas, el estado de las estaciones y la información operativa publicada por cada nodo. De esta manera, la Raspberry Pi no se limita a almacenar datos, sino que los transforma en información útil para supervisar el comportamiento del prototipo.
 
-La implementación concreta de estos bloques, incluyendo la estructura de los scripts, los endpoints expuestos, el modelo de datos y la evolución desde el prototipo local previo, se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
+La implementación concreta de estos bloques, incluyendo la estructura de los \textit{scripts}, los \textit{endpoints} expuestos, el modelo de datos y la evolución desde el prototipo local previo, se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
 
 \begin{table}[H]
 \begin{center}
@@ -477,13 +479,13 @@ La implementación concreta de estos bloques, incluyendo la estructura de los sc
 \hline
 Prototipo MQTT local & Validación previa de la cadena software en Raspberry. & Permitió comprobar recepción, almacenamiento, API y visualización antes de adoptar la arquitectura final con ThingSpeak. \\
 \hline
-Ingesta desde ThingSpeak & Consulta periódica de telemetría y estado publicados por las estaciones. & Permite alimentar el histórico local y el dashboard sin conexión directa con los nodos de campo. \\
+Ingesta desde ThingSpeak & Consulta periódica de telemetría y estado publicados por las estaciones. & Permite alimentar el histórico local y el \textit{dashboard} sin conexión directa con los nodos de campo. \\
 \hline
 SQLite & Almacenamiento local de lecturas, estados e incidencias. & Base de datos ligera, autocontenida y suficiente para el prototipo. \\
 \hline
-FastAPI & Exposición de datos mediante endpoints HTTP. & Facilita crear una API sencilla entre la base de datos y el dashboard. \\
+FastAPI & Exposición de datos mediante \textit{endpoints} HTTP. & Facilita crear una API sencilla entre la base de datos y el \textit{dashboard}. \\
 \hline
-Dashboard web & Visualización de medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo sin acceder a consola o consultas SQL. \\
+\textit{Dashboard} web & Visualización de medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo sin acceder a consola o consultas SQL. \\
 \hline
 \end{tabular}
 \caption{Bloques principales de la arquitectura software de supervisión en Raspberry Pi}
@@ -493,7 +495,7 @@ Dashboard web & Visualización de medidas, histórico, estado del relé y estado
 
 La lógica de decisión de riego no se mantiene en la Raspberry Pi en la arquitectura final. Aunque este dispositivo tiene capacidad suficiente para aplicar reglas más complejas, se ha decidido desplazar la decisión crítica al nodo de campo. Esta elección reduce la dependencia de la red y evita que la actuación física dependa de un comando remoto.
 
-La Raspberry conserva un papel relevante como sistema de supervisión: consulta los datos publicados, mantiene un histórico local, expone la API y sirve el dashboard. La implementación concreta de estos bloques se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}. La referencia de endpoints se recoge en el Anexo~\ref{anexo:manual_api}, y el uso de la interfaz por parte del usuario se documenta en el Anexo~\ref{anexo:manual_usuario}.
+La Raspberry conserva un papel relevante como sistema de supervisión: consulta los datos publicados, mantiene un histórico local, expone la API y sirve el \textit{dashboard}. La implementación concreta de estos bloques se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}. La referencia de \textit{endpoints} se recoge en el Anexo~\ref{anexo:manual_api}, y el uso de la interfaz por parte del usuario se documenta en el Anexo~\ref{anexo:manual_usuario}.
 
 \section{Materiales empleados}
 \label{sec:materiales_empleados}
@@ -526,13 +528,13 @@ Fallo de alimentación o picos de consumo & Reinicios, pérdida de comunicación
 \hline
 Lecturas erróneas o inestables & Decisiones de riego basadas en datos no fiables. & Validación de rangos, descarte de valores incoherentes, pruebas por bloques y calibración progresiva. \\
 \hline
-Regla local mal configurada & Activación del riego en condiciones no deseadas. & Umbrales configurables, cooldown, pruebas controladas y actuación limitada por firmware. \\
+Regla local mal configurada & Activación del riego en condiciones no deseadas. & Umbrales configurables, \textit{cooldown}, pruebas controladas y actuación limitada por \textit{firmware}. \\
 \hline
 Activación prolongada de la bomba & Riego indefinido o consumo innecesario de agua. & Bomba apagada por defecto, tiempo máximo de actuación y apagado explícito al finalizar el riego. \\
 \hline
 Pérdida de comunicación & Ausencia de telemetría o supervisión remota incompleta. & Decisión local independiente, publicación de estados cuando sea posible y supervisión de datos obsoletos. \\
 \hline
-Fallo del software en Raspberry Pi & Pérdida temporal de API, dashboard o histórico local. & Separación por módulos, logs, script de gestión y autonomía de las estaciones para la decisión de riego. \\
+Fallo del software en Raspberry Pi & Pérdida temporal de API, \textit{dashboard} o histórico local. & Separación por módulos, \textit{logs}, \textit{script} de gestión y autonomía de las estaciones para la decisión de riego. \\
 \hline
 \end{tabular}
 \caption{Resumen de riesgos técnicos principales y medidas de mitigación}
@@ -540,6 +542,6 @@ Fallo del software en Raspberry Pi & Pérdida temporal de API, dashboard o hist�
 \end{center}
 \end{table}
 
-Estas medidas siguen un principio común: separar supervisión y control local. La Raspberry Pi permite registrar, consultar y visualizar el estado del sistema, pero la seguridad de la actuación reside en la estación de campo. De este modo, una caída del dashboard, una pérdida de comunicación o un dato no fiable no deben provocar una activación no controlada de la bomba.
+Estas medidas siguen un principio común: separar supervisión y control local. La Raspberry Pi permite registrar, consultar y visualizar el estado del sistema, pero la seguridad de la actuación reside en la estación de campo. De este modo, una caída del \textit{dashboard}, una pérdida de comunicación o un dato no fiable no deben provocar una activación no controlada de la bomba.
 
 El desarrollo completo de esta gestión de riesgos se recoge en el Anexo~\ref{anexo:gestion_riesgos}. La relación entre riesgos, requisitos y pruebas se documenta además en el Anexo~\ref{anexo:trazabilidad_requisitos_pruebas}.
