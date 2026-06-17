@@ -15,7 +15,7 @@ El sistema se plantea a partir de estaciones de campo capaces de obtener medidas
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs/figura_3_1_requisitos_funcionales.png}
+    \includegraphics[width=\textwidth]{figs_png/figura_3_1_requisitos_funcionales.png}
     \caption{Relación entre los requisitos funcionales y el ciclo completo de funcionamiento del sistema. TierraViva debe medir, publicar telemetría, registrar histórico, visualizar el estado, decidir localmente y actuar sobre el riego de forma segura.}
     \label{fig:cap3_requisitos_funcionales}
 \end{figure}
@@ -173,7 +173,7 @@ ET-03 & Frecuencia de actualización del \textit{dashboard} & 3--5 s & La interf
 \hline
 ET-04 & Intervalo de evaluación local & Configurable & Cada estación evalúa periódicamente sus lecturas y comprueba si se cumplen las condiciones locales de riego. \\
 \hline
-ET-05 & Tiempo máximo de bomba activa & Limitado en pruebas; ajustable en \textit{firmware} & La activación de la bomba se limita a intervalos breves durante la validación del prototipo. Este valor no se plantea como una duración agronómica definitiva, sino como una medida de seguridad para evitar riego indefinido, sobrecarga del actuador o consumo innecesario de agua ante errores de control. En una instalación real debería ajustarse a partir del caudal de la bomba, el volumen de agua deseado, el tipo de sustrato y la respuesta observada de la humedad del suelo. \\
+ET-05 & Tiempo máximo de bomba activa & Limitado en pruebas; ajustable en \textit{firmware} & La activación de la bomba queda limitada por \textit{firmware} para evitar riego indefinido, sobrecarga del actuador o consumo innecesario de agua ante errores de control. \\
 \hline
 ET-06 & Tiempo mínimo entre riegos & Configurable & Se aplica un periodo de espera para evitar actuaciones repetidas en poco tiempo. \\
 \hline
