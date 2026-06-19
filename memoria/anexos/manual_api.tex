@@ -1,7 +1,7 @@
 \chapter{Manual de referencia de la API}
 \label{anexo:manual_api}
 
-Este anexo documenta la API local de TierraViva implementada sobre FastAPI. Su finalidad es servir como referencia técnica para consultar los endpoints disponibles, sus parámetros, las respuestas esperadas y los errores más habituales.
+Este anexo documenta la API local de TierraViva implementada sobre FastAPI. Su finalidad es servir como referencia técnica para consultar los \textit{endpoints} disponibles, sus parámetros, las respuestas esperadas y los errores más habituales.
 
 La API se ejecuta en la Raspberry Pi y trabaja sobre los datos almacenados previamente en SQLite. No consulta directamente los sensores ni se comunica por puerto serie con las estaciones. Las lecturas son publicadas por las estaciones en ThingSpeak, recuperadas por el ingestor \texttt{main.py}, almacenadas mediante \texttt{database.py} y expuestas posteriormente por \texttt{api.py}.
 
@@ -10,7 +10,7 @@ La API se ejecuta en la Raspberry Pi y trabaja sobre los datos almacenados previ
 La versión actual de la API permite:
 
 \begin{itemize}
-    \item servir el dashboard web desde la ruta raíz;
+    \item servir el \textit{dashboard} web desde la ruta raíz;
     \item consultar la configuración activa del sistema;
     \item obtener la última lectura de una estación;
     \item recuperar lecturas históricas recientes;
@@ -34,7 +34,7 @@ http://<IP_RASPBERRY>:8000
 
 \section{Convenciones generales}
 
-Todas las respuestas de la API se devuelven en formato JSON, salvo la ruta raíz \texttt{/}, que sirve el fichero HTML del dashboard.
+Todas las respuestas de la API se devuelven en formato JSON, salvo la ruta raíz \texttt{/}, que sirve el fichero HTML del \textit{dashboard}.
 
 En las respuestas JSON se utiliza habitualmente el campo \texttt{ok}:
 
@@ -68,9 +68,9 @@ La Tabla \ref{tab:variables_api_resumidas} recoge las variables de entorno que a
 \hline
 \texttt{SOIL\_HIGH\_THRESHOLD} & \texttt{45} & Umbral superior para clasificar humedad del suelo. \\
 \hline
-\texttt{WEB\_REFRESH\_SECONDS} & \texttt{3} & Intervalo de refresco recomendado para el dashboard. \\
+\texttt{WEB\_REFRESH\_SECONDS} & \texttt{3} & Intervalo de refresco recomendado para el \textit{dashboard}. \\
 \hline
-\texttt{DATA\_STALE\_SECONDS} & \texttt{90} & Tiempo utilizado para clasificar una lectura como reciente, antigua u offline. \\
+\texttt{DATA\_STALE\_SECONDS} & \texttt{90} & Tiempo utilizado para clasificar una lectura como reciente, antigua u \textit{offline}. \\
 \hline
 \end{tabular}
 \caption{Variables de configuración utilizadas por la API.}
@@ -79,7 +79,7 @@ La Tabla \ref{tab:variables_api_resumidas} recoge las variables de entorno que a
 
 Las variables de ThingSpeak no se utilizan directamente en \texttt{api.py}; se emplean en el proceso de ingesta \texttt{main.py}.
 
-\section{Resumen de endpoints}
+\section{Resumen de \textit{endpoints}}
 
 \begin{table}[H]
 \centering
@@ -90,7 +90,7 @@ Las variables de ThingSpeak no se utilizan directamente en \texttt{api.py}; se e
 \rowcolor{gray!20}
 \textbf{Método} & \textbf{Endpoint} & \textbf{Función} \\
 \hline
-GET & \texttt{/} & Sirve el dashboard web desde \texttt{frontend/index.html}. \\
+GET & \texttt{/} & Sirve el \textit{dashboard} web desde \texttt{frontend/index.html}. \\
 \hline
 GET & \texttt{/api/config} & Devuelve configuración activa y estado básico de ingesta. \\
 \hline
@@ -100,16 +100,16 @@ GET & \texttt{/api/readings} & Devuelve el histórico reciente de lecturas de un
 \hline
 GET & \texttt{/api/stats} & Devuelve estadísticas agregadas de una estación. \\
 \hline
-GET & \texttt{/api/health} & Comprueba el estado básico de API, base de datos y frontend. \\
+GET & \texttt{/api/health} & Comprueba el estado básico de API, base de datos y \textit{frontend}. \\
 \hline
 \end{tabular}
-\caption{Endpoints disponibles en la API actual de TierraViva.}
+\caption{\textit{Endpoints} disponibles en la API actual de TierraViva.}
 \label{tab:endpoints_api_actual}
 \end{table}
 
 \section{GET /}
 
-Sirve la interfaz web principal del dashboard.
+Sirve la interfaz web principal del \textit{dashboard}.
 
 \subsection*{Petición}
 
@@ -119,7 +119,7 @@ GET http://<IP_RASPBERRY>:8000/
 
 \subsection*{Respuesta esperada}
 
-Si el fichero \texttt{frontend/index.html} existe, el navegador muestra el dashboard de TierraViva.
+Si el fichero \texttt{frontend/index.html} existe, el navegador muestra el \textit{dashboard} de TierraViva.
 
 \subsection*{Error posible}
 
@@ -416,7 +416,7 @@ curl "http://127.0.0.1:8000/api/health?station=A"
 
 \section{Campos principales de una lectura}
 
-Las lecturas devueltas por la API proceden de la tabla \texttt{readings}. La Tabla \ref{tab:campos_lectura_api_resumido} resume los campos más relevantes para el consumo desde el dashboard.
+Las lecturas devueltas por la API proceden de la tabla \texttt{readings}. La Tabla \ref{tab:campos_lectura_api_resumido} resume los campos más relevantes para el consumo desde el \textit{dashboard}.
 
 \begin{table}[H]
 \centering
@@ -445,11 +445,11 @@ Las lecturas devueltas por la API proceden de la tabla \texttt{readings}. La Tab
 \hline
 \texttt{pressure\_hpa} & número & Presión atmosférica en hPa. \\
 \hline
-\texttt{relay\_state} & entero & Estado del relé, si está disponible como campo normalizado. \\
+\texttt{relay\_state} & entero & Estado del relé normalizado a partir del campo \texttt{field6} de ThingSpeak. \\
 \hline
-\texttt{system\_event} & entero & Evento de sistema, si está disponible como campo normalizado. \\
+\texttt{system\_event} & entero & Código de evento del sistema normalizado a partir del campo \texttt{field7} de ThingSpeak. \\
 \hline
-\texttt{debug\_code} & entero & Código auxiliar de diagnóstico, si está disponible como campo normalizado. \\
+\texttt{debug\_code} & entero & Código auxiliar de diagnóstico normalizado a partir del campo \texttt{field8} de ThingSpeak. \\
 \hline
 \texttt{source} & texto & Origen de la lectura, normalmente \texttt{thingspeak}. \\
 \hline
@@ -464,7 +464,7 @@ La codificación detallada de \texttt{relay\_state}, \texttt{system\_event} y \t
 
 \section{Clasificación de frescura y humedad}
 
-El endpoint \texttt{/api/latest} añade dos clasificaciones calculadas por la API:
+El \textit{endpoint} \texttt{/api/latest} añade dos clasificaciones calculadas por la API:
 
 \begin{table}[H]
 \centering
@@ -523,20 +523,20 @@ En la versión actual, el parámetro \texttt{station} se normaliza a mayúsculas
 \hline
 200 & Petición correcta & La API ha procesado la petición. El campo \texttt{ok} indica si existen datos. \\
 \hline
-404 & Dashboard no encontrado & Falta el fichero \texttt{frontend/index.html}. \\
+404 & \textit{Dashboard} no encontrado & Falta el fichero \texttt{frontend/index.html}. \\
 \hline
 422 & Parámetro inválido & Un parámetro no cumple las restricciones, por ejemplo \texttt{limit=0}. \\
 \hline
-500 & Error interno & Fallo no controlado durante la ejecución. Deben revisarse los logs. \\
+500 & Error interno & Fallo no controlado durante la ejecución. Deben revisarse los \textit{logs}. \\
 \hline
 \end{tabular}
 \caption{Códigos HTTP habituales en la API.}
 \label{tab:codigos_http_api_resumidos}
 \end{table}
 
-\section{Relación con el dashboard}
+\section{Relación con el \textit{dashboard}}
 
-El dashboard consume los endpoints de la API para actualizar la interfaz:
+El \textit{dashboard} consume los \textit{endpoints} de la API para actualizar la interfaz:
 
 \begin{table}[H]
 \centering
@@ -558,10 +558,10 @@ El dashboard consume los endpoints de la API para actualizar la interfaz:
 \texttt{/api/health} & Permite comprobar disponibilidad básica del servicio. \\
 \hline
 \end{tabular}
-\caption{Uso de los endpoints por parte del dashboard.}
+\caption{Uso de los \textit{endpoints} por parte del \textit{dashboard}.}
 \label{tab:relacion_api_dashboard_resumida}
 \end{table}
 
 \section{Conclusión}
 
-La API de TierraViva proporciona una capa local de consulta sobre los datos almacenados en la Raspberry Pi. Sus endpoints permiten obtener configuración, última lectura, histórico, estadísticas y estado básico del servicio. 
+La API de TierraViva proporciona una capa local de consulta sobre los datos almacenados en la Raspberry Pi. Sus \textit{endpoints} permiten obtener configuración, última lectura, histórico, estadísticas y estado básico del servicio. 
