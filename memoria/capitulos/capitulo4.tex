@@ -3,16 +3,16 @@
 
 Una vez definidos los requisitos, los materiales y las principales decisiones de diseño, este capítulo presenta la arquitectura final de TierraViva. A diferencia del capítulo anterior, donde se justifican las alternativas valoradas y los criterios de elección, aquí se describe cómo queda organizado el sistema completo y cómo interactúan sus distintos bloques durante el funcionamiento.
 
-La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, una plataforma cloud intermedia basada en ThingSpeak y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema cubre el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, publicación de telemetría, almacenamiento histórico y visualización mediante dashboard web.
+La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, una plataforma \textit{cloud} intermedia basada en ThingSpeak y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema cubre el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, publicación de telemetría, almacenamiento histórico y visualización mediante \textit{dashboard} web.
 
-El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi no actúa como elemento central de decisión del riego. La decisión crítica se desplaza al firmware de cada estación, que evalúa sus propias lecturas y aplica reglas locales de seguridad. La Raspberry conserva un papel importante, pero orientado a supervisión, histórico y visualización.
+El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi no actúa como elemento central de decisión del riego. La decisión crítica se desplaza al \textit{firmware} de cada estación, que evalúa sus propias lecturas y aplica reglas locales de seguridad. La Raspberry conserva un papel importante, pero orientado a supervisión, histórico y visualización.
 
 \section{Visión general de la arquitectura}
 \label{sec:vision_general_arquitectura}
 
-La arquitectura final de TierraViva se organiza como un sistema IoT distribuido. Las medidas se obtienen en campo, la comunicación se realiza mediante red móvil, la información se publica en una plataforma cloud y la supervisión se ejecuta desde una Raspberry Pi 5. La actuación sobre el riego, sin embargo, no depende de una decisión externa enviada desde la Raspberry, sino de reglas locales ejecutadas en cada estación.
+La arquitectura final de TierraViva se organiza como un sistema IoT distribuido. Las medidas se obtienen en campo, la comunicación se realiza mediante red móvil, la información se publica en una plataforma \textit{cloud} y la supervisión se ejecuta desde una Raspberry Pi 5. La actuación sobre el riego, sin embargo, no depende de una decisión externa enviada desde la Raspberry, sino de reglas locales ejecutadas en cada estación.
 
-El sistema está formado por cuatro elementos principales: las estaciones autónomas de campo A y B, la plataforma ThingSpeak, la Raspberry Pi 5 y el dashboard web. Las estaciones se encargan de medir, decidir y actuar localmente. ThingSpeak funciona como capa intermedia de telemetría y estado. La Raspberry Pi consulta los datos, mantiene un histórico local y expone una API. El dashboard permite supervisar el estado del sistema desde una interfaz web.
+El sistema está formado por cuatro elementos principales: las estaciones autónomas de campo A y B, la plataforma ThingSpeak, la Raspberry Pi 5 y el \textit{dashboard} web. Las estaciones se encargan de medir, decidir y actuar localmente. ThingSpeak funciona como capa intermedia de telemetría y estado. La Raspberry Pi consulta los datos, mantiene un histórico local y expone una API. El \textit{dashboard} permite supervisar el estado del sistema desde una interfaz web.
 
 La Figura~\ref{fig:arquitectura_final_tierraviva} muestra la arquitectura final del sistema.
 
@@ -25,14 +25,14 @@ La Figura~\ref{fig:arquitectura_final_tierraviva} muestra la arquitectura final 
 
 El flujo de funcionamiento comienza en las estaciones de campo. Cada estación mide variables del suelo y del entorno, evalúa localmente si procede regar y, si corresponde, acciona la bomba mediante relé durante un tiempo limitado. Posteriormente publica en ThingSpeak las medidas, el estado del relé, el evento de sistema y el código auxiliar de diagnóstico.
 
-ThingSpeak desacopla las estaciones de la Raspberry Pi: los nodos de campo no necesitan conocer la ubicación del sistema de supervisión ni mantener una conexión directa con él. La Raspberry consulta los canales publicados, almacena un histórico local, expone una API y sirve el dashboard web.
+ThingSpeak desacopla las estaciones de la Raspberry Pi: los nodos de campo no necesitan conocer la ubicación del sistema de supervisión ni mantener una conexión directa con él. La Raspberry consulta los canales publicados, almacena un histórico local, expone una API y sirve el \textit{dashboard} web.
 
-La arquitectura final puede resumirse en una separación clara de responsabilidades: las estaciones miden, deciden y actúan; ThingSpeak recibe la telemetría; la Raspberry registra y supervisa; y el dashboard presenta la información al usuario. El flujo completo de funcionamiento se representa de forma ampliada en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
+La arquitectura final puede resumirse en una separación clara de responsabilidades: las estaciones miden, deciden y actúan; ThingSpeak recibe la telemetría; la Raspberry registra y supervisa; y el \textit{dashboard} presenta la información al usuario. El flujo completo de funcionamiento se representa de forma ampliada en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
 
 \section{Estaciones de campo A y B}
 \label{sec:estaciones_campo_ab}
 
-Las estaciones de campo son los nodos autónomos de TierraViva. Su función dentro de la arquitectura final es adquirir datos del entorno, evaluar localmente reglas de riego, accionar la bomba cuando corresponda y publicar telemetría y estado en la plataforma cloud. En esta versión del sistema se contemplan dos estaciones, denominadas estación A y estación B, con una estructura hardware equivalente y una configuración lógica diferenciada.
+Las estaciones de campo son los nodos autónomos de TierraViva. Su función dentro de la arquitectura final es adquirir datos del entorno, evaluar localmente reglas de riego, accionar la bomba cuando corresponda y publicar telemetría y estado en la plataforma \textit{cloud} . En esta versión del sistema se implementan dos estaciones, denominadas estación A y estación B, con una estructura hardware equivalente y una configuración lógica diferenciada.
 
 Ambas estaciones siguen el mismo diseño base: Arduino UNO como controlador local, sensores de suelo y ambientales, módulo LTE A7670E-LASA para comunicación remota, relé para accionar la bomba de agua y alimentación principal a 12 V con regulación a 5 V mediante LM2596. La diferencia entre ellas no está en la arquitectura física, sino en el identificador de estación y el canal de ThingSpeak utilizado para publicar sus datos.
 
@@ -57,7 +57,7 @@ Comunicación & A7670E-LASA mediante LTE/HTTP & A7670E-LASA mediante LTE/HTTP \\
 \hline
 Canal ThingSpeak & Canal asociado a estación A & Canal asociado a estación B \\
 \hline
-Decisión de riego & Regla local en firmware & Regla local en firmware \\
+Decisión de riego & Regla local en \textit{firmware} & Regla local en \textit{firmware} \\
 \hline
 Actuación & Relé y bomba de agua 12 V & Relé y bomba de agua 12 V \\
 \hline
@@ -78,9 +78,9 @@ La Figura~\ref{fig:cap4_bloques_estacion_campo} resume esta configuración. El o
     \label{fig:cap4_bloques_estacion_campo}
 \end{figure}
 
-Desde el punto de vista arquitectónico, cada estación se organiza en cuatro bloques: adquisición de datos, decisión local, comunicación LTE/HTTP y actuación mediante relé y bomba. La estación conserva la responsabilidad sobre la ejecución segura del riego: valida lecturas, aplica cooldown, limita el tiempo de actuación y mantiene la bomba apagada ante condiciones no verificables.
+Desde el punto de vista arquitectónico, cada estación se organiza en cuatro bloques: adquisición de datos, decisión local, comunicación LTE/HTTP y actuación mediante relé y bomba. La estación conserva la responsabilidad sobre la ejecución segura del riego: valida lecturas, aplica \textit{cooldown}, limita el tiempo de actuación y mantiene la bomba apagada ante condiciones no verificables.
 
-El detalle de firmware y control del relé se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}. El conexionado eléctrico, la alimentación y la integración física de sensores, módem, relé y bomba se documentan en el Anexo~\ref{anexo:esquemas_electricos}. Los materiales empleados se recogen en el Anexo~\ref{anexo:materiales}.
+El detalle de \textit{firmware} y control del relé se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}. El conexionado eléctrico, la alimentación y la integración física de sensores, módem, relé y bomba se documentan en el Anexo~\ref{anexo:esquemas_electricos}. Los materiales empleados se recogen en el Anexo~\ref{anexo:materiales}.
 
 \section{Arquitectura de comunicaciones LTE/HTTP}
 \label{sec:arquitectura_comunicaciones_lte_http}
@@ -98,14 +98,14 @@ El Arduino UNO se comunica con el A7670E-LASA mediante UART y comandos AT. Desde
 
 La comunicación se utiliza en sentido ascendente: las estaciones publican medidas, estado del relé, evento de sistema y código auxiliar de diagnóstico. La Raspberry Pi consulta posteriormente esa información desde ThingSpeak, pero no envía órdenes de riego a las estaciones. Esta decisión simplifica el sistema y evita que información antigua en la nube pueda condicionar una actuación física.
 
-La arquitectura LTE/HTTP no proporciona comunicación en tiempo real estricto, pero resulta adecuada para supervisión. La decisión crítica de riego no depende de la respuesta inmediata de un sistema externo, sino de la evaluación local realizada por la estación. El detalle de inicialización del módem, pruebas con comandos AT e integración en firmware se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
+La arquitectura LTE/HTTP no proporciona comunicación en tiempo real estricto, pero resulta adecuada para supervisión. La decisión crítica de riego no depende de la respuesta inmediata de un sistema externo, sino de la evaluación local realizada por la estación. El detalle de inicialización del módem, pruebas con comandos AT e integración en \textit{firmware} se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
 \section{ThingSpeak como capa intermedia}
 \label{sec:thingspeak_capa_intermedia}
 
-ThingSpeak actúa en TierraViva como capa intermedia entre las estaciones de campo y la Raspberry Pi. Su función dentro de la arquitectura final es desacoplar la publicación de datos en campo de la supervisión posterior: las estaciones publican telemetría y estado mediante LTE/HTTP, mientras que la Raspberry Pi lee esa información, mantiene un histórico local y la muestra en el dashboard.
+ThingSpeak actúa en TierraViva como capa intermedia entre las estaciones de campo y la Raspberry Pi. Su función dentro de la arquitectura final es desacoplar la publicación de datos en campo de la supervisión posterior: las estaciones publican telemetría y estado mediante LTE/HTTP, mientras que la Raspberry Pi lee esa información, mantiene un histórico local y la muestra en el \textit{dashboard}.
 
-La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt{TierraViva\_A} y \texttt{TierraViva\_B}. Cada canal corresponde a una estación de campo y contiene tanto las variables medidas como la información de estado generada por el firmware. En la arquitectura final no se utilizan canales de comandos, ya que la decisión de riego se realiza localmente en cada estación.
+La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt{TierraViva\_A} y \texttt{TierraViva\_B}. Cada canal corresponde a una estación de campo y contiene tanto las variables medidas como la información de estado generada por el \textit{firmware}. En la arquitectura final no se utilizan canales de comandos, ya que la decisión de riego se realiza localmente en cada estación.
 
 \begin{figure}[H]
 \centering
@@ -114,7 +114,7 @@ La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt
 \label{fig:thingspeak_canales_tierraviva}
 \end{figure}
 
-Cada publicación incluye humedad del suelo, variables ambientales, estado del relé, evento de sistema y código auxiliar de diagnóstico. Mantener la misma estructura en ambos canales simplifica el firmware y la lógica de supervisión, ya que la Raspberry puede aplicar el mismo proceso de lectura para las estaciones A y B.
+Cada publicación incluye humedad del suelo, variables ambientales, estado del relé, evento de sistema y código auxiliar de diagnóstico. Mantener la misma estructura en ambos canales simplifica el \textit{firmware} y la lógica de supervisión, ya que la Raspberry puede aplicar el mismo proceso de lectura para las estaciones A y B.
 
 En fases anteriores se valoró utilizar ThingSpeak también como mecanismo de control descendente desde la Raspberry hacia las estaciones. Esta opción se descartó porque obligaba a gestionar órdenes remotas, evitar repeticiones, descartar información obsoleta y garantizar que una entrada antigua no provocase una actuación no deseada. En la arquitectura final, ThingSpeak se reserva para telemetría y estado, no para transportar órdenes de riego.
 
@@ -123,29 +123,29 @@ La estructura completa de campos, nombres internos y códigos publicados se docu
 \section{Raspberry Pi como sistema de supervisión}
 \label{sec:raspberry_sistema_supervision}
 
-La Raspberry Pi 5 actúa como sistema de supervisión de TierraViva. Su papel dentro de la arquitectura final no es sustituir a las estaciones de campo, conectarse físicamente a los sensores ni decidir la activación de la bomba, sino consultar la información disponible en ThingSpeak, mantener un histórico local, exponer una API y servir el dashboard web.
+La Raspberry Pi 5 actúa como sistema de supervisión de TierraViva. Su papel dentro de la arquitectura final no es sustituir a las estaciones de campo, conectarse físicamente a los sensores ni decidir la activación de la bomba, sino consultar la información disponible en ThingSpeak, mantener un histórico local, exponer una API y servir el \textit{dashboard} web.
 
-Esta separación mantiene la coherencia del sistema distribuido. Las estaciones publican su información mediante LTE/HTTP y la Raspberry trabaja sobre los datos ya disponibles en la plataforma cloud. A partir de esos datos, construye una vista de supervisión del estado de cada estación.
+Esta separación mantiene la coherencia del sistema distribuido. Las estaciones publican su información mediante LTE/HTTP y la Raspberry trabaja sobre los datos ya disponibles en la plataforma \textit{cloud}. A partir de esos datos, construye una vista de supervisión del estado de cada estación.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_4_5_pipeline_raspberry_supervision.png}
-    \caption{Pipeline software de supervisión en Raspberry Pi.}
+    \caption{Flujo de software de supervisión en Raspberry Pi.}
     \label{fig:cap4_pipeline_raspberry_supervision}
 \end{figure}
 
-El pipeline software se organiza en cuatro responsabilidades: consulta de ThingSpeak, almacenamiento local en SQLite, exposición de datos mediante FastAPI y visualización en el dashboard. La API evita que la interfaz acceda directamente a la base de datos o a ThingSpeak, y permite separar almacenamiento, consulta y presentación.
+El flujo de software se organiza en cuatro responsabilidades: consulta de ThingSpeak, almacenamiento local en SQLite, exposición de datos mediante FastAPI y visualización en el \textit{dashboard}. La API evita que la interfaz acceda directamente a la base de datos o a ThingSpeak, y permite separar almacenamiento, consulta y presentación.
 
 La Raspberry puede detectar datos antiguos, campos ausentes o pérdida de publicaciones, pero esas incidencias pertenecen a la supervisión. La seguridad de la actuación sigue residiendo en la estación de campo, que es quien controla físicamente el relé y la bomba.
 
-La implementación detallada de la ingesta, la base de datos, la API y el dashboard se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}. La referencia completa de endpoints se recoge en el Anexo~\ref{anexo:manual_api}, y el uso de la interfaz por parte del usuario se documenta en el Anexo~\ref{anexo:manual_usuario}.
+La implementación detallada de la ingesta, la base de datos, la API y el \textit{dashboard} se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}. La referencia completa de \textit{endpoints} se recoge en el Anexo~\ref{anexo:manual_api}, y el uso de la interfaz por parte del usuario se documenta en el Anexo~\ref{anexo:manual_usuario}.
 
 \section{Decisión local de riego y eventos}
 \label{sec:decision_local_eventos}
 
 La decisión de riego en TierraViva se ejecuta localmente en cada estación de campo. Esta elección elimina la necesidad de enviar comandos remotos desde la Raspberry Pi y desplaza la responsabilidad crítica al nodo que está físicamente conectado al sistema de riego.
 
-El criterio inicial se basa en una regla verificable de humedad del suelo. La estación solo puede activar el relé si la lectura es válida, se cumple la condición de sequedad, no existe cooldown activo y no se detecta ningún error crítico. La actuación se limita siempre por firmware para evitar activaciones indefinidas.
+El criterio inicial se basa en una regla verificable de humedad del suelo. La estación solo puede activar el relé si la lectura es válida, se cumple la condición de sequedad, no existe \textit{cooldown} activo y no se detecta ningún error crítico. La actuación se limita siempre por \textit{firmware} para evitar activaciones indefinidas.
 
 \begin{figure}[H]
     \centering
@@ -156,21 +156,21 @@ El criterio inicial se basa en una regla verificable de humedad del suelo. La es
 
 Tras cada ciclo, la estación publica en ThingSpeak las medidas ambientales y la información operativa necesaria para supervisar lo ocurrido: estado del relé, evento de sistema y código auxiliar de diagnóstico. De este modo, la Raspberry Pi puede reconstruir el comportamiento de la estación sin participar en la decisión local.
 
-La codificación completa de eventos y diagnósticos se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}. El flujo visual de decisión local se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}, y la implementación concreta en firmware se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
+La codificación completa de eventos y diagnósticos se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}. El flujo visual de decisión local se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}, y la implementación concreta en \textit{firmware} se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
 \section{Modo seguro}
 \label{sec:modo_seguro}
 
-El modo seguro define el comportamiento que debe adoptar la estación cuando no puede garantizar que una actuación sobre el riego sea correcta. Dado que TierraViva acciona físicamente una bomba de agua, el criterio adoptado es conservador: ante una lectura inválida, reinicio, fallo de comunicación, cooldown activo o estado no verificable, la bomba debe permanecer apagada.
+El modo seguro define el comportamiento que debe adoptar la estación cuando no puede garantizar que una actuación sobre el riego sea correcta. Dado que TierraViva acciona físicamente una bomba de agua, el criterio adoptado es conservador: ante una lectura inválida, reinicio, fallo de comunicación, \textit{cooldown} activo o estado no verificable, la bomba debe permanecer apagada.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_4_7_modo_seguro_estacion.png}
-    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, fallo de publicación, cooldown o finalización del tiempo de riego, el sistema prioriza mantener el relé desactivado y la bomba apagada.}
+    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, fallo de publicación, \textit{cooldown} o finalización del tiempo de riego, el sistema prioriza mantener el relé desactivado y la bomba apagada.}
     \label{fig:cap4_modo_seguro_estacion}
 \end{figure}
 
-El modo seguro se aplica tanto en el arranque como durante el funcionamiento normal. El firmware debe configurar el relé en estado desactivado al iniciar la estación, descartar lecturas incoherentes para la actuación, limitar siempre el tiempo de riego y aplicar un periodo mínimo entre activaciones.
+El modo seguro se aplica tanto en el arranque como durante el funcionamiento normal. El \textit{firmware} debe configurar el relé en estado desactivado al iniciar la estación, descartar lecturas incoherentes para la actuación, limitar siempre el tiempo de riego y aplicar un periodo mínimo entre activaciones.
 
 La pérdida de comunicación no debe interpretarse como una orden de riego ni como una condición que deje la bomba activa. En la arquitectura final, la comunicación se utiliza para supervisión y trazabilidad, mientras que la seguridad de la actuación permanece bajo control local de la estación.
 

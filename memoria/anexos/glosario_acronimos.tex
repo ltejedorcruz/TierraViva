@@ -100,7 +100,7 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     Familia de microcontroladores considerada como alternativa a Arduino UNO por su mayor potencia de cálculo y conectividad integrada.
 
     \item[Estación remota]
-    Nodo físico instalado en campo o entorno de pruebas. Está formado por Arduino UNO, sensores, módulo LTE, relé, alimentación y sistema de riego.
+    Nodo físico instalado en campo o entorno de pruebas. En TierraViva existen dos estaciones remotas implementadas, A y B, formadas por Arduino UNO, sensores, módulo LTE, relé, alimentación y sistema de riego.
 
     \item[FastAPI]
     Framework de Python utilizado para crear la API local de TierraViva.
@@ -403,9 +403,9 @@ Además de los términos generales anteriores, en la memoria se utilizan algunos
 \hline
 \endlastfoot
 
-Estación A & Primera estación remota del prototipo. Publica datos en su canal ThingSpeak correspondiente. \\
+Estación A & Primera estación remota implementada y montada del prototipo. Publica datos en su canal ThingSpeak correspondiente y sirve como estación principal de validación del sistema. \\
 \hline
-Estación B & Segunda estación prevista para ampliación o validación multiestación. Debe disponer de identificador y canal propios. \\
+Estación B & Segunda estación remota implementada y montada siguiendo la arquitectura base de TierraViva. Dispone de identificador y canal ThingSpeak propios, lo que permite separar sus datos de los de la estación A y validar el funcionamiento multiestación del sistema. \\
 \hline
 \texttt{field1} & Campo ThingSpeak asociado a \texttt{soil\_moisture\_pct}. \\
 \hline
