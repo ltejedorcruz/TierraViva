@@ -93,6 +93,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[CH340G]
     Conversor USB-serie presente en la placa Arduino UNO compatible utilizada. Permite la comunicación entre el ordenador y el microcontrolador para programar y depurar el \textit{firmware}.
 
+    \item[Cirkit Designer]
+    Herramienta de diseño y documentación de circuitos utilizada para elaborar el esquema eléctrico general de una estación TierraViva.
+
     \item[Clave primaria]
     Campo o conjunto de campos que identifica de forma única cada registro de una tabla. En el modelo SQLite de TierraViva se representa mediante la abreviatura PK.
 
@@ -104,6 +107,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Comando AT]
     Instrucción enviada a un módem para configurarlo o solicitar información. En TierraViva se usan comandos AT para gestionar el A7670E-LASA.
+
+    \item[Condensador]
+    Componente electrónico utilizado para almacenar carga eléctrica de forma temporal y ayudar a estabilizar tensiones o filtrar variaciones rápidas. En TierraViva se menciona como elemento auxiliar de estabilización eléctrica.
 
     \item[Conductividad eléctrica]
     Magnitud relacionada con la concentración de sales disueltas en el agua o el sustrato. Se menciona como posible ampliación futura para mejorar la caracterización agronómica del entorno.
@@ -207,6 +213,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[LTE]
     Tecnología de comunicación móvil utilizada por el módulo A7670E-LASA para proporcionar conectividad a la estación remota.
 
+    \item[Masa común]
+    Referencia eléctrica compartida entre los distintos módulos del circuito. En TierraViva permite que Arduino, sensores, relé, regulador y módulo LTE interpreten correctamente las señales entre sí.
+
     \item[Modo seguro]
     Estado conservador de funcionamiento en el que la estación evita actuaciones peligrosas o no justificadas ante lecturas no fiables o condiciones anómalas.
 
@@ -264,6 +273,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Relé normalmente abierto]
     Configuración del relé en la que el circuito permanece abierto cuando no hay señal de activación. Es la opción más segura para mantener el riego apagado por defecto.
     
+    \item[Resistencia]
+    Componente electrónico que limita o ajusta el paso de corriente. En TierraViva se utiliza especialmente en el divisor resistivo empleado para adaptar niveles de señal.
+
     \item[Restricción UNIQUE]
     Restricción de base de datos que impide insertar registros duplicados para una combinación de campos. En TierraViva se aplica sobre \texttt{station} y \texttt{entry\_id} para evitar duplicar lecturas ya procesadas.
 
