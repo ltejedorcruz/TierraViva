@@ -13,6 +13,8 @@ La definición de estos requisitos permite separar con claridad qué debe hacer 
 
 El sistema se plantea a partir de estaciones de campo capaces de obtener medidas del entorno, evaluar localmente reglas sencillas de riego y enviar la información a una plataforma intermedia. A partir de esos datos, el sistema de supervisión debe poder registrar el histórico, visualizar el estado del prototipo y mostrar las actuaciones realizadas por cada estación. La estación de campo debe ejecutar la actuación de forma autónoma y segura, evitando activaciones indefinidas, riegos repetidos o estados peligrosos ante lecturas inválidas, errores de comunicación o fallos eléctricos.
 
+Para facilitar la trazabilidad del sistema, los requisitos funcionales se identifican con el prefijo RF (requisito funcional). 
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_3_1_requisitos_funcionales.png}
@@ -82,7 +84,7 @@ La relación completa entre requisitos, pruebas y evidencias de validación se d
 
 Los requisitos no funcionales describen las condiciones de calidad que debe cumplir el sistema, más allá de las funciones concretas indicadas en el apartado anterior. En TierraViva estos requisitos son especialmente importantes porque el proyecto no consiste únicamente en que cada bloque funcione de forma aislada, sino en que el conjunto pueda integrarse, probarse, ampliarse y defenderse como un prototipo de ingeniería.
 
-El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No se pretende desarrollar un producto industrial cerrado, pero sí una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta. La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
+El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No se pretende desarrollar un producto industrial cerrado, pero sí una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta. Para facilitar su trazabilidad, los requisitos no funcionales se identifican con el prefijo RNF (requisito no funcional). La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
 
 \begin{figure}[H]
     \centering
@@ -137,7 +139,7 @@ La tolerancia a fallos y el consumo razonable son especialmente relevantes por l
 
 Además de los requisitos funcionales y no funcionales, el sistema necesita definir una serie de parámetros temporales y criterios operativos que regulen su comportamiento durante el funcionamiento. En un sistema IoT de riego, estos valores son importantes porque afectan al consumo energético, a la carga de comunicaciones, a la capacidad de respuesta y, sobre todo, a la seguridad de la actuación sobre la bomba de agua.
 
-Las especificaciones temporales no se plantean como valores rígidos e inmodificables, sino como parámetros iniciales de diseño. Durante el desarrollo y la validación del prototipo pueden ajustarse en función de los resultados obtenidos, siempre manteniendo dos criterios principales: evitar comunicaciones innecesarias y garantizar que cualquier actuación sobre el riego quede limitada en el tiempo.
+Las especificaciones temporales (ET) no se plantean como valores rígidos e inmodificables, sino como parámetros iniciales de diseño. Durante el desarrollo y la validación del prototipo pueden ajustarse en función de los resultados obtenidos, siempre manteniendo dos criterios principales: evitar comunicaciones innecesarias y garantizar que cualquier actuación sobre el riego quede limitada en el tiempo.
 
 \begin{figure}[H]
     \centering
@@ -485,7 +487,7 @@ SQLite & Almacenamiento local de lecturas, estados e incidencias. & Base de dato
 \hline
 FastAPI & Exposición de datos mediante \textit{endpoints} HTTP. & Facilita crear una API sencilla entre la base de datos y el \textit{dashboard}. \\
 \hline
-\textit{Dashboard} web & Visualización de medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo sin acceder a consola o consultas SQL. \\
+\textit{Dashboard} web & Visualización de medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo sin acceder a la consola ni realizar consultas SQL (\textit{Structured Query Language}). \\
 \hline
 \end{tabular}
 \caption{Bloques principales de la arquitectura software de supervisión en Raspberry Pi}

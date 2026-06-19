@@ -15,6 +15,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Actuador]
     Elemento capaz de ejecutar una acción física sobre el entorno. En TierraViva, la bomba de agua de 12 V actúa como actuador del sistema de riego.
 
+    \item[Adafruit IO]
+    Plataforma IoT orientada a proyectos de electrónica conectada. Se consideró como alternativa para publicación y consulta de datos, aunque finalmente se seleccionó ThingSpeak por su sencillez de integración con la arquitectura propuesta.
+
     \item[Agricultura de precisión]
     Enfoque agrícola basado en medir variables del entorno y del cultivo para tomar decisiones más ajustadas que un riego fijo o manual.
 
@@ -39,6 +42,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[BH1750]
     Sensor digital de luminosidad utilizado para medir luz ambiental en lux. En algunos módulos aparece integrado como GY-302.
 
+    \item[Blynk]
+    Plataforma IoT orientada a la creación de aplicaciones y paneles de control para dispositivos conectados. Se valoró como alternativa de visualización y gestión, pero no se adoptó en la versión final para mantener una arquitectura más controlada y documentable desde Raspberry Pi.
+
     \item[BME280]
     Sensor ambiental utilizado para medir temperatura, humedad relativa y presión atmosférica mediante bus I2C.
 
@@ -57,6 +63,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Canal ThingSpeak]
     Espacio de almacenamiento en ThingSpeak donde una estación publica sus lecturas y estados. Cada estación debe tener su propio canal para evitar mezclar datos.
 
+    \item[Caudal]
+    Volumen de agua que circula por unidad de tiempo. En TierraViva se plantea como posible variable futura para cuantificar el volumen real aplicado durante cada riego.
+
     \item[Cloud]
     Infraestructura o servicio remoto usado para almacenar, procesar o intercambiar datos. En TierraViva, ThingSpeak se usa como apoyo de telemetría, no como núcleo de control.
 
@@ -65,6 +74,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Comando AT]
     Instrucción enviada a un módem para configurarlo o solicitar información. En TierraViva se usan comandos AT para gestionar el A7670E-LASA.
+
+    \item[Conductividad eléctrica]
+    Magnitud relacionada con la concentración de sales disueltas en el agua o el sustrato. Se menciona como posible ampliación futura para mejorar la caracterización agronómica del entorno.
 
     \item[Control descendente]
     Envío de órdenes desde una plataforma o dashboard hacia una estación remota. Se descarta en la versión actual para reducir complejidad y evitar actuaciones no deseadas.
@@ -83,6 +95,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Entry ID]
     Identificador de entrada asignado por ThingSpeak a cada publicación. La Raspberry Pi lo utiliza para evitar almacenar lecturas duplicadas.
+
+    \item[ESP32]
+    Familia de microcontroladores considerada como alternativa a Arduino UNO por su mayor potencia de cálculo y conectividad integrada.
 
     \item[Estación remota]
     Nodo físico instalado en campo o entorno de pruebas. Está formado por Arduino UNO, sensores, módulo LTE, relé, alimentación y sistema de riego.
@@ -120,6 +135,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[LM2596]
     Regulador DC-DC utilizado para convertir una tensión de entrada superior, como 12 V, en una salida regulada de 5 V.
 
+    \item[LoRa]
+    Modulación radio de largo alcance y bajo consumo considerada como alternativa de comunicación para estaciones remotas. En TierraViva se analiza junto con LoRaWAN, aunque finalmente se adopta conectividad LTE para validar el prototipo completo dentro del alcance del TFG.
+
     \item[LoRaWAN]
     Tecnología LPWAN considerada como alternativa de comunicación. Se descarta como solución principal por la necesidad de cobertura o infraestructura adicional.
 
@@ -138,11 +156,17 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Módulo relé]
     Dispositivo que permite controlar una carga eléctrica mediante una señal de baja potencia. En TierraViva se utiliza para activar o desactivar la bomba de agua.
 
+    \item[Nivel de depósito]
+    Medida asociada a la cantidad de agua disponible en el recipiente o sistema de almacenamiento. Se plantea como mejora futura para detectar falta de agua antes de activar la bomba.
+
     \item[Nodo de campo]
     Dispositivo situado en el entorno físico de medida. En TierraViva equivale a la estación remota basada en Arduino UNO.
 
     \item[Nodo de supervisión]
     Equipo encargado de recoger, almacenar y mostrar información del sistema. En TierraViva este papel lo cumple la Raspberry Pi.
+
+    \item[pH]
+    Magnitud utilizada para expresar el carácter ácido o básico de una disolución. En TierraViva se menciona como posible variable futura, no implementada en el prototipo actual.
 
     \item[Plataforma cloud]
     Servicio remoto que permite recibir, almacenar o consultar datos. En TierraViva, ThingSpeak actúa como plataforma cloud de telemetría.
@@ -177,8 +201,14 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[SQLite]
     Sistema de base de datos ligero basado en fichero. En TierraViva almacena lecturas, estados y eventos de forma local en la Raspberry Pi.
 
+    \item[STM32]
+    Familia de microcontroladores considerada como alternativa por sus mayores prestaciones y flexibilidad, aunque con una complejidad de configuración superior para el alcance del TFG.
+
     \item[Telemetría]
     Conjunto de datos medidos por una estación y enviados a un sistema de supervisión.
+
+    \item[ThingsBoard]
+    Plataforma IoT de código abierto orientada a la gestión de dispositivos, telemetría, reglas y dashboards. Se consideró como alternativa más completa, aunque se descartó para el alcance actual por requerir mayor configuración e infraestructura.
 
     \item[ThingSpeak]
     Plataforma IoT utilizada como capa intermedia para recibir los datos publicados por las estaciones y permitir su consulta desde la Raspberry Pi.
@@ -188,6 +218,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Trazabilidad]
     Capacidad de reconstruir el origen y evolución de un dato, decisión o evento. En TierraViva se apoya en \texttt{entry\_id}, \texttt{raw\_json}, SQLite, logs y documentación de pruebas.
+
+    \item[Ubidots]
+    Plataforma IoT orientada a la gestión, visualización y análisis de datos de dispositivos conectados. Se valoró como alternativa cloud, pero no se seleccionó para TierraViva al priorizar una solución sencilla, verificable y compatible con el flujo HTTP planteado.
 
     \item[Umbral]
     Valor límite utilizado para tomar una decisión. En TierraViva se usan umbrales de humedad del suelo para clasificar el estado del sustrato y decidir si puede ser necesario regar.
@@ -245,6 +278,8 @@ CSV & \textit{Comma-Separated Values} & Formato tabular útil para exportación 
 \hline
 DC & \textit{Direct Current} & Corriente continua usada en la alimentación de 12 V y 5 V del prototipo. \\
 \hline
+ET & Especificación temporal y operativa & Identificador utilizado para los parámetros temporales y criterios operativos del sistema, como frecuencias de lectura, envío de telemetría, tiempo máximo de bomba y estado seguro. \\
+\hline
 GND & \textit{Ground} & Referencia eléctrica común del circuito. \\
 \hline
 GPIO & \textit{General Purpose Input/Output} & Pines de entrada/salida usados para control digital. \\
@@ -267,7 +302,7 @@ IP & \textit{Internet Protocol} & Dirección utilizada para acceder al dashboard
 \hline
 JSON & \textit{JavaScript Object Notation} & Formato de datos utilizado por la API y por las respuestas de ThingSpeak. \\
 \hline
-LED & \textit{Light Emitting Diode} & Indicador luminoso empleado en pruebas o diagnóstico. \\
+LED & \textit{Light Emitting Diode} & Indicador luminoso empleado en el prototipo. \\
 \hline
 LoRaWAN & \textit{Long Range Wide Area Network} & Tecnología LPWAN considerada como alternativa de comunicación. \\
 \hline
