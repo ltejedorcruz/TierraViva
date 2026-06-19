@@ -5,7 +5,7 @@ Este anexo resume los principales flujos de funcionamiento de TierraViva. Su fin
 
 \section{Flujo general del sistema}
 
-La Figura \ref{fig:flujo_general_tierraviva} muestra el recorrido completo de la información desde la estación remota hasta el usuario.
+La Figura~\ref{fig:flujo_general_tierraviva} muestra el recorrido completo de la información desde la estación remota hasta el usuario.
 
 \begin{figure}[H]
     \centering
@@ -18,7 +18,7 @@ La estación concentra la medición, la decisión local y la actuación segura. 
 
 \section{Ciclo de funcionamiento de la estación}
 
-La Figura \ref{fig:ciclo_estacion_tierraviva} resume el ciclo ejecutado por la estación remota.
+La Figura~\ref{fig:ciclo_estacion_tierraviva} resume el ciclo ejecutado por la estación remota.
 
 \begin{figure}[H]
     \centering
@@ -27,11 +27,11 @@ La Figura \ref{fig:ciclo_estacion_tierraviva} resume el ciclo ejecutado por la e
     \label{fig:ciclo_estacion_tierraviva}
 \end{figure}
 
-El relé se fuerza a estado apagado durante el arranque y la actuación se limita temporalmente mediante firmware. Esta decisión reduce el riesgo de activaciones no deseadas.
+El relé se fuerza a estado apagado durante el arranque y la actuación se limita temporalmente mediante \textit{firmware}. Esta decisión reduce el riesgo de activaciones no deseadas.
 
 \section{Decisión local de riego}
 
-La Figura \ref{fig:decision_local_riego_resumida} muestra la lógica principal de decisión de riego ejecutada en Arduino.
+La Figura~\ref{fig:decision_local_riego_resumida} muestra la lógica principal de decisión de riego ejecutada en Arduino.
 
 \begin{figure}[H]
     \centering
@@ -40,11 +40,11 @@ La Figura \ref{fig:decision_local_riego_resumida} muestra la lógica principal d
     \label{fig:decision_local_riego_resumida}
 \end{figure}
 
-La respuesta segura ante lectura inválida, error o cooldown es mantener la bomba apagada.
+La respuesta segura ante lectura inválida, error o \textit{cooldown} es mantener la bomba apagada.
 
 \section{Supervisión en Raspberry Pi}
 
-La Figura \ref{fig:flujo_supervision_raspberry} resume el flujo seguido por la Raspberry Pi una vez que la estación ha publicado datos en ThingSpeak.
+La Figura~\ref{fig:flujo_supervision_raspberry} resume el flujo seguido por la Raspberry Pi una vez que la estación ha publicado datos en ThingSpeak.
 
 \begin{figure}[H]
     \centering
@@ -57,7 +57,7 @@ Este flujo deja claro que la Raspberry Pi trabaja sobre datos publicados y almac
 
 \section{Flujo ante fallos}
 
-La Figura \ref{fig:flujo_fallos_resumido} resume la respuesta esperada ante fallos relevantes.
+La Figura~\ref{fig:flujo_fallos_resumido} resume la respuesta esperada ante fallos relevantes.
 
 \begin{figure}[H]
     \centering
@@ -70,7 +70,7 @@ La prioridad del sistema ante condiciones no fiables es mantener el estado segur
 
 \section{Secuencia extremo a extremo}
 
-La Tabla \ref{tab:secuencia_extremo_extremo_resumida} sintetiza la secuencia completa desde la medida física hasta la visualización.
+La Tabla~\ref{tab:secuencia_extremo_extremo_resumida} sintetiza la secuencia completa desde la medida física hasta la visualización.
 
 \begin{table}[H]
 \centering
@@ -87,15 +87,15 @@ La Tabla \ref{tab:secuencia_extremo_extremo_resumida} sintetiza la secuencia com
 \hline
 3 & Relé y bomba & Ejecutan el riego únicamente si se cumplen las condiciones y durante un tiempo limitado. \\
 \hline
-4 & A7670E-LASA & Publica telemetría y estado en ThingSpeak mediante LTE. \\
+4 & A7670E-LASA & Publica telemetría y estado en ThingSpeak mediante LTE/HTTP. \\
 \hline
 5 & ThingSpeak & Almacena la entrada y asigna un \texttt{entry\_id}. \\
 \hline
 6 & Raspberry Pi & Recupera lecturas nuevas, evita duplicados y las guarda en SQLite. \\
 \hline
-7 & API & Expone los datos almacenados mediante endpoints HTTP. \\
+7 & API & Expone los datos almacenados mediante \textit{endpoints} HTTP. \\
 \hline
-8 & Dashboard & Muestra lecturas, estados, gráficas e histórico al usuario. \\
+8 & \textit{Dashboard} & Muestra lecturas, estados, gráficas e histórico al usuario. \\
 \hline
 \end{tabular}
 \caption{Secuencia extremo a extremo de TierraViva.}
@@ -104,7 +104,7 @@ La Tabla \ref{tab:secuencia_extremo_extremo_resumida} sintetiza la secuencia com
 
 \section{Responsabilidades por bloque}
 
-La Tabla \ref{tab:responsabilidades_bloques_resumida} resume las responsabilidades principales de cada capa del sistema.
+La Tabla~\ref{tab:responsabilidades_bloques_resumida} resume las responsabilidades principales de cada capa del sistema.
 
 \begin{table}[H]
 \centering
@@ -119,17 +119,17 @@ Sensores & Medir variables del suelo y del entorno. & No \\
 \hline
 Arduino UNO & Leer sensores, validar datos, decidir riego y controlar el relé. & Sí \\
 \hline
-Relé y bomba & Ejecutar físicamente el riego cuando el firmware lo permite. & Sí \\
+Relé y bomba & Ejecutar físicamente el riego cuando el \textit{firmware} lo permite. & Sí \\
 \hline
 A7670E-LASA & Enviar telemetría mediante LTE. & No \\
 \hline
 ThingSpeak & Recibir y conservar lecturas publicadas por las estaciones. & No \\
 \hline
-Raspberry Pi & Ingerir, almacenar y servir datos al dashboard. & No \\
+Raspberry Pi & Ingerir, almacenar y servir datos al \textit{dashboard}. & No \\
 \hline
 API FastAPI & Exponer lecturas, histórico, estadísticas y estado. & No \\
 \hline
-Dashboard & Presentar información al usuario. & No \\
+\textit{Dashboard} & Presentar información al usuario. & No \\
 \hline
 \end{tabular}
 \caption{Responsabilidades principales de los bloques de TierraViva.}
