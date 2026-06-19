@@ -39,7 +39,7 @@ La combinación de ambos criterios permite clasificar cada riesgo como bajo, med
 
 \section{Resumen de riesgos identificados}
 
-La Tabla \ref{tab:resumen_riesgos} resume los riesgos más relevantes del proyecto. Se han seleccionado aquellos que pueden afectar de forma directa al funcionamiento del prototipo o a la validez de las pruebas.
+La Tabla~\ref{tab:resumen_riesgos} resume los riesgos más relevantes del proyecto. Se han seleccionado aquellos que pueden afectar de forma directa al funcionamiento del prototipo o a la validez de las pruebas.
 
 \begin{table}[H]
 \centering
@@ -56,9 +56,9 @@ R02 & Lecturas incorrectas del sensor de humedad del suelo por falta de calibrac
 \hline
 R03 & Degradación puntual del enlace LTE por ubicación, antena, incidencia del operador o reinicio del módem. & M & M & \cellcolor{yellow!30}Medio \\
 \hline
-R04 & Indisponibilidad temporal de ThingSpeak o límites de uso de la plataforma. & B & M & \cellcolor{yellow!30}Medio \\
+R04 & Indisponibilidad temporal de ThingSpeak o límites de uso de la plataforma. & M & M & \cellcolor{yellow!30}Medio \\
 \hline
-R05 & Activación incorrecta o excesiva de la bomba por error de lógica o lectura anómala. & B & A & \cellcolor{red!25}Alto \\
+R05 & Activación incorrecta o excesiva de la bomba por error de lógica o lectura anómala. & M & A & \cellcolor{red!25}Alto \\
 \hline
 R06 & Daño eléctrico por cableado incorrecto, niveles lógicos incompatibles o ausencia de masa común. & M & A & \cellcolor{red!25}Alto \\
 \hline
@@ -66,7 +66,7 @@ R07 & Exposición de la electrónica a humedad, polvo, lluvia o salpicaduras dur
 \hline
 R08 & Exposición accidental de claves API o credenciales sensibles en el repositorio o documentación. & M & M & \cellcolor{yellow!30}Medio \\
 \hline
-R09 & Inconsistencias entre firmware, backend, API y dashboard durante la evolución del código. & M & M & \cellcolor{yellow!30}Medio \\
+R09 & Inconsistencias entre \textit{firmware}, \textit{backend}, API y \textit{dashboard} durante la evolución del código. & M & M & \cellcolor{yellow!30}Medio \\
 \hline
 R10 & Retrasos en pruebas de campo por disponibilidad de parcela, climatología o logística de montaje. & M & M & \cellcolor{yellow!30}Medio \\
 \hline
@@ -74,6 +74,9 @@ R10 & Retrasos en pruebas de campo por disponibilidad de parcela, climatología 
 \caption{Resumen de riesgos principales del proyecto TierraViva.}
 \label{tab:resumen_riesgos}
 \end{table}
+\begin{flushleft}
+\footnotesize\textit{Nota:} B = baja/bajo, M = media/medio y A = alta/alto, según se trate de probabilidad, impacto o nivel de riesgo.
+\end{flushleft}
 
 \section{Mapa de riesgos por bloques del sistema}
 
@@ -144,7 +147,7 @@ La actuación sobre el riego es el punto más delicado del sistema, ya que impli
 \textbf{Medidas adoptadas:}
 
 \begin{itemize}
-    \item limitación del tiempo máximo de riego por firmware;
+    \item limitación del tiempo máximo de riego por \textit{firmware};
     \item desactivación explícita del relé al finalizar cada evento;
     \item periodo mínimo de seguridad entre riegos consecutivos;
     \item arranque del sistema con el relé en estado apagado;
@@ -196,6 +199,10 @@ R01 & Prueba de encendido, respuesta AT y envío de datos del A7670E-LASA. & Res
 \hline
 R02 & Prueba de lectura del sensor en seco, húmedo y condiciones intermedias. & Valores diferenciables y coherentes para definir umbrales de riego. \\
 \hline
+R03 & Prueba de comunicación LTE y recuperación tras pérdida puntual de enlace. & Registro de publicación en ThingSpeak o \textit{logs} de fallo y recuperación de conectividad. \\
+\hline
+R04 & Prueba de consulta a ThingSpeak y comportamiento ante ausencia temporal de nuevas entradas. & Última lectura disponible, estado de dato antiguo u observación registrada en la API o el \textit{dashboard}. \\
+\hline
 R05 & Prueba de activación temporizada del relé y apagado automático. & La bomba o carga se desactiva al finalizar el tiempo programado. \\
 \hline
 R06 & Prueba de integración eléctrica por bloques. & Tensiones correctas, masa común y funcionamiento estable de sensores y actuadores. \\
@@ -204,7 +211,9 @@ R07 & Prueba controlada en entorno exterior o parcela. & Funcionamiento del prot
 \hline
 R08 & Revisión de repositorio y ficheros de configuración. & Ausencia de claves reales en código, memoria o capturas públicas. \\
 \hline
-R09 & Prueba de integración firmware--ThingSpeak--Raspberry--dashboard. & Lecturas coherentes desde la estación hasta la interfaz web. \\
+R09 & Prueba de integración \textit{firmware}--ThingSpeak--Raspberry--\textit{dashboard}. & Lecturas coherentes desde la estación hasta la interfaz web. \\
+\hline
+R10 & Planificación de prueba en entorno real o controlado. & Evidencia de ejecución de la prueba, fotografías, capturas o registro de limitaciones logísticas. \\
 \hline
 \end{tabular}
 \caption{Relación entre riesgos principales y pruebas de validación.}
