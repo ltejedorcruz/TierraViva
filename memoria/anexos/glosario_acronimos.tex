@@ -231,6 +231,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Modo seguro]
     Estado conservador de funcionamiento en el que la estación evita actuaciones peligrosas o no justificadas ante lecturas no fiables o condiciones anómalas.
 
+    \item[Monitor serie]
+    Herramienta del entorno Arduino utilizada para visualizar mensajes enviados por la placa durante la ejecución del \textit{firmware}. En TierraViva permite comprobar lecturas de sensores, respuestas del módem, registro LTE y publicación en ThingSpeak.
+
     \item[Mosquitto]
     Broker MQTT utilizado en el prototipo local previo para validar la cadena de adquisición, transporte, almacenamiento y visualización antes de adoptar la arquitectura final basada en LTE y ThingSpeak.
 
@@ -288,6 +291,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Relé normalmente abierto]
     Configuración del relé en la que el circuito permanece abierto cuando no hay señal de activación. Es la opción más segura para mantener el riego apagado por defecto.
     
+    \item[Repositorio]
+    Espacio donde se almacena el código fuente y la documentación técnica del proyecto. En TierraViva contiene el \textit{firmware}, el software de Raspberry Pi, la API, el \textit{dashboard} y los ficheros auxiliares de instalación.
+
     \item[Resistencia]
     Componente electrónico que limita o ajusta el paso de corriente. En TierraViva se utiliza especialmente en el divisor resistivo empleado para adaptar niveles de señal.
 
@@ -414,6 +420,8 @@ IA & Inteligencia artificial & Línea no implementada en la versión actual; se 
 \hline
 I2C & \textit{Inter-Integrated Circuit} & Bus usado por los sensores BME280 y BH1750. \\
 \hline
+ID & Identificador & Código utilizado para distinguir estaciones, canales, entradas, registros o parámetros dentro de la documentación y configuración de TierraViva. \\
+\hline
 IDE & \textit{Integrated Development Environment} & Entorno utilizado para programar y cargar el \textit{firmware} en Arduino. \\
 \hline
 IEEE & \textit{Institute of Electrical and Electronics Engineers} & Organización profesional y editorial citada a través de \textit{IEEE Sensors Journal} en el estado del arte sobre riego inteligente e IoT. \\
@@ -447,6 +455,8 @@ OASIS & \textit{Organization for the Advancement of Structured Information Stand
 ODS & Objetivos de Desarrollo Sostenible & Marco de Naciones Unidas utilizado para relacionar TierraViva con agricultura sostenible, eficiencia hídrica, consumo responsable y adaptación climática. \\
 \hline
 PCB & \textit{Printed Circuit Board} & Placa de circuito impreso; no se fabrica en la versión actual, pero se plantea como posible mejora de robustez. \\
+\hline
+PIN & \textit{Personal Identification Number} & Código de identificación asociado a la tarjeta SIM. En TierraViva se comprueba que no bloquee el registro del módem LTE en la red móvil. \\
 \hline
 PK & \textit{Primary Key} & Clave primaria de una tabla de base de datos. En TierraViva se utiliza en el modelo SQLite para identificar de forma única registros de tablas como \texttt{readings}, \texttt{valve\_events} y \texttt{system\_state}. \\
 \hline

@@ -3,7 +3,7 @@
 
 Este anexo describe el procedimiento necesario para instalar y poner en marcha TierraViva a partir del repositorio del proyecto. Su objetivo es permitir que el prototipo pueda reproducirse de forma ordenada, comprobando cada bloque antes de ejecutar una prueba completa.
 
-El manual se centra en la instalación práctica del sistema. Los esquemas eléctricos se recogen en el Anexo \ref{anexo:esquemas_electricos}; los flujos de funcionamiento, en el Anexo \ref{anexo:diagramas_flujo_funcionamiento}; la estructura de ThingSpeak, en el Anexo \ref{anexo:estructura_thingspeak_estados}; y la referencia completa de endpoints, en el Anexo \ref{anexo:manual_api}.
+El manual se centra en la instalación práctica del sistema. Los esquemas eléctricos se recogen en el Anexo~\ref{anexo:esquemas_electricos}; los flujos de funcionamiento, en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}; la estructura de ThingSpeak, en el Anexo~\ref{anexo:estructura_thingspeak_estados}; y la referencia completa de \textit{endpoints}, en el Anexo~\ref{anexo:manual_api}.
 
 \section{Alcance}
 
@@ -15,7 +15,7 @@ La instalación descrita corresponde a la versión actual de TierraViva, formada
     \item Raspberry Pi como nodo local de supervisión;
     \item base de datos SQLite;
     \item API local con FastAPI;
-    \item dashboard web accesible desde navegador.
+    \item \textit{dashboard} web accesible desde navegador.
 \end{itemize}
 
 \section{Requisitos previos}
@@ -25,20 +25,20 @@ Antes de comenzar la instalación deben estar disponibles los siguientes element
 \begin{itemize}
     \item repositorio del proyecto TierraViva;
     \item Raspberry Pi con Raspberry Pi OS y conexión a Internet;
-    \item Arduino IDE para cargar el firmware de estación;
+    \item Arduino IDE para cargar el \textit{firmware} de estación;
     \item cuenta de ThingSpeak;
     \item un canal ThingSpeak por estación;
     \item \texttt{Channel ID}, \texttt{Read API Key} y \texttt{Write API Key} de cada canal;
     \item tarjeta SIM sin PIN activo;
     \item módulo A7670E-LASA con antena conectada;
-    \item estación montada según el esquema eléctrico del Anexo \ref{anexo:esquemas_electricos}.
+    \item estación montada según el esquema eléctrico del Anexo~\ref{anexo:esquemas_electricos}.
 \end{itemize}
 
 Las claves reales no deben incluirse en la memoria ni subirse al repositorio. En la documentación se utilizarán siempre marcadores como \texttt{<READ\_KEY\_A>} o \texttt{<WRITE\_KEY\_A>}.
 
 \section{Preparación de ThingSpeak}
 
-Para cada estación debe existir un canal ThingSpeak independiente. La correspondencia entre campos y variables se encuentra documentada en el Anexo \ref{anexo:estructura_thingspeak_estados}. Como comprobación mínima, antes de integrar la estación se recomienda verificar que el canal acepta una escritura manual.
+Para cada estación debe existir un canal ThingSpeak independiente. La correspondencia entre campos y variables se encuentra documentada en el Anexo~\ref{anexo:estructura_thingspeak_estados}. Como comprobación mínima, antes de integrar la estación se recomienda verificar que el canal acepta una escritura manual.
 
 \begin{verbatim}
 https://api.thingspeak.com/update?api_key=<WRITE_KEY>&field1=35
@@ -46,9 +46,9 @@ https://api.thingspeak.com/update?api_key=<WRITE_KEY>&field1=35
 
 Si la petición es correcta, ThingSpeak devuelve un número de entrada. Después debe comprobarse en el canal que se ha registrado una nueva lectura.
 
-\section{Carga del firmware de estación}
+\section{Carga del \textit{firmware} de estación}
 
-El firmware de la estación se encuentra en:
+El \textit{firmware} de la estación se encuentra en:
 
 \begin{verbatim}
 Estacion/Estacion_A_final_Plus/Estacion_A_final_Plus.ino
@@ -86,14 +86,14 @@ Antes de cargarlo en Arduino UNO deben revisarse, como mínimo, los siguientes p
 \texttt{SEND\_INTERVAL\_MS} & Intervalo de publicación de telemetría. \\
 \hline
 \end{tabular}
-\caption{Parámetros principales que deben revisarse antes de cargar el firmware.}
+\caption{Parámetros principales que deben revisarse antes de cargar el \textit{firmware}.}
 \label{tab:parametros_firmware_instalacion}
 \end{table}
 
-\subsection{Librerías empleadas por el firmware}
+\subsection{Librerías empleadas por el \textit{firmware}}
 \label{subsec:librerias_firmware_estacion}
 
-El firmware de la estación remota utiliza varias librerías de Arduino y de C/C++ para gestionar la comunicación con sensores, el módem LTE y el tratamiento de cadenas. Estas dependencias no añaden funcionalidad aislada, sino que permiten implementar de forma ordenada los bloques principales del sketch: lectura I2C, comunicación serie con el A7670E-LASA, adquisición de medidas ambientales y construcción de peticiones HTTP.
+El \textit{firmware} de la estación remota utiliza varias librerías de Arduino y de C/C++ para gestionar la comunicación con sensores, el módem LTE y el tratamiento de cadenas. Estas dependencias no añaden funcionalidad aislada, sino que permiten implementar de forma ordenada los bloques principales del sketch: lectura I2C, comunicación serie con el A7670E-LASA, adquisición de medidas ambientales y construcción de peticiones HTTP.
 
 \begin{table}[H]
 \centering
@@ -119,19 +119,19 @@ El firmware de la estación remota utiliza varias librerías de Arduino y de C/C
 \texttt{string.h} & Tratamiento de cadenas en C, como búsqueda de respuestas y construcción de mensajes. & Permite usar funciones como \texttt{strstr()} y \texttt{snprintf()}, útiles para interpretar respuestas del módem y construir peticiones HTTP con buffers controlados. \\
 \hline
 \end{tabular}
-\caption{Librerías principales utilizadas por el firmware de estación.}
+\caption{Librerías principales utilizadas por el \textit{firmware} de estación.}
 \label{tab:librerias_firmware_estacion}
 \end{table}
 
 El uso de \texttt{SoftwareSerial} requiere una consideración específica. Arduino UNO solo dispone de un puerto serie hardware, utilizado normalmente para cargar el programa y depurar mediante el monitor serie. Por ello, la comunicación con el A7670E-LASA se implementa mediante un puerto serie software en los pines \texttt{D10} y \texttt{D11}. En el montaje de TierraViva, \texttt{D10} recibe datos desde \texttt{TXD} del módem y \texttt{D11} transmite hacia \texttt{RXD} del módem mediante divisor resistivo.
 
-Durante las pruebas se evitó utilizar velocidades elevadas en este puerto serie software. Aunque algunos módems pueden trabajar a baudios superiores, en Arduino UNO \texttt{SoftwareSerial} puede volverse inestable a velocidades altas. Por ese motivo, el firmware se estabilizó a \texttt{9600} baudios, priorizando fiabilidad frente a velocidad de transmisión.
+Durante las pruebas se evitó utilizar velocidades elevadas en este puerto serie software. Aunque algunos módems pueden trabajar a baudios superiores, en Arduino UNO \texttt{SoftwareSerial} puede volverse inestable a velocidades altas. Por ese motivo, el \textit{firmware} se estabilizó a \texttt{9600} baudios, priorizando fiabilidad frente a velocidad de transmisión.
 
 Las librerías \texttt{Wire}, \texttt{BH1750} y \texttt{Adafruit\_BME280} permiten integrar los sensores digitales sobre el mismo bus I2C. En la estación, el BH1750 se detectó en la dirección \texttt{0x23} y el BME280 en la dirección \texttt{0x76}, por lo que ambos pueden compartir las líneas \texttt{SDA} y \texttt{SCL} sin conflicto de direcciones.
 
 Por último, \texttt{string.h} se utiliza para trabajar con cadenas de caracteres de forma controlada. Esta decisión es relevante en Arduino UNO porque la memoria SRAM disponible es reducida. Funciones como \texttt{snprintf()} permiten construir cadenas dentro de buffers de tamaño definido, mientras que \texttt{strstr()} permite comprobar si una respuesta del módem contiene textos como \texttt{OK} o códigos HTTP esperados.
 
-La carga del firmware se realiza desde Arduino IDE:
+La carga del \textit{firmware} se realiza desde Arduino IDE:
 
 \begin{enumerate}
     \item Conectar Arduino UNO al ordenador mediante USB;
@@ -140,16 +140,16 @@ La carga del firmware se realiza desde Arduino IDE:
     \item Seleccionar el puerto serie correspondiente;
     \item Comprobar que las librerías indicadas en la Tabla~\ref{tab:librerias_firmware_estacion} están disponibles en el entorno de Arduino;
     \item Compilar el programa;
-    \item Cargar el firmware;
+    \item Cargar el \textit{firmware};
     \item Abrir el monitor serie a \texttt{9600} baudios para comprobar sensores, módem, red LTE y publicación.
 \end{enumerate}
 
-La Figura \ref{fig:arduino_placa_uno} muestra el procedimiento para seleccionar la placa \textit{Arduino UNO} en Arduino IDE. A continuación, la Figura \ref{fig:arduino_puerto_usb} muestra la selección del puerto serie asociado a la placa conectada por USB.
+La Figura~\ref{fig:arduino_placa_uno} muestra el procedimiento para seleccionar la placa \textit{Arduino UNO} en Arduino IDE. A continuación, la Figura~\ref{fig:arduino_puerto_usb} muestra la selección del puerto serie asociado a la placa conectada por USB.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{figs/seleccion_placa_Arduino.png}
-    \caption{Selección de la placa \textit{Arduino UNO} en Arduino IDE antes de cargar el firmware de la estación.}
+    \caption{Selección de la placa \textit{Arduino UNO} en Arduino IDE antes de cargar el \textit{firmware} de la estación.}
     \label{fig:arduino_placa_uno}
 \end{figure}
 
@@ -222,9 +222,9 @@ TIERRAVIVA_LOG_LEVEL=INFO
 
 El fichero \texttt{.env} no debe subirse al repositorio. Si accidentalmente se publica una clave real, debe regenerarse en ThingSpeak.
 
-\section{Preparación del dashboard}
+\section{Preparación del \textit{dashboard}}
 
-El dashboard fuente se encuentra en el directorio:
+El \textit{dashboard} fuente se encuentra en el directorio:
 
 \begin{verbatim}
 dashboard/
@@ -236,7 +236,7 @@ La API sirve la interfaz desde:
 frontend/index.html
 \end{verbatim}
 
-Por tanto, antes de arrancar el sistema debe copiarse el dashboard al directorio \texttt{frontend/}:
+Por tanto, antes de arrancar el sistema debe copiarse el \textit{dashboard} al directorio \texttt{frontend/}:
 
 \begin{verbatim}
 mkdir -p frontend
@@ -251,9 +251,9 @@ frontend/css/tierraviva.css
 frontend/js/tierraviva.js
 \end{verbatim}
 
-\section{Instalación mediante script}
+\section{Instalación mediante \textit{script}}
 
-Antes de utilizar el script debe concederse permiso de ejecución:
+Antes de utilizar el \textit{script} debe concederse permiso de ejecución:
 
 \begin{verbatim}
 chmod +x tierraviva.sh
@@ -267,7 +267,7 @@ La instalación inicial se realiza con:
 
 Este comando prepara el entorno de ejecución del proyecto: crea el entorno virtual, instala dependencias, inicializa la base de datos y crea los directorios necesarios para la ejecución.
 
-Tras la instalación, se recomienda repetir la copia del dashboard para asegurar que el frontend servido por la API está actualizado:
+Tras la instalación, se recomienda repetir la copia del \textit{dashboard} para asegurar que el \textit{frontend} servido por la API está actualizado:
 
 \begin{verbatim}
 rsync -a dashboard/ frontend/
@@ -287,7 +287,7 @@ Este comando inicia los procesos principales:
 
 \begin{itemize}
     \item \texttt{main.py}, encargado de consultar ThingSpeak y almacenar lecturas nuevas;
-    \item \texttt{api.py}, encargado de servir la API y el dashboard web.
+    \item \texttt{api.py}, encargado de servir la API y el \textit{dashboard} web.
 \end{itemize}
 
 Para detener el sistema se utiliza:
@@ -308,7 +308,7 @@ Para consultar el estado:
 ./tierraviva.sh status
 \end{verbatim}
 
-Para revisar los logs:
+Para revisar los \textit{logs}:
 
 \begin{verbatim}
 ./tierraviva.sh logs
@@ -337,11 +337,11 @@ http://<IP_RASPBERRY>:8000/api/readings?station=A&limit=20
 http://<IP_RASPBERRY>:8000/api/stats?station=A&hours=24
 \end{verbatim}
 
-La descripción completa de endpoints, parámetros y respuestas se recoge en el Anexo \ref{anexo:manual_api}.
+La descripción completa de \textit{endpoints}, parámetros y respuestas se recoge en el Anexo~\ref{anexo:manual_api}.
 
-\section{Acceso al dashboard}
+\section{Acceso al \textit{dashboard}}
 
-Una vez arrancada la API y copiado el dashboard en \texttt{frontend/}, la interfaz web se abre desde:
+Una vez arrancada la API y copiado el \textit{dashboard} en \texttt{frontend/}, la interfaz web se abre desde:
 
 \begin{verbatim}
 http://<IP_RASPBERRY>:8000/
@@ -353,7 +353,7 @@ Si se accede desde la propia Raspberry Pi, puede utilizarse:
 http://127.0.0.1:8000/
 \end{verbatim}
 
-El dashboard debe mostrar la estación seleccionada, la última lectura disponible, el estado de frescura, variables ambientales, estado de relé, eventos, gráficas y tabla de lecturas recientes.
+El \textit{dashboard} debe mostrar la estación seleccionada, la última lectura disponible, el estado de frescura, variables ambientales, estado de relé, eventos, gráficas y tabla de lecturas recientes.
 
 \section{Comprobación extremo a extremo}
 
@@ -384,7 +384,7 @@ Inserción en SQLite & La lectura aparece en \texttt{readings}.\\
 \hline
 API operativa & \texttt{/api/health} responde correctamente.\\
 \hline
-Dashboard visible & La interfaz muestra datos de la estación.\\
+\textit{Dashboard} visible & La interfaz muestra datos de la estación.\\
 \hline
 Relé sin bomba & El relé conmuta y vuelve a apagado.\\
 \hline
@@ -408,19 +408,19 @@ Bomba temporizada & La bomba se activa y se apaga tras el tiempo configurado.\\
 \rowcolor{URJCRed}
 \TVHead{Problema} & \TVHead{Causa probable} & \TVHead{Acción recomendada} \\
 \hline
-No aparecen datos en ThingSpeak & Clave de escritura incorrecta, APN incorrecto o fallo LTE. & Revisar firmware, SIM, antena, APN y monitor serie. \\
+No aparecen datos en ThingSpeak & Clave de escritura incorrecta, APN incorrecto o fallo LTE. & Revisar \textit{firmware}, SIM, antena, APN y monitor serie. \\
 \hline
 La Raspberry no recupera datos & Canal o clave de lectura incorrectos. & Revisar \texttt{THINGSPEAK\_CHANNEL\_A/B} y \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
 \hline
 La API no arranca & Entorno virtual o dependencias no preparados. & Ejecutar \texttt{./tierraviva.sh install}. \\
 \hline
-El dashboard no carga & No existe \texttt{frontend/index.html}. & Ejecutar \texttt{rsync -a dashboard/ frontend/}. \\
+El \textit{dashboard} no carga & No existe \texttt{frontend/index.html}. & Ejecutar \texttt{rsync -a dashboard/ frontend/}. \\
 \hline
-No hay registros en SQLite & La estación no ha publicado o el ingestor no está activo. & Revisar ThingSpeak y logs de \texttt{main.py}. \\
+No hay registros en SQLite & La estación no ha publicado o el ingestor no está activo. & Revisar ThingSpeak y \textit{logs} de \texttt{main.py}. \\
 \hline
-El relé se activa al arrancar & Lógica invertida o inicialización incorrecta. & Comprobar configuración del firmware y probar sin bomba. \\
+El relé se activa al arrancar & Lógica invertida o inicialización incorrecta. & Comprobar configuración del \textit{firmware} y probar sin bomba. \\
 \hline
-La bomba no se apaga & Error de cableado o uso del contacto incorrecto del relé. & Usar contacto normalmente abierto y validar apagado por firmware. \\
+La bomba no se apaga & Error de cableado o uso del contacto incorrecto del relé. & Usar contacto normalmente abierto y validar apagado por \textit{firmware}. \\
 \hline
 El módulo LTE se reinicia & Alimentación insuficiente durante transmisión. & Revisar fuente, LM2596, corriente disponible y masa común. \\
 \hline
@@ -431,6 +431,6 @@ El módulo LTE se reinicia & Alimentación insuficiente durante transmisión. & 
 
 \section{Conclusión}
 
-La puesta en marcha de TierraViva debe realizarse por bloques: primero estación y sensores, después publicación en ThingSpeak, más tarde ingesta en Raspberry Pi, base de datos, API, dashboard y finalmente actuación sobre relé o bomba. Esta secuencia permite aislar errores y evita que un fallo de montaje, configuración o comunicación quede oculto dentro de una prueba completa.
+La puesta en marcha de TierraViva debe realizarse por bloques: primero estación y sensores, después publicación en ThingSpeak, más tarde ingesta en Raspberry Pi, base de datos, API, \textit{dashboard} y finalmente actuación sobre relé o bomba. Esta secuencia permite aislar errores y evita que un fallo de montaje, configuración o comunicación quede oculto dentro de una prueba completa.
 
 El procedimiento descrito en este anexo no sustituye a los anexos técnicos específicos, sino que los ordena en una secuencia práctica de instalación y validación inicial.
