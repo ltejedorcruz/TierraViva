@@ -20,7 +20,7 @@ La Tabla \ref{cuadro:dafo_interno} recoge los factores internos del proyecto: fo
 \begin{minipage}[t]{0.43\textwidth}
 \vspace{0.1cm}
 \begin{itemize}
-    \item \textbf{F1. Arquitectura modular:} separación clara entre estación de campo, plataforma IoT, almacenamiento local, API y dashboard.
+    \item \textbf{F1. Arquitectura modular:} separación clara entre estación de campo, plataforma IoT, almacenamiento local, API y \textit{dashboard}.
     \item \textbf{F2. Decisión local de riego:} la estación puede actuar sobre la bomba sin depender continuamente de la Raspberry Pi.
     \item \textbf{F3. Conectividad móvil:} el uso del módulo LTE A7670E-LASA evita depender de una red WiFi local en la parcela.
     \item \textbf{F4. Prototipo funcional:} integra sensorización, comunicaciones, almacenamiento, visualización y actuación física.
@@ -34,7 +34,7 @@ La Tabla \ref{cuadro:dafo_interno} recoge los factores internos del proyecto: fo
 \vspace{0.1cm}
 \begin{itemize}
     \item \textbf{D1. Dependencia de la señal LTE local:} el funcionamiento remoto requiere señal suficiente, antena adecuada y alimentación estable del módem.
-    \item \textbf{D2. Robustez limitada:} el montaje no alcanza todavía el nivel mecánico, eléctrico y ambiental de un producto industrial, pero no es el objetivo de este prototipo académico. Se podría tomar como una continuación futura.
+    \item \textbf{D2. Robustez limitada:} el montaje no alcanza todavía el nivel mecánico, eléctrico y ambiental de un producto industrial, ya que el objetivo de esta versión es validar un prototipo académico funcional. Su mejora se plantea como una línea clara de evolución futura.
     \item \textbf{D3. Calibración de sensores:} la humedad del suelo depende del sustrato, la profundidad y la colocación del sensor.
     \item \textbf{D4. Consumo del módulo LTE:} la comunicación móvil puede generar picos de corriente y aumentar el consumo total.
     \item \textbf{D5. Escalabilidad validada parcialmente:} la arquitectura admite más estaciones, pero la validación se centra en un número reducido de nodos.
@@ -81,7 +81,7 @@ La Tabla \ref{cuadro:dafo_externo} recoge los factores externos: oportunidades y
     \item \textbf{A3. Fallos hidráulicos:} una bomba obstruida, un tubo desconectado o una fuga pueden impedir el riego aunque la lógica funcione.
     \item \textbf{A4. Lecturas erróneas:} un sensor mal colocado o degradado puede provocar decisiones incorrectas.
     \item \textbf{A5. Dependencia de servicios externos:} ThingSpeak introduce dependencia de disponibilidad, límites de uso y cambios de plataforma.
-    \item \textbf{A6. Seguridad y credenciales:} una implantación real requeriría reforzar la protección de claves, endpoints y canales.
+    \item \textbf{A6. Seguridad y credenciales:} una implantación real requeriría reforzar la protección de claves, \textit{endpoints} y canales.
 \end{itemize}
 \vspace{0.1cm}
 \end{minipage}
@@ -95,13 +95,15 @@ La Tabla \ref{cuadro:dafo_externo} recoge los factores externos: oportunidades y
 
 \section{Lectura sintética del análisis}
 
-El análisis muestra que TierraViva tiene una base técnica sólida para un prototipo académico de riego inteligente. Sus principales fortalezas se encuentran en la integración de varias capas: estación embebida, comunicación LTE, plataforma IoT, almacenamiento local, API y dashboard.
+El análisis muestra que TierraViva tiene una base técnica sólida para un prototipo académico de riego inteligente. Sus principales fortalezas se encuentran en la integración de varias capas: estación embebida, comunicación LTE, plataforma IoT, almacenamiento local, API y \textit{dashboard}.
 
 Las debilidades se relacionan principalmente con la madurez del prototipo: protección ambiental, calibración, consumo energético y validación limitada a un número reducido de nodos. Estas limitaciones no invalidan el proyecto, pero delimitan correctamente su alcance.
 
 Las oportunidades apuntan hacia una evolución natural del sistema: más estaciones, mayor robustez, predicción meteorológica, alertas y optimización energética. Las amenazas se concentran en aspectos típicos de sistemas IoT de campo: comunicación, exposición ambiental, fiabilidad de sensores, dependencia de servicios externos y seguridad.
 
 \section{Estrategias derivadas del DAFO}
+
+Las estrategias se identifican combinando las iniciales de los bloques DAFO: fortalezas y oportunidades (FO), debilidades y oportunidades (DO), fortalezas y amenazas (FA), y debilidades y amenazas (DA).
 
 A partir de la matriz anterior se plantean cuatro estrategias de mejora y consolidación.
 
@@ -129,6 +131,6 @@ A partir de la matriz anterior se plantean cuatro estrategias de mejora y consol
 
 \section{Conclusión}
 
-El análisis DAFO confirma que TierraViva es un proyecto viable, estable, funcional y coherente. Su valor principal reside en integrar hardware, comunicaciones y software para resolver un problema real: la supervisión y automatización del riego en un entorno desatendido.
+El análisis DAFO confirma que TierraViva es un proyecto viable, estable, funcional y coherente. Su valor principal reside en integrar hardware, comunicaciones y \textit{software} para resolver un problema real: la supervisión y automatización del riego en un entorno desatendido.
 
 Al mismo tiempo, el DAFO permite reconocer de forma honesta los límites del prototipo. La cobertura móvil local, la calibración de sensores, la exposición ambiental, la seguridad de credenciales y la dependencia de servicios externos son aspectos que deben tratarse con cautela en futuras versiones.
