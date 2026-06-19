@@ -3,7 +3,7 @@
 
 Este anexo recoge los principales términos técnicos y acrónimos utilizados en la memoria de TierraViva. Su objetivo es facilitar la lectura del documento, especialmente en los apartados donde confluyen conceptos de electrónica, comunicaciones móviles, sistemas embebidos, plataformas IoT, bases de datos, API y desarrollo web.
 
-El glosario no sustituye a los anexos técnicos específicos. La estructura de campos de ThingSpeak se documenta en el Anexo \ref{anexo:estructura_thingspeak_estados}; la referencia de endpoints, en el Anexo \ref{anexo:manual_api}; y el uso del dashboard, en el Anexo \ref{anexo:manual_usuario}.
+El glosario no sustituye a los anexos técnicos específicos. La estructura de campos de ThingSpeak se documenta en el Anexo \ref{anexo:estructura_thingspeak_estados}; la referencia de endpoints, en el Anexo \ref{anexo:manual_api}; y el uso del \textit{dashboard}, en el Anexo \ref{anexo:manual_usuario}.
 
 \section{Glosario de términos}
 
@@ -33,11 +33,17 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Arduino UNO]
     Placa de microcontrolador utilizada como unidad de control de la estación remota. Lee sensores, gestiona el módem LTE y controla el relé.
 
+    \item[ATmega328P]
+    Microcontrolador principal de la placa Arduino UNO compatible utilizada en el prototipo. Ejecuta el \textit{firmware} de estación y coordina sensores, módem LTE, relé y lógica local de riego.
+
     \item[Automatización basada en reglas]
     Estrategia de decisión en la que una acción se ejecuta si se cumplen condiciones explícitas. En TierraViva, el riego se decide mediante umbrales, validación de lecturas y condiciones de seguridad.
 
     \item[Backend]
     Parte del software que ejecuta la lógica interna del sistema. En TierraViva se ejecuta en la Raspberry Pi e incluye la ingesta de datos, SQLite y la API.
+
+    \item[Baudio]
+    Unidad asociada a la velocidad de señalización en una comunicación serie. En TierraViva se utiliza una comunicación a 9600 baudios entre Arduino y el módem para mejorar la estabilidad con SoftwareSerial.
 
     \item[BH1750]
     Sensor digital de luminosidad utilizado para medir luz ambiental en lux. En algunos módulos aparece integrado como GY-302.
@@ -54,6 +60,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Broker]
     Intermediario utilizado en arquitecturas MQTT para recibir mensajes publicados por dispositivos y entregarlos a clientes suscritos a determinados temas.
 
+    \item[Búfer]
+    Zona de memoria utilizada para almacenar temporalmente datos o cadenas. En Arduino UNO debe dimensionarse con cuidado por la memoria SRAM limitada. 
+
     \item[Bus I2C]
     Bus de comunicación serie empleado para conectar sensores digitales con un microcontrolador. En TierraViva lo utilizan el BME280 y el BH1750.
 
@@ -65,6 +74,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Caudal]
     Volumen de agua que circula por unidad de tiempo. En TierraViva se plantea como posible variable futura para cuantificar el volumen real aplicado durante cada riego.
+
+    \item[CH340G]
+    Conversor USB-serie presente en la placa Arduino UNO compatible utilizada. Permite la comunicación entre el ordenador y el microcontrolador para programar y depurar el \textit{firmware}.
 
     \item[Cloud]
     Infraestructura o servicio remoto usado para almacenar, procesar o intercambiar datos. En TierraViva, ThingSpeak se usa como apoyo de telemetría, no como núcleo de control.
@@ -78,13 +90,19 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Conductividad eléctrica]
     Magnitud relacionada con la concentración de sales disueltas en el agua o el sustrato. Se menciona como posible ampliación futura para mejorar la caracterización agronómica del entorno.
 
+    \item[Contacto COM]
+    Contacto común del relé. En el bloque de actuación se conecta con el contacto normalmente abierto cuando el relé se activa, cerrando el circuito de alimentación de la bomba.
+
     \item[Control descendente]
-    Envío de órdenes desde una plataforma o dashboard hacia una estación remota. Se descarta en la versión actual para reducir complejidad y evitar actuaciones no deseadas.
+    Envío de órdenes desde una plataforma o \textit{dashboard} hacia una estación remota. Se descarta en la versión actual para reducir complejidad y evitar actuaciones no deseadas.
+
+    \item[Controlador CH340/CH341]
+    Controlador necesario para que Windows reconozca correctamente algunas placas Arduino compatibles basadas en conversores USB-serie CH340 o CH341.
 
     \item[Cooldown]
     Periodo mínimo de seguridad entre dos activaciones consecutivas del riego. Evita que la bomba se active repetidamente en intervalos demasiado cortos.
 
-    \item[Dashboard]
+    \item[\textit{Dashboard}]
     Interfaz visual del sistema. En TierraViva muestra lecturas actuales, gráficas, estado de conexión, eventos, diagnóstico e histórico reciente.
 
     \item[Dato obsoleto]
@@ -92,6 +110,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Decisión local]
     Lógica ejecutada directamente por la estación Arduino. En TierraViva, la decisión de riego se toma en la estación, sin depender de una orden de la Raspberry Pi.
+
+    \item[Divisor resistivo]
+    Circuito formado por resistencias que permite reducir una tensión. En TierraViva se utiliza para adaptar la señal serie enviada desde Arduino hacia la entrada RXD del módulo A7670E-LASA.
 
     \item[Entry ID]
     Identificador de entrada asignado por ThingSpeak a cada publicación. La Raspberry Pi lo utiliza para evitar almacenar lecturas duplicadas.
@@ -105,14 +126,14 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[FastAPI]
     Framework de Python utilizado para crear la API local de TierraViva.
 
-    \item[Firmware]
+    \item[\textit{Firmware}]
     Programa cargado en el microcontrolador de la estación. Controla sensores, comunicación LTE, publicación de datos, relé y lógica local de riego.
 
     \item[Frontend]
-    Parte visual de una aplicación web. En TierraViva corresponde al dashboard desarrollado con HTML, CSS y JavaScript.
+    Parte visual de una aplicación web. En TierraViva corresponde al \textit{dashboard} desarrollado con HTML, CSS y JavaScript.
 
     \item[Frescura de datos]
-    Clasificación de la antigüedad de la última lectura. La API y el dashboard la utilizan para diferenciar datos recientes, antiguos u offline.
+    Clasificación de la antigüedad de la última lectura. La API y el \textit{dashboard} la utilizan para diferenciar datos recientes, antiguos u offline.
 
     \item[Gateway]
     Equipo que actúa como pasarela entre dispositivos y una red externa. Algunas tecnologías como LoRaWAN pueden requerir infraestructura de gateway.
@@ -132,8 +153,8 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Lectura]
     Registro asociado a una estación en un instante concreto. Puede incluir humedad del suelo, temperatura, humedad ambiental, luminosidad, presión, estado del relé, evento y diagnóstico.
 
-    \item[LM2596]
-    Regulador DC-DC utilizado para convertir una tensión de entrada superior, como 12 V, en una salida regulada de 5 V.
+    \item[LM2596/LM2596S]
+    Regulador DC-DC de tipo reductor utilizado para convertir una tensión de entrada superior, como 12 V, en una salida regulada de 5 V.
 
     \item[LoRa]
     Modulación radio de largo alcance y bajo consumo considerada como alternativa de comunicación para estaciones remotas. En TierraViva se analiza junto con LoRaWAN, aunque finalmente se adopta conectividad LTE para validar el prototipo completo dentro del alcance del TFG.
@@ -177,8 +198,11 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Publicación de telemetría]
     Envío de lecturas desde la estación hacia una plataforma externa. En TierraViva se realiza mediante HTTP sobre LTE hacia ThingSpeak.
 
+    \item[Puerto COM]
+    Identificador de puerto serie utilizado por Windows para comunicarse con dispositivos conectados por USB-serie. En TierraViva se emplea para programar y depurar Arduino desde Arduino IDE.
+
     \item[Raspberry Pi]
-    Ordenador de placa reducida utilizado como nodo local de supervisión, almacenamiento, API y dashboard.
+    Ordenador de placa reducida utilizado como nodo local de supervisión, almacenamiento, API y \textit{dashboard}.
 
     \item[Raw JSON]
     Respuesta original de ThingSpeak conservada en la base de datos. Permite mantener trazabilidad de los campos recibidos, incluso si no todos se almacenan como columnas explícitas.
@@ -198,6 +222,12 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Sensorización]
     Conjunto de sensores y medidas utilizadas para observar el estado del entorno físico.
 
+    \item[Sketch]
+    Nombre habitual de un programa desarrollado para Arduino. En TierraViva corresponde al \textit{firmware} cargado en cada estación.
+
+    \item[SoftwareSerial]
+    Librería de Arduino utilizada para crear un puerto serie software en pines digitales. En TierraViva permite comunicar Arduino UNO con el módulo A7670E-LASA sin ocupar el puerto serie hardware de programación.
+
     \item[SQLite]
     Sistema de base de datos ligero basado en fichero. En TierraViva almacena lecturas, estados y eventos de forma local en la Raspberry Pi.
 
@@ -208,7 +238,7 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     Conjunto de datos medidos por una estación y enviados a un sistema de supervisión.
 
     \item[ThingsBoard]
-    Plataforma IoT de código abierto orientada a la gestión de dispositivos, telemetría, reglas y dashboards. Se consideró como alternativa más completa, aunque se descartó para el alcance actual por requerir mayor configuración e infraestructura.
+    Plataforma IoT de código abierto orientada a la gestión de dispositivos, telemetría, reglas y \textit{dashboards}. Se consideró como alternativa más completa, aunque se descartó para el alcance actual por requerir mayor configuración e infraestructura.
 
     \item[ThingSpeak]
     Plataforma IoT utilizada como capa intermedia para recibir los datos publicados por las estaciones y permitir su consulta desde la Raspberry Pi.
@@ -229,7 +259,7 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     Servidor ASGI utilizado para ejecutar la aplicación FastAPI de TierraViva.
 
     \item[Validación incremental]
-    Estrategia de pruebas por bloques. Permite comprobar sensores, comunicaciones, almacenamiento, API, dashboard y actuación antes de validar el sistema completo.
+    Estrategia de pruebas por bloques. Permite comprobar sensores, comunicaciones, almacenamiento, API, \textit{dashboard} y actuación antes de validar el sistema completo.
 
 \end{description}
 
@@ -272,7 +302,7 @@ BLE & \textit{Bluetooth Low Energy} & Tecnología inalámbrica de bajo consumo e
 \hline
 CoAP & \textit{Constrained Application Protocol} & Protocolo IoT ligero considerado en el estado del arte como alternativa a HTTP y MQTT. \\
 \hline
-CSS & \textit{Cascading Style Sheets} & Hojas de estilo del dashboard web. \\
+CSS & \textit{Cascading Style Sheets} & Hojas de estilo del \textit{dashboard} web. \\
 \hline
 CSV & \textit{Comma-Separated Values} & Formato tabular útil para exportación o tratamiento de datos, aunque no es el formato principal del sistema actual. \\
 \hline
@@ -284,7 +314,7 @@ GND & \textit{Ground} & Referencia eléctrica común del circuito. \\
 \hline
 GPIO & \textit{General Purpose Input/Output} & Pines de entrada/salida usados para control digital. \\
 \hline
-HTML & \textit{HyperText Markup Language} & Estructura del dashboard web. \\
+HTML & \textit{HyperText Markup Language} & Estructura del \textit{dashboard} web. \\
 \hline
 HTTP & \textit{HyperText Transfer Protocol} & Protocolo usado para publicar datos en ThingSpeak y consultar la API local. \\
 \hline
@@ -292,13 +322,13 @@ IA & Inteligencia artificial & Línea no implementada en la versión actual; se 
 \hline
 I2C & \textit{Inter-Integrated Circuit} & Bus usado por los sensores BME280 y BH1750. \\
 \hline
-IDE & \textit{Integrated Development Environment} & Entorno utilizado para programar y cargar el firmware en Arduino. \\
+IDE & \textit{Integrated Development Environment} & Entorno utilizado para programar y cargar el \textit{firmware} en Arduino. \\
 \hline
 IEEE & \textit{Institute of Electrical and Electronics Engineers} & Organización profesional y editorial citada a través de \textit{IEEE Sensors Journal} en el estado del arte sobre riego inteligente e IoT. \\
 \hline
 IoT & \textit{Internet of Things} & Enfoque general del sistema TierraViva. \\
 \hline
-IP & \textit{Internet Protocol} & Dirección utilizada para acceder al dashboard o a la API de la Raspberry Pi. \\
+IP & \textit{Internet Protocol} & Dirección utilizada para acceder al \textit{dashboard} o a la API de la Raspberry Pi. \\
 \hline
 JSON & \textit{JavaScript Object Notation} & Formato de datos utilizado por la API y por las respuestas de ThingSpeak. \\
 \hline
@@ -318,6 +348,8 @@ MQTT & \textit{Message Queuing Telemetry Transport} & Protocolo publicación/sus
 \hline
 NB-IoT & \textit{Narrowband Internet of Things} & Tecnología celular LPWAN considerada dentro del contexto de comunicaciones IoT. \\
 \hline
+NO & \textit{Normally Open} & Contacto normalmente abierto del relé. En TierraViva se utiliza para que la bomba permanezca apagada mientras no exista una activación expresa desde el \textit{firmware}. \\
+\hline
 OASIS & \textit{Organization for the Advancement of Structured Information Standards} & Organización de estandarización responsable de la especificación MQTT. \\
 \hline
 ODS & Objetivos de Desarrollo Sostenible & Marco de Naciones Unidas utilizado para relacionar TierraViva con agricultura sostenible, eficiencia hídrica, consumo responsable y adaptación climática. \\
@@ -325,6 +357,8 @@ ODS & Objetivos de Desarrollo Sostenible & Marco de Naciones Unidas utilizado pa
 PCB & \textit{Printed Circuit Board} & Placa de circuito impreso; no se fabrica en la versión actual, pero se plantea como posible mejora de robustez. \\
 \hline
 PWM & \textit{Pulse Width Modulation} & Técnica de modulación utilizada para generar señales de control mediante variación del ciclo de trabajo. \\
+\hline
+RXD & \textit{Receive Data} & Línea o pin de recepción de datos del módulo A7670E-LASA en la comunicación serie con Arduino. \\
 \hline
 REST & \textit{Representational State Transfer} & Estilo de interfaz usado por la API HTTP local. \\
 \hline
@@ -350,9 +384,13 @@ SPI & \textit{Serial Peripheral Interface} & Bus serie mencionado en el contexto
 \hline
 SQL & \textit{Structured Query Language} & Lenguaje utilizado para consultar la base de datos SQLite. \\
 \hline
+SRAM & \textit{Static Random Access Memory} & Memoria volátil disponible en Arduino UNO. Su capacidad limitada condiciona el tamaño de búferes, cadenas y mensajes construidos por el \textit{firmware}. \\
+\hline
 TFG & Trabajo de Fin de Grado & Marco académico del proyecto TierraViva. \\
 \hline
 TX & Transmisión & Línea de transmisión en comunicación serie. \\
+\hline
+TXD & \textit{Transmit Data} & Línea o pin de transmisión de datos del módulo A7670E-LASA en la comunicación serie con Arduino. \\
 \hline
 UART & \textit{Universal Asynchronous Receiver-Transmitter} & Comunicación serie usada conceptualmente entre microcontrolador y módem. \\
 \hline
@@ -362,7 +400,7 @@ ITU-T & \textit{International Telecommunication Union -- Telecommunication Stand
 \hline
 UNESCO & Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura & Sistema de clasificación científica empleado en el anexo de códigos UNESCO. \\
 \hline
-URL & \textit{Uniform Resource Locator} & Dirección usada para acceder a ThingSpeak, API o dashboard. \\
+URL & \textit{Uniform Resource Locator} & Dirección usada para acceder a ThingSpeak, API o \textit{dashboard}. \\
 \hline
 USB & \textit{Universal Serial Bus} & Interfaz utilizada para programar Arduino o conectar dispositivos. \\
 \hline
@@ -467,7 +505,7 @@ Estación B & Segunda estación remota implementada y montada siguiendo la arqui
 \hline
 \texttt{THINGSPEAK\_READ\_KEY\_A/B} & Clave de lectura del canal ThingSpeak de cada estación. \\
 \hline
-\texttt{THINGSPEAK\_API\_KEY} & Clave de escritura utilizada por el firmware de estación. Debe mantenerse fuera del repositorio público. \\
+\texttt{THINGSPEAK\_API\_KEY} & Clave de escritura utilizada por el \textit{firmware} de estación. Debe mantenerse fuera del repositorio público. \\
 \hline
 \texttt{POLL\_INTERVAL\_SECONDS} & Intervalo de consulta de ThingSpeak por parte de la Raspberry Pi. \\
 \hline
@@ -477,7 +515,7 @@ Estación B & Segunda estación remota implementada y montada siguiendo la arqui
 \hline
 \texttt{SOIL\_HIGH\_THRESHOLD} & Umbral superior de humedad usado para clasificar el suelo como húmedo. \\
 \hline
-\texttt{WEB\_REFRESH\_SECONDS} & Intervalo recomendado de actualización del dashboard. \\
+\texttt{WEB\_REFRESH\_SECONDS} & Intervalo recomendado de actualización del \textit{dashboard}. \\
 \hline
 \texttt{DATA\_STALE\_SECONDS} & Tiempo usado para decidir cuándo una lectura deja de considerarse reciente. \\
 \hline
