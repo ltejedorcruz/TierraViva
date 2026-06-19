@@ -21,6 +21,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Agricultura de precisión]
     Enfoque agrícola basado en medir variables del entorno y del cultivo para tomar decisiones más ajustadas que un riego fijo o manual.
 
+    \item[Agrolab Móstoles]
+    Entorno de agricultura urbana/periurbana situado en Móstoles, Madrid, utilizado en TierraViva para realizar una prueba funcional del prototipo fuera del entorno de laboratorio.
+
     \item[ALTER TABLE]
     Instrucción SQL utilizada para modificar la estructura de una tabla existente. En TierraViva se emplea en la estrategia de migración suave del esquema SQLite durante la evolución del prototipo.
 
@@ -68,6 +71,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Bus I2C]
     Bus de comunicación serie empleado para conectar sensores digitales con un microcontrolador. En TierraViva lo utilizan el BME280 y el BH1750.
+
+    \item[Campaña agronómica]
+    Evaluación prolongada de un sistema en condiciones reales de cultivo durante un periodo suficientemente amplio para estudiar comportamiento estacional, respuesta del cultivo y ajuste fino de riego. TierraViva no se presenta como campaña agronómica completa, sino como validación funcional del prototipo.
 
     \item[Canal descendente]
     Canal de comunicación desde el sistema de supervisión hacia la estación. En la versión actual de TierraViva no se implementa control descendente de riego.
@@ -218,6 +224,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[POST]
     Método HTTP utilizado para enviar datos a un servidor. En TierraViva se menciona en el contexto de publicación de telemetría o envío de información hacia plataformas compatibles con HTTP.
+
+    \item[Prueba funcional en entorno real]
+    Ensayo realizado fuera del montaje de laboratorio para comprobar que el prototipo mantiene su flujo principal de funcionamiento en un contexto de uso más próximo al previsto. En TierraViva se aplica a la prueba realizada en Agrolab Móstoles.
 
     \item[Publicación de telemetría]
     Envío de lecturas desde la estación hacia una plataforma externa. En TierraViva se realiza mediante HTTP sobre LTE hacia ThingSpeak.
@@ -528,7 +537,7 @@ Estación B & Segunda estación remota implementada y montada siguiendo la arqui
 \hline
 \texttt{relay\_state} & Estado del relé publicado por la estación: apagado o activo. \\
 \hline
-\texttt{system\_event} & Código de evento que informa sobre reposo, riego, error, modo seguro o cooldown. \\
+\texttt{system\_event} & Código de evento que informa sobre reposo, riego, error, modo seguro o \textit{cooldown}. \\
 \hline
 \texttt{debug\_code} & Código auxiliar de diagnóstico publicado por la estación. \\
 \hline
@@ -599,7 +608,7 @@ Los códigos publicados por la estación permiten interpretar el estado operativ
 \hline
 \texttt{400} & \texttt{system\_event} / \texttt{debug\_code} & Error relevante, normalmente asociado a sensores o lectura no válida. \\
 \hline
-\texttt{429} & \texttt{system\_event} / \texttt{debug\_code} & Riego bloqueado por cooldown. \\
+\texttt{429} & \texttt{system\_event} / \texttt{debug\_code} & Riego bloqueado por \textit{cooldown}. \\
 \hline
 \end{tabular}
 \caption{Códigos de estado y diagnóstico utilizados por TierraViva.}
