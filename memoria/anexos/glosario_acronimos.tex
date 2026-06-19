@@ -48,6 +48,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Backend]
     Parte del software que ejecuta la lógica interna del sistema. En TierraViva se ejecuta en la Raspberry Pi e incluye la ingesta de datos, SQLite y la API.
 
+    \item[Batería 12 V]
+    Fuente de alimentación principal utilizada para proporcionar energía a la estación y a la carga de actuación. En TierraViva alimenta el sistema de 12 V y sirve de entrada al regulador LM2596.
+
     \item[Baudio]
     Unidad asociada a la velocidad de señalización en una comunicación serie. En TierraViva se utiliza una comunicación a 9600 baudios entre Arduino y el módem para mejorar la estabilidad con SoftwareSerial.
 
@@ -74,6 +77,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[C/C++]
     Lenguajes utilizados en el entorno Arduino para desarrollar el \textit{firmware} de las estaciones. En TierraViva se emplean para implementar la lectura de sensores, la comunicación con el módem LTE y la lógica local de riego.
+
+    \item[Cable Dupont]
+    Cable de conexión utilizado habitualmente en prototipos electrónicos para unir pines de sensores, placas de desarrollo, protoboards y módulos auxiliares.
 
     \item[Campaña agronómica]
     Evaluación prolongada de un sistema en condiciones reales de cultivo durante un periodo suficientemente amplio para estudiar comportamiento estacional, respuesta del cultivo y ajuste fino de riego. TierraViva no se presenta como campaña agronómica completa, sino como validación funcional del prototipo.
@@ -225,6 +231,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[LTE]
     Tecnología de comunicación móvil utilizada por el módulo A7670E-LASA para proporcionar conectividad a la estación remota.
 
+    \item[Macarrón termorretráctil]
+    Material aislante que se contrae al aplicar calor y se utiliza para proteger uniones eléctricas, cables y soldaduras. En TierraViva se emplea como material auxiliar de aislamiento y protección mecánica.
+
     \item[Masa común]
     Referencia eléctrica compartida entre los distintos módulos del circuito. En TierraViva permite que Arduino, sensores, relé, regulador y módulo LTE interpreten correctamente las señales entre sí.
 
@@ -255,6 +264,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Nodo de supervisión]
     Equipo encargado de recoger, almacenar y mostrar información del sistema. En TierraViva este papel lo cumple la Raspberry Pi.
 
+    \item[Optoacoplador]
+    Componente que permite transmitir una señal entre dos partes de un circuito mediante aislamiento óptico. En TierraViva aparece integrado en el módulo relé para mejorar la separación entre la señal de control y la carga conmutada.
+
     \item[pH]
     Magnitud utilizada para expresar el carácter ácido o básico de una disolución. En TierraViva se menciona como posible variable futura, no implementada en el prototipo actual.
 
@@ -263,6 +275,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[POST]
     Método HTTP utilizado para enviar datos a un servidor. En TierraViva se menciona en el contexto de publicación de telemetría o envío de información hacia plataformas compatibles con HTTP.
+
+    \item[Protoboard]
+    Placa de pruebas sin soldadura utilizada para realizar montajes temporales y validar conexiones durante el desarrollo del prototipo.
 
     \item[Prueba funcional en entorno real]
     Ensayo realizado fuera del montaje de laboratorio para comprobar que el prototipo mantiene su flujo principal de funcionamiento en un contexto de uso más próximo al previsto. En TierraViva se aplica a la prueba realizada en Agrolab Móstoles.
@@ -392,6 +407,8 @@ APN & \textit{Access Point Name} & Parámetro necesario para que el módulo LTE 
 \hline
 ASGI & \textit{Asynchronous Server Gateway Interface} & Interfaz utilizada por Uvicorn para ejecutar FastAPI. \\
 \hline
+ASIN & \textit{Amazon Standard Identification Number} & Identificador comercial utilizado por Amazon para referenciar productos. En TierraViva se emplea para documentar la trazabilidad de algunos componentes adquiridos. \\
+\hline
 AT & \textit{Attention Command} & Comandos enviados al módem A7670E-LASA. \\
 \hline
 BLE & \textit{Bluetooth Low Energy} & Tecnología inalámbrica de bajo consumo estudiada en el contexto general de comunicaciones IoT. \\
@@ -407,6 +424,8 @@ DAFO & Debilidades, Amenazas, Fortalezas y Oportunidades & Herramienta de análi
 DC & \textit{Direct Current} & Corriente continua usada en la alimentación de 12 V y 5 V del prototipo. \\
 \hline
 ET & Especificación temporal y operativa & Identificador utilizado para los parámetros temporales y criterios operativos del sistema, como frecuencias de lectura, envío de telemetría, tiempo máximo de bomba y estado seguro. \\
+\hline
+GB & \textit{Gigabyte} & Unidad de capacidad utilizada para indicar la memoria de la Raspberry Pi 5 empleada en el prototipo. \\
 \hline
 GND & \textit{Ground} & Referencia eléctrica común del circuito. \\
 \hline
@@ -513,6 +532,8 @@ USB & \textit{Universal Serial Bus} & Interfaz utilizada para programar Arduino 
 WAL & \textit{Write-Ahead Logging} & Modo de SQLite activado para mejorar la gestión de escrituras en la base de datos local. \\
 \hline
 WiFi & \textit{Wireless Fidelity} & Red inalámbrica local considerada como alternativa, pero no utilizada por las estaciones remotas. \\
+\hline
+4G & Cuarta generación de comunicaciones móviles & Familia de tecnologías móviles dentro de la que se encuadra LTE, utilizada por el módulo A7670E-LASA para la publicación de telemetría. \\
 \hline
 \caption{Acrónimos empleados en la memoria de TierraViva.}
 \label{tab:acronimos_tierraviva}\\
