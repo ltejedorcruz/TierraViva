@@ -24,6 +24,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[API Key]
     Clave utilizada para leer o escribir datos en un servicio. En TierraViva se emplean claves de ThingSpeak, que no deben publicarse en la memoria ni en el repositorio.
 
+    \item[AQUASTAT]
+    Base de datos internacional sobre agua y agricultura utilizada como fuente para contextualizar el peso del uso agrícola en las extracciones mundiales de agua.
+    
     \item[Arduino UNO]
     Placa de microcontrolador utilizada como unidad de control de la estación remota. Lee sensores, gestiona el módem LTE y controla el relé.
 
@@ -197,8 +200,6 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 \scriptsize
 
 \begin{longtable}{|p{0.14\textwidth}|p{0.30\textwidth}|p{0.46\textwidth}|}
-\caption{Acrónimos empleados en la memoria de TierraViva.}
-\label{tab:acronimos_tierraviva}\\
 \hline
 \rowcolor{gray!20}
 \textbf{Acrónimo} & \textbf{Significado} & \textbf{Uso en TierraViva} \\
@@ -272,6 +273,8 @@ MQTT & \textit{Message Queuing Telemetry Transport} & Protocolo publicación/sus
 \hline
 NB-IoT & \textit{Narrowband Internet of Things} & Tecnología celular LPWAN considerada dentro del contexto de comunicaciones IoT. \\
 \hline
+ODS & Objetivos de Desarrollo Sostenible & Marco de Naciones Unidas utilizado para relacionar TierraViva con agricultura sostenible, eficiencia hídrica, consumo responsable y adaptación climática. \\
+\hline
 PCB & \textit{Printed Circuit Board} & Placa de circuito impreso; no se fabrica en la versión actual, pero se plantea como posible mejora de robustez. \\
 \hline
 REST & \textit{Representational State Transfer} & Estilo de interfaz usado por la API HTTP local. \\
@@ -312,7 +315,8 @@ WAL & \textit{Write-Ahead Logging} & Modo de SQLite activado para mejorar la ges
 \hline
 WiFi & \textit{Wireless Fidelity} & Red inalámbrica local considerada como alternativa, pero no utilizada por las estaciones remotas. \\
 \hline
-
+\caption{Acrónimos empleados en la memoria de TierraViva.}
+\label{tab:acronimos_tierraviva}\\
 \end{longtable}
 
 \normalsize
@@ -325,8 +329,6 @@ Además de los términos generales anteriores, en la memoria se utilizan algunos
 \scriptsize
 
 \begin{longtable}{|p{0.30\textwidth}|p{0.56\textwidth}|}
-\caption{Términos específicos utilizados en TierraViva.}
-\label{tab:terminos_especificos_tierraviva}\\
 \hline
 \rowcolor{gray!20}
 \textbf{Término} & \textbf{Descripción} \\
@@ -424,7 +426,8 @@ Estación B & Segunda estación prevista para ampliación o validación multiest
 \hline
 \texttt{DATA\_STALE\_SECONDS} & Tiempo usado para decidir cuándo una lectura deja de considerarse reciente. \\
 \hline
-
+\caption{Términos específicos utilizados en TierraViva.}
+\label{tab:terminos_especificos_tierraviva}
 \end{longtable}
 
 \normalsize
