@@ -102,6 +102,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Gateway]
     Equipo que actúa como pasarela entre dispositivos y una red externa. Algunas tecnologías como LoRaWAN pueden requerir infraestructura de gateway.
 
+    \item[GET]
+    Método HTTP utilizado para solicitar o leer un recurso desde un servidor. En TierraViva se menciona como una de las formas habituales de interacción con interfaces HTTP.
+
     \item[GY-302]
     Módulo comercial basado en el sensor BH1750 para medir luminosidad ambiente.
 
@@ -143,6 +146,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Plataforma cloud]
     Servicio remoto que permite recibir, almacenar o consultar datos. En TierraViva, ThingSpeak actúa como plataforma cloud de telemetría.
+
+    \item[POST]
+    Método HTTP utilizado para enviar datos a un servidor. En TierraViva se menciona en el contexto de publicación de telemetría o envío de información hacia plataformas compatibles con HTTP.
 
     \item[Publicación de telemetría]
     Envío de lecturas desde la estación hacia una plataforma externa. En TierraViva se realiza mediante HTTP sobre LTE hacia ThingSpeak.
@@ -253,6 +259,8 @@ I2C & \textit{Inter-Integrated Circuit} & Bus usado por los sensores BME280 y BH
 \hline
 IDE & \textit{Integrated Development Environment} & Entorno utilizado para programar y cargar el firmware en Arduino. \\
 \hline
+IEEE & \textit{Institute of Electrical and Electronics Engineers} & Organización profesional y editorial citada a través de \textit{IEEE Sensors Journal} en el estado del arte sobre riego inteligente e IoT. \\
+\hline
 IoT & \textit{Internet of Things} & Enfoque general del sistema TierraViva. \\
 \hline
 IP & \textit{Internet Protocol} & Dirección utilizada para acceder al dashboard o a la API de la Raspberry Pi. \\
@@ -267,25 +275,35 @@ LPWAN & \textit{Low-Power Wide-Area Network} & Familia de redes IoT de bajo cons
 \hline
 LTE & \textit{Long Term Evolution} & Tecnología móvil utilizada por el módulo A7670E-LASA. \\
 \hline
+LTE-M & \textit{Long Term Evolution for Machines} & Tecnología celular orientada a comunicaciones IoT con mayor movilidad y menor latencia que NB-IoT. \\
+\hline
 M2M & \textit{Machine to Machine} & Comunicación entre dispositivos, relevante en protocolos como MQTT. \\
 \hline
 MQTT & \textit{Message Queuing Telemetry Transport} & Protocolo publicación/suscripción estudiado como alternativa a HTTP. \\
 \hline
 NB-IoT & \textit{Narrowband Internet of Things} & Tecnología celular LPWAN considerada dentro del contexto de comunicaciones IoT. \\
 \hline
+OASIS & \textit{Organization for the Advancement of Structured Information Standards} & Organización de estandarización responsable de la especificación MQTT. \\
+\hline
 ODS & Objetivos de Desarrollo Sostenible & Marco de Naciones Unidas utilizado para relacionar TierraViva con agricultura sostenible, eficiencia hídrica, consumo responsable y adaptación climática. \\
 \hline
 PCB & \textit{Printed Circuit Board} & Placa de circuito impreso; no se fabrica en la versión actual, pero se plantea como posible mejora de robustez. \\
 \hline
+PWM & \textit{Pulse Width Modulation} & Técnica de modulación utilizada para generar señales de control mediante variación del ciclo de trabajo. \\
+\hline
 REST & \textit{Representational State Transfer} & Estilo de interfaz usado por la API HTTP local. \\
 \hline
 RF & Requisito funcional & Identificador de requisitos que describen funciones del sistema. \\
+\hline
+RFC & \textit{Request for Comments} & Serie de documentos técnicos utilizados para especificar estándares y protocolos de Internet. \\
 \hline
 RNF & Requisito no funcional & Identificador de requisitos de calidad, robustez, coste o reproducibilidad. \\
 \hline
 RSSI & \textit{Received Signal Strength Indicator} & Indicador de intensidad de señal móvil calculado a partir del valor CSQ. \\
 \hline
 RX & Recepción & Línea de recepción en comunicación serie. \\
+\hline
+SBC & \textit{Single-Board Computer} & Computador de placa única, como Raspberry Pi, utilizado en funciones de supervisión, almacenamiento, API o visualización. \\
 \hline
 SCL & \textit{Serial Clock} & Línea de reloj del bus I2C. \\
 \hline
@@ -304,6 +322,8 @@ TX & Transmisión & Línea de transmisión en comunicación serie. \\
 UART & \textit{Universal Asynchronous Receiver-Transmitter} & Comunicación serie usada conceptualmente entre microcontrolador y módem. \\
 \hline
 UDP & \textit{User Datagram Protocol} & Protocolo de transporte asociado a CoAP en el estado del arte. \\
+\hline
+ITU-T & \textit{International Telecommunication Union -- Telecommunication Standardization Sector} & Organismo de normalización citado por la recomendación Y.2060 para definir el concepto de IoT. \\
 \hline
 UNESCO & Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura & Sistema de clasificación científica empleado en el anexo de códigos UNESCO. \\
 \hline
@@ -465,7 +485,3 @@ Los códigos publicados por la estación permiten interpretar el estado operativ
 \caption{Códigos de estado y diagnóstico utilizados por TierraViva.}
 \label{tab:codigos_estado_diagnostico_glosario}
 \end{table}
-
-\section{Conclusión}
-
-Este glosario permite mantener una nomenclatura común entre la memoria, el firmware, ThingSpeak, SQLite, la API y el dashboard. Su función es servir como consulta rápida: las definiciones detalladas, la instalación, los endpoints y la interpretación de usuario se mantienen en sus anexos correspondientes.
