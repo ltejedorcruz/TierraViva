@@ -35,21 +35,21 @@ D01 & Orientar TierraViva a riego inteligente basado en IoT. & Permitía combina
 \hline
 D02 & Utilizar Arduino UNO como controlador de estación. & Es una plataforma suficiente para leer sensores, controlar el relé y comunicarse con el módem mediante serie, manteniendo baja la complejidad de la estación. & La estación se mantiene simple, reproducible y adecuada para pruebas por bloques. \\
 \hline
-D03 & Usar Raspberry Pi como nodo local de supervisión. & La Raspberry Pi aporta capacidad para ejecutar ingesta, SQLite, API y dashboard, sin necesidad de situarla físicamente en cada estación. & Se separa la estación de campo del sistema de supervisión y visualización. \\
+D03 & Usar Raspberry Pi como nodo local de supervisión. & La Raspberry Pi aporta capacidad para ejecutar ingesta, SQLite, API y \textit{dashboard}, sin necesidad de situarla físicamente en cada estación. & Se separa la estación de campo del sistema de supervisión y visualización. \\
 \hline
 D04 & Emplear conectividad LTE mediante A7670E-LASA. & El sistema está pensado para parcelas o entornos donde no siempre existe red WiFi local disponible. & La estación puede publicar telemetría usando infraestructura móvil. \\
 \hline
-D05 & Utilizar ThingSpeak como capa intermedia de telemetría. & Permite recibir datos IoT y consultarlos posteriormente sin desarrollar una plataforma cloud propia. & Reduce tiempo de desarrollo y centra el esfuerzo en integración, validación y visualización. \\
+D05 & Utilizar ThingSpeak como capa intermedia de telemetría. & Permite recibir datos IoT y consultarlos posteriormente sin desarrollar una plataforma \textit{cloud} propia. & Reduce tiempo de desarrollo y centra el esfuerzo en integración, validación y visualización. \\
 \hline
 D06 & Mantener la decisión de riego en Arduino. & La actuación sobre agua debe poder ejecutarse de forma segura aunque falle temporalmente la comunicación o la supervisión. & La estación conserva autonomía local y no depende de órdenes remotas para actuar o mantenerse apagada. \\
 \hline
-D07 & No implementar control remoto descendente en la versión actual. & Añadir órdenes remotas implica seguridad, sincronización, gestión de comandos, latencia y riesgo de actuación no deseada. & El dashboard se limita a supervisión; no envía órdenes de riego a la estación. \\
+D07 & No implementar control remoto descendente en la versión actual. & Añadir órdenes remotas implica seguridad, sincronización, gestión de comandos, latencia y riesgo de actuación no deseada. & El \textit{dashboard} se limita a supervisión; no envía órdenes de riego a la estación. \\
 \hline
 D08 & Usar SQLite como base de datos local. & Es una solución ligera, basada en fichero y suficiente para el volumen de datos del prototipo. & Permite conservar histórico local sin desplegar un servidor de base de datos externo. \\
 \hline
-D09 & Implementar la API con FastAPI. & Facilita exponer datos estructurados mediante HTTP y conectar el backend con el dashboard. & Se separan almacenamiento, lógica de consulta e interfaz web. \\
+D09 & Implementar la API con FastAPI. & Facilita exponer datos estructurados mediante HTTP y conectar el \textit{backend} con el \textit{dashboard}. & Se separan almacenamiento, lógica de consulta e interfaz web. \\
 \hline
-D10 & Crear un dashboard web local. & Permite consultar el sistema desde un navegador sin desarrollar una aplicación móvil específica. & Mejora la usabilidad y permite visualizar lecturas, estados, gráficas e histórico. \\
+D10 & Crear un \textit{dashboard} web local. & Permite consultar el sistema desde un navegador sin desarrollar una aplicación móvil específica. & Mejora la usabilidad y permite visualizar lecturas, estados, gráficas e histórico. \\
 \hline
 D11 & Validar el relé antes de conectar la bomba. & La actuación física introduce riesgos eléctricos e hidráulicos que conviene aislar durante las primeras pruebas. & Se establece una secuencia de validación más segura: sensores, comunicación, relé sin carga y bomba controlada. \\
 \hline
@@ -75,15 +75,15 @@ Durante el desarrollo se valoraron alternativas que finalmente no se incorporaro
 \hline
 Uso exclusivo de WiFi & Dependía de disponer de una red local cercana a la parcela o huerto. & Se adopta conectividad LTE para las estaciones remotas. \\
 \hline
-LoRa/LoRaWAN como comunicación principal & Requería infraestructura adicional, gateway o cobertura LoRaWAN adecuada, aumentando la complejidad del prototipo. & Se prioriza LTE por viabilidad de integración y disponibilidad de red móvil. \\
+LoRa/LoRaWAN como comunicación principal & Requería infraestructura adicional, \textit{gateway} o cobertura LoRaWAN adecuada, aumentando la complejidad del prototipo. & Se prioriza LTE por viabilidad de integración y disponibilidad de red móvil. \\
 \hline
 Raspberry Pi como controlador directo del riego & Obliga a mantener conexión fiable con la estación y complica la actuación segura ante fallos. & La decisión de riego queda en Arduino. \\
 \hline
-Control remoto desde dashboard & Añade gestión de órdenes, autenticación, seguridad, sincronización y prevención de activaciones no deseadas. & El dashboard se mantiene como herramienta de monitorización. \\
+Control remoto desde \textit{dashboard} & Añade gestión de órdenes, autenticación, seguridad, sincronización y prevención de activaciones no deseadas. & El \textit{dashboard} se mantiene como herramienta de monitorización. \\
 \hline
 Base de datos externa o servidor remoto & Introduce dependencias de red, configuración y mantenimiento innecesarias para el prototipo. & Se emplea SQLite local en Raspberry Pi. \\
 \hline
-Aplicación móvil propia & Aumenta el alcance sin ser necesaria para validar la arquitectura principal. & Se implementa un dashboard web accesible desde navegador. \\
+Aplicación móvil propia & Aumenta el alcance sin ser necesaria para validar la arquitectura principal. & Se implementa un \textit{dashboard} web accesible desde navegador. \\
 \hline
 Modelo predictivo o inteligencia artificial & Requiere histórico suficiente, entrenamiento y validación experimental prolongada. & Se emplea lógica basada en umbrales y se deja la predicción como línea futura. \\
 \hline
@@ -109,7 +109,7 @@ Algunas decisiones no se limitaron a elegir un componente, sino que modificaron 
 \rowcolor{gray!20}
 \textbf{Cambio} & \textbf{Planteamiento inicial} & \textbf{Enfoque final} \\
 \hline
-Papel de la Raspberry Pi & Posible elemento central de decisión y supervisión. & Nodo local de ingesta, almacenamiento, API y dashboard. \\
+Papel de la Raspberry Pi & Posible elemento central de decisión y supervisión. & Nodo local de ingesta, almacenamiento, API y \textit{dashboard}. \\
 \hline
 Papel de ThingSpeak & Posible plataforma central de gestión. & Capa intermedia de telemetría y consulta. \\
 \hline
@@ -117,7 +117,7 @@ Papel de Arduino & Nodo de lectura de sensores. & Estación autónoma con lectur
 \hline
 Comunicación de campo & Dependencia potencial de red local o infraestructura específica. & Publicación LTE/HTTP desde la estación. \\
 \hline
-Actuación de riego & Posible control externo desde un nodo supervisor. & Control local temporizado desde el firmware. \\
+Actuación de riego & Posible control externo desde un nodo supervisor. & Control local temporizado desde el \textit{firmware}. \\
 \hline
 Validación & Comprobación directa del sistema completo. & Validación incremental por bloques para aislar fallos. \\
 \hline
@@ -133,7 +133,7 @@ El seguimiento del proyecto ha permitido extraer varias lecciones técnicas:
 \begin{itemize}
     \item En un sistema IoT físico, la arquitectura debe diseñarse desde el principio pensando en fallos de alimentación, sensores y comunicación.
     \item La actuación sobre una bomba no debe depender exclusivamente de una orden remota ni de una conexión continua.
-    \item Separar estación, telemetría, almacenamiento, API y dashboard facilita la depuración del sistema.
+    \item Separar estación, telemetría, almacenamiento, API y \textit{dashboard} facilita la depuración del sistema.
     \item ThingSpeak resulta útil como plataforma intermedia, pero debe tratarse como una dependencia externa y no como núcleo de control.
     \item La conectividad LTE aporta valor en entornos sin WiFi local, pero exige cuidar alimentación, antena, SIM y configuración APN.
     \item La validación por bloques reduce errores acumulados y permite localizar mejor el origen de cada fallo.
@@ -141,6 +141,6 @@ El seguimiento del proyecto ha permitido extraer varias lecciones técnicas:
 
 \section{Conclusión}
 
-El seguimiento del proyecto muestra que TierraViva ha evolucionado mediante decisiones técnicas sucesivas orientadas a mantener un equilibrio entre ambición, seguridad, reproducibilidad y alcance. Esta arquitectura no busca maximizar funcionalidades, sino construir un prototipo coherente y que funcione: estaciones autónomas que miden y actúan localmente, ThingSpeak como telemetría, Raspberry Pi como nodo de supervisión, SQLite como almacenamiento local y dashboard web como interfaz de consulta.
+El seguimiento del proyecto muestra que TierraViva ha evolucionado mediante decisiones técnicas sucesivas orientadas a mantener un equilibrio entre ambición, seguridad, reproducibilidad y alcance. Esta arquitectura no busca maximizar funcionalidades, sino construir un prototipo coherente y que funcione: estaciones autónomas que miden y actúan localmente, ThingSpeak como telemetría, Raspberry Pi como nodo de supervisión, SQLite como almacenamiento local y \textit{dashboard} web como interfaz de consulta.
 
 Este anexo justifica no solo qué se ha construido, sino por qué se ha construido de esa forma y qué alternativas quedaron fuera de la versión actual.
