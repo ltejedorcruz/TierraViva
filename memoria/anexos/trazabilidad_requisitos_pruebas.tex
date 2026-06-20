@@ -41,11 +41,11 @@ La Tabla~\ref{tab:trazabilidad_rf} relaciona los requisitos funcionales del sist
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Requisito} & \TVHead{Bloque responsable} & \TVHead{Pruebas} & \TVHead{Evidencia de validación} & \TVHead{Estado} \\
 \hline
-RF-01 & Medición de humedad del suelo & Sensor capacitivo de humedad, entrada \texttt{A0} y firmware de estación. & P04, P14, P16 & Lectura analógica variable, conversión a porcentaje y publicación de humedad de suelo en telemetría. & Validado \\
+RF-01 & Medición de humedad del suelo & Sensor capacitivo de humedad, entrada \texttt{A0} y \textit{firmware} de estación. & P04, P14, P16 & Lectura analógica variable, conversión a porcentaje y publicación de humedad de suelo en telemetría. & Validado \\
 \hline
-RF-02 & Medición ambiental & Sensor BME280, bus I2C y firmware de adquisición. & P02, P16 & Detección I2C del BME280 y lectura de temperatura, humedad relativa y presión. & Validado \\
+RF-02 & Medición ambiental & Sensor BME280, bus I2C y \textit{firmware} de adquisición. & P02, P16 & Detección I2C del BME280 y lectura de temperatura, humedad relativa y presión. & Validado \\
 \hline
-RF-03 & Medición de luminosidad & Sensor BH1750/GY-302, bus I2C y firmware de adquisición. & P03, P16 & Detección I2C del BH1750 y lectura de luminosidad en lux. & Validado \\
+RF-03 & Medición de luminosidad & Sensor BH1750/GY-302, bus I2C y \textit{firmware} de adquisición. & P03, P16 & Detección I2C del BH1750 y lectura de luminosidad en lux. & Validado \\
 \hline
 RF-04 & Envío remoto de telemetría & A7670E-LASA, LTE, comandos AT, HTTP y ThingSpeak. & P05, P06, P16, P17 & Registro LTE, petición HTTP y entrada visible en el canal ThingSpeak correspondiente. & Validado \\
 \hline
@@ -53,15 +53,15 @@ RF-05 & Identificación de estación & Configuración de estación, canales Thin
 \hline
 RF-06 & Almacenamiento histórico & Raspberry Pi, proceso de ingesta, \texttt{database.py} y SQLite. & P07, P08, P16 & Inserción de lecturas en la tabla local y conservación de histórico consultable. & Validado \\
 \hline
-RF-07 & Visualización del estado & FastAPI y dashboard web. & P09, P10, P16, P17 & Dashboard con última lectura, estado de conexión, gráficas, histórico y selección de estación. & Validado \\
+RF-07 & Visualización del estado & FastAPI y \textit{dashboard} web. & P09, P10, P16, P17 & \textit{Dashboard} con última lectura, estado de conexión, gráficas, histórico y selección de estación. & Validado \\
 \hline
-RF-08 & Decisión local de riego & Firmware Arduino, regla de humedad, confirmación de sequedad, cooldown y modo seguro. & P13, P14, P16 & Comportamiento de decisión local comprobado ante suelo seco, cooldown y lectura inválida. & Validado \\
+RF-08 & Decisión local de riego & \textit{Firmware} Arduino, regla de humedad, confirmación de sequedad, \textit{cooldown} y modo seguro. & P13, P14, P16 & Comportamiento de decisión local comprobado ante suelo seco, \textit{cooldown} y lectura inválida. & Validado \\
 \hline
 RF-09 & Actuación local sobre el riego & Pin \texttt{D7}, módulo relé, bomba de 12 V y función temporizada de actuación. & P11, P12, P13, P16, P17 & Relé conmutado, bomba activada durante el tiempo configurado y apagado explícito al finalizar. & Validado \\
 \hline
-RF-10 & Publicación de estado de actuación & Firmware de estación, campos \texttt{field6}, \texttt{field7}, \texttt{field8}, ThingSpeak e ingesta. & P06, P07, P08, P10, P16 & Publicación de estado del relé, evento de sistema y código auxiliar de diagnóstico. & Validado \\
+RF-10 & Publicación de estado de actuación & \textit{Firmware} de estación, campos \texttt{field6}, \texttt{field7}, \texttt{field8}, ThingSpeak e ingesta. & P06, P07, P08, P10, P16 & Publicación de estado del relé, evento de sistema y código auxiliar de diagnóstico. & Validado \\
 \hline
-RF-11 & Seguridad de funcionamiento & Firmware, relé apagado por defecto, límite temporal, cooldown, modo seguro y control local. & P11, P12, P13, P14, P15, P16, P17 & Bomba apagada ante arranque, lectura inválida, cooldown, pérdida de comunicación o finalización del riego. & Validado \\
+RF-11 & Seguridad de funcionamiento & \textit{Firmware}, relé apagado por defecto, límite temporal, \textit{cooldown}, modo seguro y control local. & P11, P12, P13, P14, P15, P16, P17 & Bomba apagada ante arranque, lectura inválida, \textit{cooldown}, pérdida de comunicación o finalización del riego. & Validado \\
 \hline
 \end{tabular}%
 }
@@ -89,13 +89,13 @@ Los requisitos no funcionales no siempre se validan mediante una única prueba. 
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Requisito} & \TVHead{Criterio de cumplimiento} & \TVHead{Pruebas / anexos} & \TVHead{Estado} \\
 \hline
-RNF-01 & Modularidad & El sistema está separado en estación, ThingSpeak, Raspberry Pi, SQLite, API y dashboard. & P16, arquitectura, diagramas de flujo & Validado \\
+RNF-01 & Modularidad & El sistema está separado en estación, ThingSpeak, Raspberry Pi, SQLite, API y \textit{dashboard}. & P16, arquitectura, diagramas de flujo & Validado \\
 \hline
-RNF-02 & Bajo coste & Se emplean módulos comerciales accesibles y se documenta el coste del prototipo. & Anexo de materiales, plan de recursos & Cubierto por documentación \\
+RNF-02 & Bajo coste & Se emplean módulos comerciales accesibles y se documenta el coste del prototipo. & Anexos~\ref{anexo:materiales} y~\ref{anexo:plan_recursos} & Cubierto por documentación \\
 \hline
 RNF-03 & Reproducibilidad & El montaje, instalación, configuración, librerías, esquemas y pruebas están documentados. & Manual de instalación, esquemas eléctricos, plan de pruebas & Validado \\
 \hline
-RNF-04 & Facilidad de depuración & El sistema permite probar por separado sensores, LTE, ThingSpeak, Raspberry, API, dashboard y actuación. & P01--P10, P16 & Validado \\
+RNF-04 & Facilidad de depuración & El sistema permite probar por separado sensores, LTE, ThingSpeak, Raspberry, API, \textit{dashboard} y actuación. & P01--P10, P16 & Validado \\
 \hline
 RNF-05 & Consumo razonable & Se evita actuación indefinida y se emplean ciclos configurables; no se realiza optimización energética completa. & ET-01, ET-02, ET-05, trabajos futuros & Validado con limitación \\
 \hline
@@ -103,7 +103,7 @@ RNF-06 & Tolerancia a fallos & Ante fallos de lectura, comunicación o actuació
 \hline
 RNF-07 & Escalabilidad & La arquitectura admite estaciones diferenciadas mediante identificadores y canales separados. & P07, P08, P10, P16 & Validado \\
 \hline
-RNF-08 & Claridad de visualización & El dashboard diferencia lecturas, estados, frescura del dato, gráficas e histórico. & P10, manual de usuario & Validado \\
+RNF-08 & Claridad de visualización & El \textit{dashboard} diferencia lecturas, estados, frescura del dato, gráficas e histórico. & P10, manual de usuario & Validado \\
 \hline
 RNF-09 & Adecuación académica & El alcance prioriza funciones verificables y evita presentar como cerradas funcionalidades industriales futuras. & Plan de pruebas, conclusiones, trabajos futuros & Cubierto por diseño \\
 \hline
@@ -115,7 +115,7 @@ RNF-09 & Adecuación académica & El alcance prioriza funciones verificables y e
 
 \section{Trazabilidad de especificaciones temporales y operativas}
 
-Las especificaciones temporales y operativas definen el comportamiento esperado del sistema durante su ejecución. Algunas se comprueban directamente mediante pruebas de firmware o dashboard; otras se documentan como parámetros configurables del prototipo.
+Las especificaciones temporales y operativas definen el comportamiento esperado del sistema durante su ejecución. Algunas se comprueban directamente mediante pruebas de \textit{firmware} o \textit{dashboard}; otras se documentan como parámetros configurables del prototipo.
 
 \begin{table}[H]
 \centering
@@ -133,19 +133,19 @@ Las especificaciones temporales y operativas definen el comportamiento esperado 
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Parámetro} & \TVHead{Valor / criterio} & \TVHead{Pruebas} & \TVHead{Evidencia de validación} \\
 \hline
-ET-01 & Periodo de lectura de sensores & Configurable & P02, P03, P04, P16 & Ciclos de adquisición observables en monitor serie o firmware. \\
+ET-01 & Periodo de lectura de sensores & Configurable & P02, P03, P04, P16 & Ciclos de adquisición observables en monitor serie o \textit{firmware}. \\
 \hline
 ET-02 & Frecuencia de envío de telemetría & Configurable & P06, P16 & Publicaciones sucesivas en ThingSpeak. \\
 \hline
-ET-03 & Frecuencia de actualización del dashboard & 3--5 s & P10 & Dashboard actualizando lecturas y estado sin recarga manual. \\
+ET-03 & Frecuencia de actualización del \textit{dashboard} & 3--5 s & P10 & \textit{Dashboard} actualizando lecturas y estado sin recarga manual. \\
 \hline
 ET-04 & Intervalo de evaluación local & Configurable & P13, P14 & Evaluación periódica de sensores, humedad y condiciones de riego. \\
 \hline
-ET-05 & Tiempo máximo de bomba activa & Configurable & P12, P13, P17 & Bomba apagada tras el intervalo definido por firmware. \\
+ET-05 & Tiempo máximo de bomba activa & Configurable & P12, P13, P17 & Bomba apagada tras el intervalo definido por \textit{firmware}. \\
 \hline
-ET-06 & Tiempo mínimo entre riegos & Configurable & P13 & Segundo riego bloqueado durante cooldown. \\
+ET-06 & Tiempo mínimo entre riegos & Configurable & P13 & Segundo riego bloqueado durante \textit{cooldown}. \\
 \hline
-ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & P10, P15 & Dashboard/API identifican datos obsoletos u offline. \\
+ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & P10, P15 & \textit{Dashboard}/API identifican datos obsoletos u \textit{offline}. \\
 \hline
 ET-08 & Estado seguro por defecto & Bomba apagada & P11, P14, P15, P17 & Relé apagado al arrancar o ante condición no verificable. \\
 \hline
@@ -191,17 +191,19 @@ P08 & Almacenamiento en SQLite. & RF-05, RF-06, RNF-07 & Integración \\
 \hline
 P09 & API local FastAPI. & RF-07, RNF-04, RNF-08 & Integración \\
 \hline
-P10 & Dashboard web. & RF-07, RF-10, RNF-08, ET-03, ET-07 & Aceptación \\
+P10 & \textit{Dashboard} web. & RF-07, RF-10, RNF-08, ET-03, ET-07 & Aceptación \\
 \hline
 P11 & Relé sin bomba. & RF-09, RF-11, ET-08 & Seguridad \\
 \hline
 P12 & Bomba con activación temporizada. & RF-09, RF-11, ET-05 & Seguridad \\
 \hline
-P13 & Cooldown entre riegos. & RF-08, RF-09, RF-11, ET-06 & Seguridad \\
+P13 & \textit{Cooldown} entre riegos. & RF-08, RF-09, RF-11, ET-06 & Seguridad \\
 \hline
 P14 & Lectura inválida de humedad. & RF-01, RF-08, RF-11, ET-09 & Seguridad \\
 \hline
 P15 & Pérdida temporal de comunicación. & RF-04, RF-11, RNF-06, ET-07, ET-10 & Resiliencia \\
+\hline
+P16 & Integración completa del sistema. & RF-01--RF-11, RNF-01, RNF-04, RNF-06, RNF-07, ET-01, ET-02, ET-04 & Integración \\
 \hline
 P17 & Prueba funcional en entorno real en Agrolab Móstoles. & RF-04, RF-07, RF-09, RF-11, RNF-06, RNF-08, ET-05, ET-08, ET-10 & Entorno real \\
 \hline
@@ -230,11 +232,11 @@ RF-04 & Sin telemetría remota no existe supervisión del sistema. & Publicació
 \hline
 RF-06 & Sin histórico local no puede analizarse la evolución del prototipo. & Inserción comprobada en SQLite. \\
 \hline
-RF-08 & La decisión local define cuándo se actúa sobre el riego. & Prueba de umbral, confirmación, cooldown y dato inválido. \\
+RF-08 & La decisión local define cuándo se actúa sobre el riego. & Prueba de umbral, confirmación, \textit{cooldown} y dato inválido. \\
 \hline
 RF-09 & La actuación física introduce riesgo hidráulico y eléctrico. & Prueba con relé y bomba temporizada. \\
 \hline
-RF-11 & Evita activaciones indefinidas o peligrosas. & Relé apagado ante arranque, fallo, cooldown o error. \\
+RF-11 & Evita activaciones indefinidas o peligrosas. & Relé apagado ante arranque, fallo, \textit{cooldown} o error. \\
 \hline
 RNF-06 & La tolerancia a fallos sostiene la robustez del prototipo. & Prueba ante fallo de comunicación y lectura inválida. \\
 \hline
@@ -280,6 +282,6 @@ Ensayo en Agrolab Móstoles & El prototipo se valida funcionalmente en un entorn
 
 La matriz de trazabilidad muestra que los requisitos definidos para TierraViva están cubiertos por pruebas concretas, bloques técnicos identificables y evidencias de validación. Esta relación refuerza la defensa técnica del proyecto, porque permite seguir el recorrido completo desde la definición del requisito hasta su comprobación experimental.
 
-Los requisitos funcionales quedan cubiertos mediante pruebas de sensórica, comunicación LTE, ThingSpeak, Raspberry Pi, SQLite, API, dashboard y actuación local. Los requisitos no funcionales se justifican mediante la arquitectura modular, la documentación de montaje, la estrategia de pruebas y el comportamiento seguro ante fallos. Las especificaciones temporales y operativas quedan relacionadas con pruebas de ciclos, publicación, dashboard, cooldown, actuación temporizada y estado seguro.
+Los requisitos funcionales quedan cubiertos mediante pruebas de sensórica, comunicación LTE, ThingSpeak, Raspberry Pi, SQLite, API, \textit{dashboard} y actuación local. Los requisitos no funcionales se justifican mediante la arquitectura modular, la documentación de montaje, la estrategia de pruebas y el comportamiento seguro ante fallos. Las especificaciones temporales y operativas quedan relacionadas con pruebas de ciclos, publicación, \textit{dashboard}, \textit{cooldown}, actuación temporizada y estado seguro.
 
 En conjunto, la trazabilidad confirma que TierraViva no se valida únicamente por descripción, sino mediante una relación explícita entre requisitos, implementación, pruebas y evidencias.
