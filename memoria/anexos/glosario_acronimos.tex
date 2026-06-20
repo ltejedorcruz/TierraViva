@@ -51,6 +51,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Batería 12 V]
     Fuente de alimentación principal utilizada para proporcionar energía a la estación y a la carga de actuación. En TierraViva alimenta el sistema de 12 V y sirve de entrada al regulador LM2596.
 
+    \item[Bash]
+    Intérprete de comandos utilizado en sistemas Linux para ejecutar instrucciones y automatizar tareas. En TierraViva se emplea en el script \texttt{tierraviva.sh} para instalación, arranque, parada, estado y consulta de logs.
+
     \item[Baudio]
     Unidad asociada a la velocidad de señalización en una comunicación serie. En TierraViva se utiliza una comunicación a 9600 baudios entre Arduino y el módem para mejorar la estabilidad con SoftwareSerial.
 
@@ -192,8 +195,17 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[GET]
     Método HTTP utilizado para solicitar o leer un recurso desde un servidor. En TierraViva se menciona como una de las formas habituales de interacción con interfaces HTTP.
 
+    \item[Git]
+    Sistema de control de versiones utilizado para registrar cambios en el código fuente y facilitar la organización del desarrollo.
+
+    \item[GitHub]
+    Plataforma de alojamiento de repositorios Git utilizada para conservar el código fuente, documentación técnica y evidencias del proyecto TierraViva.
+
     \item[GY-302]
     Módulo comercial basado en el sensor BH1750 para medir luminosidad ambiente.
+
+    \item[Hardware]
+    Conjunto de componentes físicos del sistema. En TierraViva incluye estaciones remotas, sensores, módulo LTE, relé, bomba, alimentación, cableado y Raspberry Pi.
 
     \item[hPa]
     Hectopascal, unidad de presión utilizada para expresar la presión atmosférica medida por el sensor BME280. En TierraViva aparece asociada a la variable \texttt{pressure\_hpa}.
@@ -212,6 +224,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[JavaScript]
     Lenguaje utilizado en el frontend del dashboard para consultar la API, procesar respuestas y actualizar dinámicamente la interfaz web.
+
+    \item[LaTeX]
+    Sistema de composición de documentos utilizado para redactar la memoria, anexos, tablas, figuras, referencias y estructura formal del TFG.
 
     \item[Lectura]
     Registro asociado a una estación en un instante concreto. Puede incluir humedad del suelo, temperatura, humedad ambiental, luminosidad, presión, estado del relé, evento y diagnóstico.
@@ -339,6 +354,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Sketch]
     Nombre habitual de un programa desarrollado para Arduino. En TierraViva corresponde al \textit{firmware} cargado en cada estación.
 
+    \item[Software]
+    Conjunto de programas y ficheros ejecutables del sistema. En TierraViva incluye el \textit{firmware} de estación, el ingestor, la base de datos, la API, el \textit{dashboard} y los scripts de gestión.
+
     \item[SoftwareSerial]
     Librería de Arduino utilizada para crear un puerto serie software en pines digitales. En TierraViva permite comunicar Arduino UNO con el módulo A7670E-LASA sin ocupar el puerto serie hardware de programación.
 
@@ -347,6 +365,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[STM32]
     Familia de microcontroladores considerada como alternativa por sus mayores prestaciones y flexibilidad, aunque con una complejidad de configuración superior para el alcance del TFG.
+
+    \item[Tarjeta microSD]
+    Tarjeta de memoria de pequeño formato utilizada como almacenamiento principal en la Raspberry Pi. En TierraViva se emplea para alojar el sistema operativo, el software del proyecto, la base de datos SQLite y los ficheros auxiliares de ejecución.
 
     \item[Telemetría]
     Conjunto de datos medidos por una estación y enviados a un sistema de supervisión.
@@ -368,6 +389,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Umbral]
     Valor límite utilizado para tomar una decisión. En TierraViva se usan umbrales de humedad del suelo para clasificar el estado del sustrato y decidir si puede ser necesario regar.
+
+    \item[USB-C]
+    Tipo de conector USB reversible utilizado por algunos dispositivos modernos. En TierraViva aparece asociado a la alimentación de la Raspberry Pi.
 
     \item[Uvicorn]
     Servidor ASGI utilizado para ejecutar la aplicación FastAPI de TierraViva.
