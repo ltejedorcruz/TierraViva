@@ -90,11 +90,14 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     \item[Canal ThingSpeak]
     Espacio de almacenamiento en ThingSpeak donde una estación publica sus lecturas y estados. Cada estación debe tener su propio canal para evitar mezclar datos.
 
+    \item[Caso de prueba]
+    Comprobación definida para validar una funcionalidad, condición o comportamiento concreto del sistema. En TierraViva los casos de prueba se identifican mediante códigos P01--P17.
+
     \item[Caudal]
     Volumen de agua que circula por unidad de tiempo. En TierraViva se plantea como posible variable futura para cuantificar el volumen real aplicado durante cada riego.
 
     \item[Credenciales]
-    Datos de autenticación, como claves de lectura o escritura, utilizados para acceder a servicios o canales de comunicación. En TierraViva deben protegerse especialmente las claves asociadas a ThingSpeak y a la API.
+    Datos de autenticación, como claves de lectura o escritura, utilizados para acceder a servicios o canales de comunicación.
 
     \item[CH340G]
     Conversor USB-serie presente en la placa Arduino UNO compatible utilizada. Permite la comunicación entre el ordenador y el microcontrolador para programar y depurar el \textit{firmware}.
@@ -323,6 +326,9 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
 
     \item[Script]
     Programa auxiliar utilizado para automatizar tareas de ejecución, instalación o mantenimiento. En TierraViva se utiliza especialmente en el fichero \texttt{tierraviva.sh}.
+
+    \item[Seguridad funcional]
+    Conjunto de medidas orientadas a evitar actuaciones peligrosas o no deseadas del sistema. En TierraViva se aplica especialmente al control del relé, la bomba, los tiempos máximos de riego, el modo seguro y el bloqueo por \textit{cooldown}.
 
     \item[Sensor capacitivo de humedad del suelo]
     Sensor que permite estimar la humedad del sustrato mediante una lectura analógica. Es la variable principal para la decisión local de riego.

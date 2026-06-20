@@ -1,7 +1,7 @@
 \chapter{Plan de pruebas}
 \label{anexo:plan_pruebas}
 
-Este anexo define el plan de pruebas seguido para validar el funcionamiento de TierraViva. El objetivo es comprobar de forma progresiva cada parte del sistema antes de realizar una integración completa: sensores, comunicaciones, almacenamiento, dashboard y actuación sobre el riego.
+Este anexo define el plan de pruebas seguido para validar el funcionamiento de TierraViva. El objetivo es comprobar de forma progresiva cada parte del sistema antes de realizar una integración completa: sensores, comunicaciones, almacenamiento, \textit{dashboard} y actuación sobre el riego.
 
 Al tratarse de un prototipo que combina hardware, software y servicios externos, las pruebas se han organizado por fases. Esta estrategia reduce el riesgo de errores difíciles de aislar, ya que permite validar primero cada bloque por separado y después comprobar el comportamiento del sistema completo.
 
@@ -26,7 +26,7 @@ F3 & Pruebas del módulo LTE & Validar comunicación AT, registro en red y enví
 \hline
 F4 & Pruebas de ThingSpeak & Confirmar publicación y lectura remota de telemetría. \\
 \hline
-F5 & Pruebas de Raspberry Pi & Verificar consulta de datos, almacenamiento SQLite, API y dashboard. \\
+F5 & Pruebas de Raspberry Pi & Verificar consulta de datos, almacenamiento SQLite, API y \textit{dashboard}. \\
 \hline
 F6 & Pruebas de actuación sin carga real & Validar la lógica de riego usando relé o indicador, sin bomba conectada. \\
 \hline
@@ -54,7 +54,7 @@ El entorno de pruebas se compone de una estación remota, una Raspberry Pi como 
 \rowcolor{gray!20}
 \textbf{Elemento} & \textbf{Uso durante las pruebas} \\
 \hline
-Arduino UNO & Ejecución del firmware de estación, lectura de sensores y control del relé. \\
+Arduino UNO & Ejecución del \textit{firmware} de estación, lectura de sensores y control del relé. \\
 \hline
 A7670E-LASA & Comunicación LTE/4G mediante comandos AT y envío de telemetría. \\
 \hline
@@ -70,11 +70,11 @@ Bomba de 12 V & Actuación física sobre el sistema de riego. \\
 \hline
 ThingSpeak & Recepción de telemetría y consulta remota desde Raspberry Pi. \\
 \hline
-Raspberry Pi & Ejecución de scripts de consulta, almacenamiento SQLite, API y dashboard. \\
+Raspberry Pi & Ejecución de \textit{scripts} de consulta, almacenamiento SQLite, API y \textit{dashboard}. \\
 \hline
 SQLite & Registro histórico de lecturas, estados y eventos de riego. \\
 \hline
-Dashboard web & Visualización del estado del sistema y de las últimas lecturas. \\
+\textit{Dashboard} web & Visualización del estado del sistema y de las últimas lecturas. \\
 \hline
 Agrolab Móstoles & Entorno real de agricultura urbana/periurbana utilizado para la prueba funcional final del prototipo. \\
 \hline
@@ -108,7 +108,7 @@ Raspberry Pi & El sistema consulta lecturas, las almacena localmente y mantiene 
 \hline
 API & Los endpoints devuelven respuestas válidas y coherentes con la base de datos. \\
 \hline
-Dashboard & La interfaz muestra datos actualizados y estados interpretables para el usuario. \\
+\textit{Dashboard} & La interfaz muestra datos actualizados y estados interpretables para el usuario. \\
 \hline
 Relé & El relé cambia de estado únicamente cuando corresponde y vuelve a estado seguro. \\
 \hline
@@ -136,7 +136,7 @@ La Tabla \ref{tab:casos_prueba} recoge los casos de prueba principales. Se han s
 \hline
 P01 & Verificación de alimentación & Medir la salida del LM2596 y comprobar masa común antes de conectar todos los módulos. & Tensiones correctas y ausencia de calentamiento o reinicios. \\
 \hline
-P02 & Lectura de BME280 & Ejecutar el firmware con el sensor conectado al bus I2C. & Temperatura, humedad y presión con valores coherentes. \\
+P02 & Lectura de BME280 & Ejecutar el \textit{firmware} con el sensor conectado al bus I2C. & Temperatura, humedad y presión con valores coherentes. \\
 \hline
 P03 & Lectura de BH1750 & Exponer el sensor a diferentes condiciones de luz. & Variación de lux coherente entre sombra y luz directa. \\
 \hline
@@ -146,27 +146,27 @@ P05 & Comunicación AT con A7670E-LASA & Enviar comandos básicos como \texttt{A
 \hline
 P06 & Publicación en ThingSpeak & Enviar una lectura de prueba desde la estación. & La lectura aparece en el canal de la estación. \\
 \hline
-P07 & Consulta desde Raspberry Pi & Ejecutar el script de lectura de ThingSpeak. & La Raspberry recupera la última lectura disponible. \\
+P07 & Consulta desde Raspberry Pi & Ejecutar el \textit{script} de lectura de ThingSpeak. & La Raspberry recupera la última lectura disponible. \\
 \hline
 P08 & Almacenamiento en SQLite & Insertar lecturas obtenidas desde ThingSpeak en la base de datos local. & Las lecturas quedan registradas con estación, fecha y valores. \\
 \hline
 P09 & API local & Consultar endpoints como \texttt{/api/latest}, \texttt{/api/readings} y \texttt{/api/health}. & La API responde sin error y devuelve datos coherentes. \\
 \hline
-P10 & Dashboard web & Abrir la interfaz desde navegador y comprobar actualización de datos. & El dashboard muestra lecturas, estado y frescura de datos. \\
+P10 & \textit{Dashboard} web & Abrir la interfaz desde navegador y comprobar actualización de datos. & El \textit{dashboard} muestra lecturas, estado y frescura de datos. \\
 \hline
 P11 & Relé sin bomba & Activar el pin de control y observar el cambio de estado del relé sin carga hidráulica. & El relé conmuta y vuelve a apagado al finalizar. \\
 \hline
 P12 & Bomba con activación temporizada & Conectar bomba o carga real y ejecutar una orden de riego limitada. & La bomba se activa durante el tiempo definido y se apaga correctamente. \\
 \hline
-P13 & Cooldown entre riegos & Forzar dos decisiones de riego consecutivas. & La segunda activación se bloquea si no ha pasado el tiempo mínimo. \\
+P13 & \textit{Cooldown} entre riegos & Forzar dos decisiones de riego consecutivas. & La segunda activación se bloquea si no ha pasado el tiempo mínimo. \\
 \hline
 P14 & Lectura inválida de humedad & Simular valor fuera de rango o desconexión del sensor. & El sistema no activa el riego y registra estado de error. \\
 \hline
 P15 & Pérdida temporal de comunicación & Interrumpir temporalmente la publicación o consulta de datos. & El sistema registra el fallo y mantiene estado seguro. \\
 \hline
-P16 & Integración completa & Ejecutar estación, ThingSpeak, Raspberry, API, dashboard y actuación. & El flujo completo funciona de extremo a extremo. \\
+P16 & Integración completa & Ejecutar estación, ThingSpeak, Raspberry, API, \textit{dashboard} y actuación. & El flujo completo funciona de extremo a extremo. \\
 \hline
-P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, ejecutar la estación, comprobar telemetría, dashboard y actuación controlada, y registrar foto/vídeo como evidencia. & El sistema funciona en entorno real de cultivo y mantiene actuación segura. \\
+P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, ejecutar la estación, comprobar telemetría, \textit{dashboard} y actuación controlada, y registrar foto/vídeo como evidencia. & El sistema funciona en entorno real de cultivo y mantiene actuación segura. \\
 \hline
 \end{tabular}
 \caption{Casos de prueba principales definidos para TierraViva.}
@@ -176,7 +176,7 @@ P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, 
 \subsection{P17. Prueba funcional en entorno real en Agrolab Móstoles}
 \label{subsec:p17_agrolab_mostoles}
 
-\textbf{Objetivo.} Validar el comportamiento del prototipo TierraViva en un entorno real de cultivo, comprobando adquisición de datos, publicación de telemetría, supervisión desde Raspberry Pi, visualización en dashboard y actuación controlada del riego.
+\textbf{Objetivo.} Validar el comportamiento del prototipo TierraViva en un entorno real de cultivo, comprobando adquisición de datos, publicación de telemetría, supervisión desde Raspberry Pi, visualización en \textit{dashboard} y actuación controlada del riego.
 
 \textbf{Entorno de prueba.} La prueba se realiza en Agrolab Móstoles, espacio de agricultura urbana/periurbana situado en Móstoles, Madrid. Este entorno permite comprobar el funcionamiento del sistema en condiciones más próximas al uso previsto que las pruebas realizadas sobre mesa o en montaje controlado.
 
@@ -184,9 +184,9 @@ P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, 
 \begin{enumerate}
     \item instalar la estación en la zona de prueba autorizada;
     \item verificar alimentación, sensores, relé, bomba y conectividad LTE;
-    \item iniciar el firmware de estación y comprobar la lectura de sensores;
+    \item iniciar el \textit{firmware} de estación y comprobar la lectura de sensores;
     \item publicar telemetría en el canal ThingSpeak correspondiente;
-    \item comprobar la ingesta desde Raspberry Pi, el almacenamiento local y la visualización en dashboard;
+    \item comprobar la ingesta desde Raspberry Pi, el almacenamiento local y la visualización en \textit{dashboard};
     \item ejecutar una actuación de riego controlada;
     \item registrar fotografía del montaje y vídeo de funcionamiento como evidencia.
 \end{enumerate}
@@ -218,19 +218,19 @@ Para reducir riesgos durante las pruebas, la validación se realiza de forma gra
 \hline
 1 & Probar sensores y alimentación por separado. & Evitar que un error de cableado afecte al sistema completo. \\
 \hline
-2 & Probar el módulo LTE con comandos AT básicos. & Confirmar que la comunicación funciona antes de integrarla en el firmware. \\
+2 & Probar el módulo LTE con comandos AT básicos. & Confirmar que la comunicación funciona antes de integrarla en el \textit{firmware}. \\
 \hline
 3 & Publicar datos de prueba en ThingSpeak. & Validar el canal de telemetría antes de automatizar el envío. \\
 \hline
 4 & Consultar datos desde Raspberry Pi. & Comprobar que la supervisión remota recibe la información esperada. \\
 \hline
-5 & Validar base de datos, API y dashboard. & Confirmar que el backend local interpreta y muestra correctamente los datos. \\
+5 & Validar base de datos, API y \textit{dashboard}. & Confirmar que el \textit{backend} local interpreta y muestra correctamente los datos. \\
 \hline
 6 & Activar relé sin bomba conectada. & Probar la lógica de actuación sin riesgo hidráulico. \\
 \hline
 7 & Activar bomba durante tiempos cortos y controlados. & Validar la actuación real con riesgo limitado. \\
 \hline
-8 & Ejecutar prueba completa con sensores, comunicación, backend y riego. & Confirmar el funcionamiento integrado del prototipo. \\
+8 & Ejecutar prueba completa con sensores, comunicación, \textit{backend} y riego. & Confirmar el funcionamiento integrado del prototipo. \\
 \hline
 9 & Realizar la prueba funcional en Agrolab Móstoles. & Comprobar el comportamiento del prototipo en un entorno real de cultivo y registrar evidencias fotográficas y audiovisuales. \\
 \hline
@@ -300,7 +300,7 @@ R07 & Exposición ambiental del montaje. & P16, P17 \\
 \hline
 R08 & Exposición accidental de claves o credenciales. & Revisión de repositorio y ficheros de configuración \\
 \hline
-R09 & Inconsistencias entre firmware, backend, API y dashboard. & P07, P08, P09, P10, P16 \\
+R09 & Inconsistencias entre \textit{firmware}, \textit{backend}, API y \textit{dashboard}. & P07, P08, P09, P10, P16 \\
 \hline
 \end{tabular}
 \caption{Trazabilidad entre riesgos y pruebas.}
@@ -337,6 +337,6 @@ Bloqueada & La prueba no puede ejecutarse por falta de componente, entorno, conf
 
 \section{Conclusión}
 
-El plan de pruebas de TierraViva permite validar el sistema de forma progresiva y controlada. La estrategia planteada evita conectar directamente todos los componentes sin haber comprobado antes alimentación, sensores, comunicación, almacenamiento, API, dashboard y actuación.
+El plan de pruebas de TierraViva permite validar el sistema de forma progresiva y controlada. La estrategia planteada evita conectar directamente todos los componentes sin haber comprobado antes alimentación, sensores, comunicación, almacenamiento, API, \textit{dashboard} y actuación.
 
 Además, la relación entre riesgos y pruebas refuerza la calidad del proyecto, ya que cada punto crítico identificado dispone de una comprobación asociada. De este modo, la validación del prototipo no se limita a demostrar que funciona en condiciones ideales, sino que también contempla errores previsibles, situaciones de fallo y medidas de seguridad funcional.
