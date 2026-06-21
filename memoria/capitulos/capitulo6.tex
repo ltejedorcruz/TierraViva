@@ -514,14 +514,15 @@ El \textit{dashboard} web constituye la capa de presentación del sistema softwa
 
 Dentro de la arquitectura final, el \textit{dashboard} no toma decisiones de riego, no accede al puerto serie, no escribe en la base de datos y no envía órdenes a las estaciones. Su papel se limita a consultar la API local, representar el estado del sistema y actualizar la información mostrada conforme llegan nuevos datos.
 
-La implementación del \textit{frontend} se organiza principalmente en dos bloques:
+La implementación actual del \textit{frontend} se concentra en el fichero:
 
-\begin{itemize}
-    \item \texttt{dashboard/index.html}, que define la estructura visual de la interfaz;
-    \item \texttt{dashboard/js/tierraviva.js}, que contiene la lógica de actualización, consulta a la API y refresco dinámico de los datos.
-\end{itemize}
+\begin{center}
+\texttt{dashboard/index.html}
+\end{center}
 
-Esta separación permite mantener diferenciado el marcado visual de la lógica de comunicación con la API. El fichero HTML define las zonas principales del panel, mientras que el JavaScript se encarga de solicitar datos, procesar respuestas y actualizar los elementos de la página sin recargarla por completo.
+Este fichero contiene la estructura HTML de la interfaz, los estilos CSS embebidos en una sección \texttt{<style>} y la lógica JavaScript embebida en una sección \texttt{<script>}. Los recursos gráficos utilizados por la interfaz se almacenan en el directorio \texttt{dashboard/images/}.
+
+Esta organización no implica que el \textit{dashboard} carezca de separación lógica entre presentación y comportamiento. La decisión de mantener el \textit{dashboard} en un único fichero HTML facilita el despliegue del prototipo y reduce el número de rutas que deben sincronizarse durante las pruebas.
 
 \subsection{Papel del \textit{dashboard} dentro de la arquitectura}
 
@@ -612,7 +613,7 @@ Con esta organización se mantiene una separación clara de responsabilidades: A
 
 Para facilitar la puesta en marcha del software en la Raspberry Pi, el proyecto incluye el \textit{script} \texttt{tierraviva.sh}. Este \textit{script} agrupa las operaciones principales de despliegue y ejecución, evitando tener que lanzar manualmente cada componente desde la terminal.
 
-El \textit{script} permite instalar dependencias, preparar el entorno virtual, preparar el directorio del \textit{dashboard} servido por FastAPI, arrancar el proceso de ingesta \texttt{main.py}, iniciar el servidor \texttt{api.py} mediante Uvicorn, consultar el estado de ejecución, detener los procesos y revisar los \textit{logs}. Esta automatización resulta útil durante las pruebas porque reduce errores repetitivos de arranque y deja una forma reproducible de iniciar el sistema.
+El \textit{script} permite instalar dependencias, preparar el entorno virtual, preparar el directorio \texttt{frontend/} servido por FastAPI, arrancar el proceso de ingesta \texttt{main.py}, iniciar el servidor \texttt{api.py} mediante Uvicorn, consultar el estado de ejecución, detener los procesos y revisar los \textit{logs}. Esta automatización resulta útil durante las pruebas porque reduce errores repetitivos de arranque y deja una forma reproducible de iniciar el sistema.
 
 \begin{table}[H]
 \centering

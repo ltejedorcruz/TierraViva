@@ -230,13 +230,25 @@ El \textit{dashboard} fuente se encuentra en el directorio:
 dashboard/
 \end{verbatim}
 
-La API sirve la interfaz desde:
+La interfaz principal se concentra en el fichero:
 
 \begin{verbatim}
-frontend/index.html
+dashboard/index.html
 \end{verbatim}
 
-Por tanto, antes de arrancar el sistema debe copiarse el \textit{dashboard} al directorio \texttt{frontend/}:
+Este fichero incluye la estructura HTML, los estilos CSS embebidos y la lógica JavaScript necesaria para consultar la API y actualizar la interfaz. Los recursos gráficos se almacenan en:
+
+\begin{verbatim}
+dashboard/images/
+\end{verbatim}
+
+La API sirve la interfaz desde el directorio de ejecución:
+
+\begin{verbatim}
+frontend/
+\end{verbatim}
+
+Por tanto, antes de arrancar el sistema debe copiarse el contenido de \texttt{dashboard/} al directorio \texttt{frontend/}:
 
 \begin{verbatim}
 mkdir -p frontend
@@ -247,9 +259,10 @@ Después de este paso debe existir, al menos:
 
 \begin{verbatim}
 frontend/index.html
-frontend/css/tierraviva.css
-frontend/js/tierraviva.js
+frontend/images/
 \end{verbatim}
+
+No se requiere la existencia de carpetas \texttt{frontend/css/} ni \texttt{frontend/js/}, ya que los estilos y la lógica JavaScript están integrados en el propio fichero \texttt{index.html}. Esta organización simplifica el despliegue del prototipo y reduce el riesgo de rutas estáticas inconsistentes durante las pruebas.
 
 \section{Instalación mediante \textit{script}}
 
@@ -267,7 +280,7 @@ La instalación inicial se realiza con:
 
 Este comando prepara el entorno de ejecución del proyecto: crea el entorno virtual, instala dependencias, inicializa la base de datos y crea los directorios necesarios para la ejecución.
 
-Tras la instalación, se recomienda repetir la copia del \textit{dashboard} para asegurar que el \textit{frontend} servido por la API está actualizado:
+Tras la instalación, se recomienda comprobar que el contenido de \texttt{dashboard/} está sincronizado con \texttt{frontend/}, especialmente el fichero \texttt{index.html} y el directorio \texttt{images/}:
 
 \begin{verbatim}
 rsync -a dashboard/ frontend/
@@ -414,7 +427,9 @@ La Raspberry no recupera datos & Canal o clave de lectura incorrectos. & Revisar
 \hline
 La API no arranca & Entorno virtual o dependencias no preparados. & Ejecutar \texttt{./tierraviva.sh install}. \\
 \hline
-El \textit{dashboard} no carga & No existe \texttt{frontend/index.html}. & Ejecutar \texttt{rsync -a dashboard/ frontend/}. \\
+El \textit{dashboard} no carga & No existe \texttt{frontend/index.html} o no se ha sincronizado el contenido de \texttt{dashboard/}. & Ejecutar \texttt{rsync -a dashboard/ frontend/} y comprobar que existen \texttt{frontend/index.html} y \texttt{frontend/images/}. \\
+\hline
+El \textit{dashboard} carga sin logotipos o imágenes & No se ha copiado correctamente el directorio \texttt{images/}. & Repetir \texttt{rsync -a dashboard/ frontend/} y revisar que existen los ficheros gráficos en \texttt{frontend/images/}. \\
 \hline
 No hay registros en SQLite & La estación no ha publicado o el ingestor no está activo. & Revisar ThingSpeak y \textit{logs} de \texttt{main.py}. \\
 \hline
