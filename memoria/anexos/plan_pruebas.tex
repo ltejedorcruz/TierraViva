@@ -144,7 +144,7 @@ P04 & Lectura de humedad del suelo & Probar el sensor en seco, húmedo y condici
 \hline
 P05 & Comunicación AT con A7670E-LASA & Enviar comandos básicos como \texttt{AT}, \texttt{AT+CPIN?}, \texttt{AT+CSQ} y \texttt{AT+CEREG?}. & Respuestas válidas, SIM lista y registro en red. \\
 \hline
-P06 & Publicación en ThingSpeak & Enviar una lectura de prueba desde la estación. & La lectura aparece en el canal de la estación. \\
+P06 & Publicación en ThingSpeak & Enviar una lectura de prueba desde la estación mediante LTE/HTTP. & La estación recibe una respuesta \texttt{+HTTPACTION: 0,200,...} y la lectura aparece en el canal ThingSpeak correspondiente. \\
 \hline
 P07 & Consulta desde Raspberry Pi & Ejecutar el \textit{script} de lectura de ThingSpeak. & La Raspberry recupera la última lectura disponible. \\
 \hline
@@ -156,15 +156,15 @@ P10 & \textit{Dashboard} web & Abrir la interfaz desde navegador y comprobar act
 \hline
 P11 & Relé sin bomba & Activar el pin de control y observar el cambio de estado del relé sin carga hidráulica. & El relé conmuta y vuelve a apagado al finalizar. \\
 \hline
-P12 & Bomba con activación temporizada & Conectar bomba o carga real y ejecutar una orden de riego limitada. & La bomba se activa durante el tiempo definido y se apaga correctamente. \\
+P12 & Bomba con activación temporizada & Conectar bomba o carga real y ejecutar una actuación de riego limitada por \textit{firmware}. & El monitor serie registra \texttt{Riego completado. Segundos: 10} y la bomba se apaga al finalizar el intervalo configurado. \\
 \hline
-P13 & \textit{Cooldown} entre riegos & Forzar dos decisiones de riego consecutivas. & La segunda activación se bloquea si no ha pasado el tiempo mínimo. \\
+P13 & \textit{Cooldown} entre riegos & Forzar decisiones de riego consecutivas en ciclos próximos. & El monitor serie registra \texttt{Cooldown activo: SI} y \texttt{Decision local: COOLDOWN}, bloqueando la nueva actuación. \\
 \hline
 P14 & Lectura inválida de humedad & Simular valor fuera de rango o desconexión del sensor. & El sistema no activa el riego y registra estado de error. \\
 \hline
 P15 & Pérdida temporal de comunicación & Interrumpir temporalmente la publicación o consulta de datos. & El sistema registra el fallo y mantiene estado seguro. \\
 \hline
-P16 & Integración completa & Ejecutar estación, ThingSpeak, Raspberry, API, \textit{dashboard} y actuación. & El flujo completo funciona de extremo a extremo. \\
+P16 & Integración completa & Ejecutar estación, ThingSpeak, Raspberry, API, \textit{dashboard} y actuación. & El flujo completo funciona de extremo a extremo y queda documentado mediante capturas del monitor serie, ThingSpeak, API y \textit{dashboard}. \\
 \hline
 P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, ejecutar la estación, comprobar telemetría, \textit{dashboard} y actuación controlada, y registrar foto/vídeo como evidencia. & El sistema funciona en entorno real de cultivo y mantiene actuación segura. \\
 \hline
@@ -201,7 +201,123 @@ P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, 
     \item ante cualquier condición no verificable, la bomba permanece apagada.
 \end{itemize}
 
-\textbf{Evidencias.} Vídeo de funcionamiento disponible en el repositorio del proyecto [url].
+\textbf{Evidencias.} La prueba se documenta mediante fotografía del montaje, vídeo de funcionamiento, capturas de ThingSpeak, capturas del \textit{dashboard} y registros de monitor serie. Las evidencias de monitor serie asociadas a la estación se recogen de forma específica en la Subsección~\ref{subsec:evidencias_monitor_serie_pruebas}.
+
+\subsection{Evidencias de monitor serie de la estación remota}
+\label{subsec:evidencias_monitor_serie_pruebas}
+
+Durante las pruebas de integración de la estación se registraron salidas del monitor serie del Arduino IDE. Estas evidencias permiten comprobar el comportamiento real del \textit{firmware} durante el arranque, la lectura de sensores, la inicialización del módem LTE, la publicación en ThingSpeak y la decisión local de riego.
+
+La Figura~\ref{fig:anexo_monitor_serie_inicio_lte} muestra la fase de arranque e integración. En ella se observa la detección de sensores I2C, la inicialización del BME280 y del BH1750, la detección de baudios del módem, el registro en red LTE, la disponibilidad de datos móviles, la decisión local de riego y la publicación correcta en ThingSpeak.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{figs_png/monitor_serie_inicio_lte_thingspeak.png}
+    \caption{Evidencia de monitor serie durante inicialización, registro LTE y publicación correcta en ThingSpeak.}
+    \label{fig:anexo_monitor_serie_inicio_lte}
+\end{figure}
+
+La Figura~\ref{fig:anexo_monitor_serie_decision_riego} recoge varios ciclos consecutivos de funcionamiento. En esta captura se observa que la estación no activa siempre el riego, sino que alterna entre \texttt{NO RIEGO}, \texttt{RIEGO} y estados bloqueados por \textit{cooldown} según la humedad medida y las condiciones internas del \textit{firmware}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{figs_png/monitor_serie_decision_riego_cooldown.png}
+    \caption{Evidencia de monitor serie durante ciclos de decisión local, actuación temporizada y publicación en ThingSpeak.}
+    \label{fig:anexo_monitor_serie_decision_riego}
+\end{figure}
+
+Además de las capturas, se conserva el registro textual de ejecución. A continuación se incluyen fragmentos representativos del log, seleccionados para documentar los estados principales sin incorporar todo el fichero completo en el cuerpo del anexo.
+
+\textbf{Inicialización de sensores, módem y conectividad LTE:}
+
+\begin{verbatim}
+=== TierraViva Estacion Remota ===
+Sensores I2C listos.
+BME280 OK
+BH1750 OK
+Detectando baudios del modem...
+Probando baudios: 9600
+Probando baudios: 115200
+RESPONDE EN 115200
+Cambiando modem a 9600...
+Modem cambiado a 9600.
+Modem OK
+Esperando registro LTE...
+LTE listo.
+Datos moviles OK
+Sistema listo
+\end{verbatim}
+
+\textbf{Ciclo con decisión local de riego y publicación correcta:}
+
+\begin{verbatim}
+--- Lecturas ---
+Suelo bruto: 557
+Suelo %: 0
+Temp C: 28.8
+Humedad %: 29.1
+Lux: 2
+Presion hPa: 946
+Modo seguro: ACTIVO
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPACTION: AT+HTTPACTION=0
+
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+\end{verbatim}
+
+\textbf{Ciclo con bloqueo por \textit{cooldown}:}
+
+\begin{verbatim}
+--- Lecturas ---
+Suelo bruto: 557
+Suelo %: 0
+Temp C: 28.8
+Humedad %: 29.0
+Lux: 3
+Presion hPa: 946
+Modo seguro: ACTIVO
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPACTION: AT+HTTPACTION=0
+
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+\end{verbatim}
+
+\textbf{Ciclo sin actuación de riego:}
+
+\begin{verbatim}
+--- Lecturas ---
+Suelo bruto: 245
+Suelo %: 90
+Temp C: 28.8
+Humedad %: 29.0
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: NO RIEGO
+HTTPACTION: AT+HTTPACTION=0
+
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+\end{verbatim}
+
+Estos fragmentos muestran tres comportamientos relevantes para la validación: actuación de riego cuando se cumplen las condiciones de sequedad, bloqueo de una nueva actuación durante el periodo de \textit{cooldown} y ausencia de riego cuando la humedad medida no requiere actuación. También se observa que la publicación en ThingSpeak se valida mediante la respuesta \texttt{+HTTPACTION: 0,200,3}.
+
+En ejecuciones prolongadas se observaron fallos temporales de publicación HTTP, como errores en \texttt{HTTPINIT} o respuestas no interpretables del módem. Estos fallos no provocaron una actuación insegura de la bomba, ya que la decisión crítica de riego permanece en el \textit{firmware} local de la estación. La consecuencia de estos fallos se limita a la pérdida temporal de publicación en la plataforma, aspecto contemplado en las pruebas de tolerancia a fallos y en el análisis de riesgos.
 
 \section{Secuencia de validación}
 

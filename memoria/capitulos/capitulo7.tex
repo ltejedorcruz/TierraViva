@@ -96,40 +96,42 @@ La publicación en ThingSpeak se consideró válida cuando la estación obtuvo u
 
 La Raspberry Pi se validó consultando los canales ThingSpeak, evitando duplicados mediante \texttt{entry\_id}, registrando lecturas en SQLite y exponiendo los datos mediante FastAPI. El \textit{dashboard} confirmó la visualización final de las lecturas, el estado de conexión, la antigüedad del dato, gráficas históricas y selección de estación.
 
-La Figura~\ref{fig:evidencias_validacion_tierraviva} recoge evidencias visuales del flujo completo de validación.
+La Figura~\ref{fig:evidencias_validacion_tierraviva} recoge cuatro evidencias visuales del flujo completo de validación: publicación en ThingSpeak, visualización en el \textit{dashboard}, inicialización de la estación desde monitor serie y ciclos de decisión local de riego. Esta composición permite conservar evidencia experimental real sin duplicar figuras extensas en el cuerpo principal de la memoria.
 
 \begin{figure}[H]
 \centering
 
 \begin{minipage}{0.48\textwidth}
     \centering
-    %\includegraphics[width=\textwidth]{figs/evidencia_sensores_monitor_serie.png}
-    \small (a) Lectura conjunta de sensores.
+    \includegraphics[width=\textwidth]{figs_png/evidencia_thingspeak_publicacion.png}
+    \small (a) Publicación de telemetría en ThingSpeak.
 \end{minipage}
 \hfill
 \begin{minipage}{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figs_png/evidencia_thingspeak_publicacion.png}
-    \small (b) Publicación de telemetría en ThingSpeak.
+    \includegraphics[width=\textwidth]{figs_png/evidencia_dashboard.png}
+    \small (b) Visualización en el \textit{dashboard} local.
 \end{minipage}
 
 \vspace{0.35cm}
 
 \begin{minipage}{0.48\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figs_png/evidencia_dashboard.png}
-    \small (c) Visualización en \textit{dashboard} local.
+    \includegraphics[width=\textwidth]{figs_png/monitor_serie_inicio_lte_thingspeak.png}
+    \small (c) Inicialización, registro LTE y publicación HTTP correcta.
 \end{minipage}
 \hfill
 \begin{minipage}{0.48\textwidth}
     \centering
-    %\includegraphics[width=\textwidth]{figs/evidencia_actuacion_bomba.png}
-    \small (d) Prueba de actuación con relé y bomba.
+    \includegraphics[width=\textwidth]{figs_png/monitor_serie_decision_riego_cooldown.png}
+    \small (d) Ciclos de decisión local, riego y \textit{cooldown}.
 \end{minipage}
 
-\caption{Evidencias visuales de validación del flujo completo de TierraViva.}
+\caption[Evidencias visuales del flujo completo de validación]{Evidencias visuales del flujo completo de validación de TierraViva. Se documenta la publicación de telemetría en ThingSpeak, la visualización desde el \textit{dashboard}, la inicialización de la estación mediante monitor serie y la ejecución de ciclos de decisión local con riego temporizado y bloqueo por \textit{cooldown}.}
 \label{fig:evidencias_validacion_tierraviva}
 \end{figure}
+
+Los registros completos asociados a estas capturas se recogen en el Anexo~\ref{subsec:evidencias_monitor_serie_pruebas}.
 
 \section{Prueba funcional en entorno real en Agrolab Móstoles}
 \label{sec:validacion_agrolab_mostoles}
@@ -153,6 +155,8 @@ La evidencia principal de esta prueba queda formada por la fotografía del monta
 La validación de la actuación se trató como una parte crítica del proyecto, ya que TierraViva acciona físicamente una bomba de agua. Por ello, no bastaba con comprobar que el relé podía activarse: también era necesario verificar que el \textit{firmware} mantenía la bomba apagada ante condiciones no fiables.
 
 Las pruebas se centraron en seis situaciones: arranque de estación, riego autorizado, \textit{cooldown} activo, lectura inválida, pérdida temporal de comunicación y fallo de supervisión en Raspberry Pi. En todos los casos se verificó que la decisión crítica permanecía en la estación y que la bomba no dependía de una orden externa para apagarse.
+
+El detalle de las ejecuciones registradas en el monitor serie se recoge en el Anexo~\ref{subsec:evidencias_monitor_serie_pruebas}, donde se muestran ciclos representativos con \texttt{NO RIEGO}, \texttt{RIEGO}, bloqueo por \textit{cooldown}, actuación temporizada de 10 segundos y publicación correcta en ThingSpeak.
 
 La Tabla~\ref{tab:cap7_seguridad_funcional} resume las pruebas de seguridad funcional más relevantes.
 

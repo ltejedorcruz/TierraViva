@@ -1,0 +1,386 @@
+=== TierraViva Estacion Remota ===
+Sensores I2C listos.
+BME280 OK
+BH1750 OK
+Detectando baudios del modem...
+Probando baudios: 9600
+Probando baudios: 115200
+RESPONDE EN 115200
+Cambiando modem a 9600...
+Modem cambiado a 9600.
+Modem OK
+Esperando registro LTE...
+LTE listo.
+Datos moviles OK
+Sistema listo
+
+--- Lecturas ---
+Suelo bruto: 557
+Suelo %: 0
+Temp C: 28.8
+Humedad %: 29.1
+Lux: 2
+Presion hPa: 946
+Modo seguro: ACTIVO
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 557
+Suelo %: 0
+Temp C: 28.8
+Humedad %: 29.0
+Lux: 3
+Presion hPa: 946
+Modo seguro: ACTIVO
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 245
+Suelo %: 90
+Temp C: 28.8
+Humedad %: 29.0
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: NO RIEGO
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 261
+Suelo %: 85
+Temp C: 28.8
+Humedad %: 28.8
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: NO RIEGO
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 276
+Suelo %: 81
+Temp C: 28.8
+Humedad %: 28.6
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: NO RIEGO
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 542
+Suelo %: 4
+Temp C: 28.8
+Humedad %: 28.9
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: NO RIEGO
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 536
+Suelo %: 6
+Temp C: 28.8
+Humedad %: 28.7
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 532
+Suelo %: 7
+Temp C: 28.8
+Humedad %: 28.5
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPACTION: AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,3
+
+ThingSpeak OK
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 532
+Suelo %: 7
+Temp C: 28.8
+Humedad %: 28.5
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPACTION: b�����f�^��@�
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 528
+Suelo %: 8
+Temp C: 28.8
+Humedad %: 28.7
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 540
+Suelo %: 5
+Temp C: 28.8
+Humedad %: 29.6
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 536
+Suelo %: 6
+Temp C: 28.8
+Humedad %: 28.9
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 526
+Suelo %: 9
+Temp C: 28.8
+Humedad %: 28.8
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 523
+Suelo %: 10
+Temp C: 28.9
+Humedad %: 28.5
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 522
+Suelo %: 10
+Temp C: 28.8
+Humedad %: 29.0
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 522
+Suelo %: 10
+Temp C: 28.9
+Humedad %: 28.7
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 523
+Suelo %: 10
+Temp C: 28.9
+Humedad %: 28.5
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 523
+Suelo %: 10
+Temp C: 28.9
+Humedad %: 28.3
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 526
+Suelo %: 9
+Temp C: 28.9
+Humedad %: 28.4
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 525
+Suelo %: 9
+Temp C: 28.8
+Humedad %: 28.2
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 524
+Suelo %: 9
+Temp C: 28.8
+Humedad %: 28.3
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 526
+Suelo %: 9
+Temp C: 28.8
+Humedad %: 28.1
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 525
+Suelo %: 9
+Temp C: 28.8
+Humedad %: 28.2
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: NO
+Decision local: RIEGO
+Riego completado. Segundos: 10
+HTTPINIT fallo
+ThingSpeak ERROR
+Esperando 30 segundos...
+
+--- Lecturas ---
+Suelo bruto: 525
+Suelo %: 9
+Temp C: 28.8
+Humedad %: 28.4
+Lux: 3
+Presion hPa: 946
+Modo seguro: NORMAL
+Cooldown activo: SI
+Decision local: COOLDOWN
