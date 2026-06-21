@@ -51,12 +51,13 @@ La Tabla~\ref{tab:variables_api_resumidas} recoge las variables de entorno que a
 
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 \small
 \begin{tabular}{|p{0.32\textwidth}|p{0.18\textwidth}|p{0.38\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Variable} & \textbf{Valor por defecto} & \textbf{Uso} \\
+\rowcolor{URJCRed}
+\TVHead{Variable} & \TVHead{Valor por defecto} & \TVHead{Uso} \\
 \hline
 \texttt{TIERRAVIVA\_HOME} & \texttt{\textasciitilde/tierraviva} & Ruta base usada para localizar \texttt{data/}, \texttt{frontend/} y la base SQLite. \\
 \hline
@@ -87,8 +88,8 @@ Las variables de ThingSpeak no se utilizan directamente en \texttt{api.py}; se e
 \small
 \begin{tabular}{|p{0.16\textwidth}|p{0.28\textwidth}|p{0.42\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Método} & \textbf{Endpoint} & \textbf{Función} \\
+\rowcolor{URJCRed}
+\TVHead{Método} & \TVHead{Endpoint} & \TVHead{Función} \\
 \hline
 GET & \texttt{/} & Sirve el \textit{dashboard} web desde \texttt{frontend/index.html}. \\
 \hline
@@ -143,8 +144,8 @@ Devuelve la configuración activa de la API para una estación.
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Parámetro} & \TVHead{Tipo} & \TVHead{Obligatorio} & \TVHead{Descripción} \\
 \hline
 \texttt{station} & texto & No & Estación consultada. Si se omite, se utiliza \texttt{STATION\_ID}. \\
 \hline
@@ -189,8 +190,8 @@ Devuelve la última lectura almacenada para una estación.
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Parámetro} & \TVHead{Tipo} & \TVHead{Obligatorio} & \TVHead{Descripción} \\
 \hline
 \texttt{station} & texto & No & Estación consultada, por ejemplo \texttt{A} o \texttt{B}. \\
 \hline
@@ -256,8 +257,8 @@ Devuelve una lista de lecturas recientes almacenadas para una estación.
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Parámetro} & \TVHead{Tipo} & \TVHead{Obligatorio} & \TVHead{Descripción} \\
 \hline
 \texttt{station} & texto & No & Estación consultada. \\
 \hline
@@ -314,8 +315,8 @@ Devuelve estadísticas agregadas de una estación durante una ventana temporal.
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Parámetro} & \TVHead{Tipo} & \TVHead{Obligatorio} & \TVHead{Descripción} \\
 \hline
 \texttt{station} & texto & No & Estación consultada. \\
 \hline
@@ -385,8 +386,8 @@ Devuelve una comprobación básica del estado del servicio.
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Parámetro} & \textbf{Tipo} & \textbf{Obligatorio} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Parámetro} & \TVHead{Tipo} & \TVHead{Obligatorio} & \TVHead{Descripción} \\
 \hline
 \texttt{station} & texto & No & Estación sobre la que se comprueba si existen datos. \\
 \hline
@@ -424,8 +425,8 @@ Las lecturas devueltas por la API proceden de la tabla \texttt{readings}. La Tab
 \scriptsize
 \begin{tabular}{|p{0.30\textwidth}|p{0.18\textwidth}|p{0.40\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Campo} & \textbf{Tipo} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Campo} & \TVHead{Tipo} & \TVHead{Descripción} \\
 \hline
 \texttt{id} & entero & Identificador interno de SQLite. \\
 \hline
@@ -472,8 +473,8 @@ El \textit{endpoint} \texttt{/api/latest} añade dos clasificaciones calculadas 
 \small
 \begin{tabular}{|p{0.24\textwidth}|p{0.26\textwidth}|p{0.36\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Campo} & \textbf{Valores} & \textbf{Significado} \\
+\rowcolor{URJCRed}
+\TVHead{Campo} & \TVHead{Valores} & \TVHead{Significado} \\
 \hline
 \texttt{freshness} & \texttt{fresh}, \texttt{stale}, \texttt{offline}, \texttt{desconocido} & Indica si la última lectura es reciente, antigua, demasiado antigua o no interpretable. \\
 \hline
@@ -496,8 +497,8 @@ FastAPI valida automáticamente algunos parámetros numéricos. Si se solicita u
 \small
 \begin{tabular}{|p{0.26\textwidth}|p{0.22\textwidth}|p{0.38\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Endpoint} & \textbf{Parámetro} & \textbf{Validación} \\
+\rowcolor{URJCRed}
+\TVHead{Endpoint} & \TVHead{Parámetro} & \TVHead{Validación} \\
 \hline
 \texttt{/api/readings} & \texttt{limit} & Entero entre 1 y 500. \\
 \hline
@@ -518,8 +519,8 @@ En la versión actual, el parámetro \texttt{station} se normaliza a mayúsculas
 \small
 \begin{tabular}{|p{0.18\textwidth}|p{0.26\textwidth}|p{0.42\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Código} & \textbf{Situación} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Situación} & \TVHead{Interpretación} \\
 \hline
 200 & Petición correcta & La API ha procesado la petición. El campo \texttt{ok} indica si existen datos. \\
 \hline
@@ -544,8 +545,8 @@ El \textit{dashboard} consume los \textit{endpoints} de la API para actualizar l
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.52\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Endpoint} & \textbf{Uso en dashboard} \\
+\rowcolor{URJCRed}
+\TVHead{Endpoint} & \TVHead{Uso en dashboard} \\
 \hline
 \texttt{/api/config} & Carga estaciones activas, umbrales y tiempos de refresco. \\
 \hline

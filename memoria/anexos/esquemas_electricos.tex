@@ -11,7 +11,7 @@ La Figura~\ref{fig:esquema_estacion_tierraviva} muestra el esquema general de un
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs/esquema_estacion_TierraViva.png}
+    \includegraphics[width=\textwidth]{figs_png/esquema_estacion_TierraViva.png}
     \caption{Esquema eléctrico general de una estación TierraViva elaborado en Cirkit Designer.}
     \label{fig:esquema_estacion_tierraviva}
 \end{figure}
@@ -26,22 +26,39 @@ El esquema de la estación puede dividirse en varios bloques funcionales:
     \item \textbf{Sensorización}: formada por el sensor capacitivo de humedad del suelo, el BME280 y el BH1750.
     \item \textbf{Comunicación}: formada por el módulo LTE A7670E-LASA y su antena.
     \item \textbf{Actuación}: formada por el módulo relé y la bomba de agua de 12 V.
-    \item \textbf{Protección y estabilización}: formada por resistencias, condensadores y elementos auxiliares de acondicionamiento eléctrico.
+    \item \textbf{Protección y estabilización}: formada por resistencias, condensadores y elementos auxiliares de acondicionamiento eléctrico. Incluye el divisor resistivo de adaptación hacia el módulo LTE, los condensadores de desacoplo de alimentación y el condensador electrolítico de \(2200~\mu\mathrm{F}\) para mejorar la estabilidad durante la conmutación del motor.
 \end{itemize}
 
 \section{Correspondencia con el cableado del prototipo}
 
 La Tabla~\ref{tab:correspondencia_esquema_cableado} resume la correspondencia entre los principales bloques del esquema y las conexiones descritas en el manual de instalación.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
-\small
-\begin{tabular}{|p{0.28\textwidth}|p{0.28\textwidth}|p{0.34\textwidth}|}
+\begingroup
+\renewcommand{\arraystretch}{1.35}
+\scriptsize
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|p{0.28\textwidth}|p{0.28\textwidth}|p{0.34\textwidth}|}
+
 \hline
-\rowcolor{gray!20}
-\textbf{Bloque} & \textbf{Elemento principal} & \textbf{Función dentro de la estación} \\
+\rowcolor{URJCRed}
+\TVHead{Bloque} & \TVHead{Elemento principal} & \TVHead{Función dentro de la estación} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Bloque} & \TVHead{Elemento principal} & \TVHead{Función dentro de la estación} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Alimentación & Batería 12 V y LM2596 & Proporcionar alimentación de potencia y tensión regulada de 5 V para la electrónica. \\
 \hline
 Control & Arduino UNO & Coordinar lectura de sensores, publicación de datos y actuación sobre el relé. \\
@@ -54,10 +71,12 @@ Sensorización de suelo & Sensor capacitivo de humedad & Medir el estado hídric
 \hline
 Actuación & Relé y bomba 12 V & Activar físicamente el riego cuando se cumplen las condiciones definidas. \\
 \hline
-\end{tabular}
 \caption{Correspondencia entre el esquema eléctrico y los bloques funcionales de la estación.}
-\label{tab:correspondencia_esquema_cableado}
-\end{table}
+\label{tab:correspondencia_esquema_cableado}\\
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Notas de interpretación}
 

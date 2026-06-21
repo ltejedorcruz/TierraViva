@@ -15,8 +15,8 @@ La validación de TierraViva se plantea como un proceso incremental. En primer l
 \small
 \begin{tabular}{|c|p{0.30\textwidth}|p{0.43\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Fase} & \textbf{Tipo de prueba} & \textbf{Objetivo principal} \\
+\rowcolor{URJCRed}
+\TVHead{Fase} & \TVHead{Tipo de prueba} & \TVHead{Objetivo principal} \\
 \hline
 F1 & Pruebas eléctricas básicas & Verificar alimentación, masas comunes, tensiones y conexiones antes de cargar el sistema completo. \\
 \hline
@@ -51,8 +51,8 @@ El entorno de pruebas se compone de una estación remota, una Raspberry Pi como 
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.58\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Elemento} & \textbf{Uso durante las pruebas} \\
+\rowcolor{URJCRed}
+\TVHead{Elemento} & \TVHead{Uso durante las pruebas} \\
 \hline
 Arduino UNO & Ejecución del \textit{firmware} de estación, lectura de sensores y control del relé. \\
 \hline
@@ -93,8 +93,8 @@ Para considerar válida una prueba, se definen criterios de aceptación claros. 
 \small
 \begin{tabular}{|p{0.30\textwidth}|p{0.56\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Área} & \textbf{Criterio de aceptación} \\
+\rowcolor{URJCRed}
+\TVHead{Área} & \TVHead{Criterio de aceptación} \\
 \hline
 Alimentación & Las tensiones medidas se mantienen dentro de valores seguros antes y durante la prueba. \\
 \hline
@@ -131,8 +131,8 @@ La Tabla \ref{tab:casos_prueba} recoge los casos de prueba principales. Se han s
 \scriptsize
 \begin{tabular}{|c|p{0.20\textwidth}|p{0.30\textwidth}|p{0.28\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{ID} & \textbf{Prueba} & \textbf{Procedimiento} & \textbf{Resultado esperado} \\
+\rowcolor{URJCRed}
+\TVHead{ID} & \TVHead{Prueba} & \TVHead{Procedimiento} & \TVHead{Resultado esperado} \\
 \hline
 P01 & Verificación de alimentación & Medir la salida del LM2596 y comprobar masa común antes de conectar todos los módulos. & Tensiones correctas y ausencia de calentamiento o reinicios. \\
 \hline
@@ -213,8 +213,8 @@ Para reducir riesgos durante las pruebas, la validación se realiza de forma gra
 \small
 \begin{tabular}{|c|p{0.37\textwidth}|p{0.39\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Paso} & \textbf{Acción} & \textbf{Motivo} \\
+\rowcolor{URJCRed}
+\TVHead{Paso} & \TVHead{Acción} & \TVHead{Motivo} \\
 \hline
 1 & Probar sensores y alimentación por separado. & Evitar que un error de cableado afecte al sistema completo. \\
 \hline
@@ -249,8 +249,8 @@ La seguridad funcional en TierraViva se centra en evitar actuaciones no deseadas
 \small
 \begin{tabular}{|p{0.35\textwidth}|p{0.45\textwidth}|p{0.12\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Condición comprobada} & \textbf{Comportamiento esperado} & \textbf{Prioridad} \\
+\rowcolor{URJCRed}
+\TVHead{Condición comprobada} & \TVHead{Comportamiento esperado} & \TVHead{Prioridad} \\
 \hline
 Arranque o reinicio de la estación & El relé debe comenzar apagado. & Alta \\
 \hline
@@ -281,8 +281,8 @@ El plan de pruebas se ha definido teniendo en cuenta los riesgos principales del
 \small
 \begin{tabular}{|c|p{0.42\textwidth}|p{0.34\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Riesgo} & \textbf{Descripción} & \textbf{Pruebas asociadas} \\
+\rowcolor{URJCRed}
+\TVHead{Riesgo} & \TVHead{Descripción} & \TVHead{Pruebas asociadas} \\
 \hline
 R01 & Alimentación insuficiente o inestable del módulo LTE. & P01, P05, P06 \\
 \hline
@@ -317,8 +317,8 @@ Para homogeneizar el registro de resultados se utilizarán los siguientes estado
 \small
 \begin{tabular}{|p{0.22\textwidth}|p{0.64\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Estado} & \textbf{Significado} \\
+\rowcolor{URJCRed}
+\TVHead{Estado} & \TVHead{Significado} \\
 \hline
 No ejecutada & La prueba está definida pero aún no se ha realizado. \\
 \hline

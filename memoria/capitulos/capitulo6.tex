@@ -55,8 +55,6 @@ Esta fase previa no se considera un desvío del proyecto, sino una etapa útil d
 
 Una vez validado el prototipo local con MQTT, la implementación final de la Raspberry Pi se adaptó al modelo de comunicación definido para TierraViva: las estaciones no envían datos directamente a la Raspberry, sino que publican su telemetría y estado en ThingSpeak mediante LTE/HTTP. Por tanto, el primer bloque software de la Raspberry consiste en consultar periódicamente la plataforma \textit{cloud}, obtener la última publicación disponible de cada estación y convertirla a una estructura interna común.
 
-Este bloque se implementa en el módulo principal de ingesta, asociado al fichero \texttt{main.py}, disponible en el repositorio público del proyecto \cite{tierraviva_github}. Su responsabilidad no es decidir el riego ni enviar órdenes a las estaciones, sino mantener actualizada la copia local de los datos publicados en la nube. De esta forma, la Raspberry Pi actúa como sistema de supervisión: lee, normaliza, registra y sirve información al \textit{dashboard}, mientras que la decisión de actuación permanece en el \textit{firmware} de cada estación.
-
 \begin{wrapfigure}{r}{0.32\textwidth}
     \vspace{-12pt}
     \centering
@@ -65,6 +63,8 @@ Este bloque se implementa en el módulo principal de ingesta, asociado al ficher
     \label{fig:logo_thingspeak}
     \vspace{-8pt}
 \end{wrapfigure}
+
+Este bloque se implementa en el módulo principal de ingesta, asociado al fichero \texttt{main.py}, disponible en el repositorio público del proyecto \cite{tierraviva_github}. Su responsabilidad no es decidir el riego ni enviar órdenes a las estaciones, sino mantener actualizada la copia local de los datos publicados en la nube. De esta forma, la Raspberry Pi actúa como sistema de supervisión: lee, normaliza, registra y sirve información al \textit{dashboard}, mientras que la decisión de actuación permanece en el \textit{firmware} de cada estación.
 
 La lectura desde ThingSpeak se organiza a partir de una configuración por estación. En lugar de duplicar código para la estación A y la estación B, el programa utiliza una estructura común que contiene el identificador lógico de la estación, el identificador del canal de ThingSpeak y la clave de lectura correspondiente. Estos valores se cargan desde variables de entorno, por ejemplo \texttt{THINGSPEAK\_CHANNEL\_A}, \texttt{THINGSPEAK\_READ\_KEY\_A}, \texttt{THINGSPEAK\_CHANNEL\_B} y \texttt{THINGSPEAK\_READ\_KEY\_B}. Esta solución evita introducir claves directamente en el código fuente y permite reutilizar la misma lógica para varias estaciones.
 
@@ -81,7 +81,8 @@ La correspondencia aplicada por la Raspberry sigue el contrato de datos definido
 \small
 \begin{tabular}{|p{0.18\textwidth}|p{0.28\textwidth}|p{0.44\textwidth}|}
 \hline
-\textbf{Campo ThingSpeak} & \textbf{Nombre interno} & \textbf{Interpretación en Raspberry Pi} \\
+\rowcolor{URJCRed}
+\TVHead{Campo ThingSpeak} & \TVHead{Nombre interno} & \TVHead{Interpretación en Raspberry Pi} \\
 \hline
 \texttt{field1} & \texttt{soil\_moisture\_pct} & Humedad del suelo normalizada para el prototipo. \\
 \hline
@@ -261,7 +262,8 @@ El diagrama incluye un nodo conceptual denominado \textit{Estación lógica}. Es
 \small
 \begin{tabular}{|p{0.22\textwidth}|p{0.30\textwidth}|p{0.38\textwidth}|}
 \hline
-\textbf{Tabla} & \textbf{Información almacenada} & \textbf{Papel dentro del sistema} \\
+\rowcolor{URJCRed}
+\TVHead{Tabla} & \TVHead{Información almacenada} & \TVHead{Papel dentro del sistema} \\
 \hline
 \texttt{readings} & Lecturas procedentes de ThingSpeak, variables ambientales, humedad de suelo, estado operativo y respuesta original. & Conserva el histórico de telemetría y permite consultar la evolución temporal de cada estación. \\
 \hline
@@ -313,8 +315,8 @@ Además de las variables ambientales, cada publicación de ThingSpeak incluye tr
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.26\textwidth}|p{0.42\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Campo ThingSpeak} & \textbf{Nombre interno} & \textbf{Función en Raspberry Pi} \\
+\rowcolor{URJCRed}
+\TVHead{Campo ThingSpeak} & \TVHead{Nombre interno} & \TVHead{Función en Raspberry Pi} \\
 \hline
 \texttt{field6} & \texttt{relay\_state} & Indica si el relé estaba apagado o activo en la última publicación recibida. \\
 \hline
@@ -341,8 +343,8 @@ Por ejemplo, una estación puede publicar un evento de riego activado, de riego 
 \small
 \begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.36\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Campo} & \textbf{Pregunta que responde} & \textbf{Uso principal} \\
+\rowcolor{URJCRed}
+\TVHead{Campo} & \TVHead{Pregunta que responde} & \TVHead{Uso principal} \\
 \hline
 \texttt{relay\_state} & ¿El relé estaba activo? & Mostrar el estado físico publicado por la estación. \\
 \hline
@@ -369,8 +371,8 @@ El proceso de normalización también convierte los valores recibidos a tipos ad
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.52\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Acción de Raspberry Pi} & \textbf{Finalidad} \\
+\rowcolor{URJCRed}
+\TVHead{Acción de Raspberry Pi} & \TVHead{Finalidad} \\
 \hline
 Leer la última entrada de ThingSpeak & Obtener la telemetría más reciente publicada por cada estación. \\
 \hline
@@ -403,8 +405,8 @@ El \textit{dashboard} consume esos \textit{endpoints} para mostrar al usuario un
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.52\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Elemento software} & \textbf{Uso de los estados} \\
+\rowcolor{URJCRed}
+\TVHead{Elemento software} & \TVHead{Uso de los estados} \\
 \hline
 Ingestor \texttt{main.py} & Recupera y normaliza los campos publicados por ThingSpeak. \\
 \hline
@@ -477,8 +479,8 @@ La API expone un conjunto reducido de \textit{endpoints} orientados a supervisi�
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.54\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Endpoint} & \textbf{Uso dentro del sistema} \\
+\rowcolor{URJCRed}
+\TVHead{Endpoint} & \TVHead{Uso dentro del sistema} \\
 \hline
 \texttt{/} & Sirve el \textit{dashboard} web al navegador. \\
 \hline
@@ -565,8 +567,8 @@ La interfaz se organiza en bloques funcionales: cabecera, selector de estación,
 \small
 \begin{tabular}{|p{0.30\textwidth}|p{0.50\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Bloque del \textit{dashboard}} & \textbf{Función técnica} \\
+\rowcolor{URJCRed}
+\TVHead{Bloque del \textit{dashboard}} & \TVHead{Función técnica} \\
 \hline
 Cabecera y selector & Permiten identificar el sistema y seleccionar la estación consultada. \\
 \hline
@@ -617,7 +619,8 @@ El \textit{script} permite instalar dependencias, preparar el entorno virtual, p
 \small
 \begin{tabular}{|p{0.25\textwidth}|p{0.60\textwidth}|}
 \hline
-\textbf{Comando} & \textbf{Función} \\
+\rowcolor{URJCRed}
+\TVHead{Comando} & \TVHead{Función} \\
 \hline
 \texttt{./tierraviva.sh install} & Crea el entorno, instala dependencias e inicializa la base de datos. \\
 \hline

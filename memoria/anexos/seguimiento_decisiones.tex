@@ -28,8 +28,8 @@ La Tabla \ref{tab:registro_decisiones_tecnicas} resume las decisiones que más h
 \scriptsize
 \begin{tabular}{|p{0.09\textwidth}|p{0.24\textwidth}|p{0.29\textwidth}|p{0.28\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{ID} & \textbf{Decisión} & \textbf{Justificación} & \textbf{Impacto en el proyecto} \\
+\rowcolor{URJCRed}
+\TVHead{ID} & \TVHead{Decisión} & \TVHead{Justificación} & \TVHead{Impacto en el proyecto} \\
 \hline
 D01 & Orientar TierraViva a riego inteligente basado en IoT. & Permitía combinar sensorización, electrónica, comunicaciones, software y aplicación ambiental real dentro de un alcance defendible para un TFG. & El proyecto queda centrado en un prototipo funcional de monitorización y actuación sobre riego. \\
 \hline
@@ -55,6 +55,8 @@ D11 & Validar el relé antes de conectar la bomba. & La actuación física intro
 \hline
 D12 & Documentar limitaciones y decisiones descartadas. & El proyecto combina hardware, comunicaciones y software, por lo que es importante diferenciar lo implementado, lo validado y lo planteado como trabajo futuro. & La memoria gana trazabilidad y evita presentar como terminado aquello que pertenece a futuras versiones. \\
 \hline
+D13 & Incorporar un condensador electrolítico de \(2200~\mu\mathrm{F}\) en la rama de la bomba. & La bomba de agua actúa como carga de motor y puede introducir perturbaciones durante el arranque, parada o conmutación mediante relé. & Se mejora la estabilidad eléctrica del bloque de actuación y se documenta una medida de mitigación aplicada durante el montaje del prototipo. \\
+\hline
 \end{tabular}
 \caption{Registro de decisiones técnicas relevantes.}
 \label{tab:registro_decisiones_tecnicas}
@@ -70,8 +72,8 @@ Durante el desarrollo se valoraron alternativas que finalmente no se incorporaro
 \scriptsize
 \begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Alternativa} & \textbf{Motivo de descarte} & \textbf{Decisión final} \\
+\rowcolor{URJCRed}
+\TVHead{Alternativa} & \TVHead{Motivo de descarte} & \TVHead{Decisión final} \\
 \hline
 Uso exclusivo de WiFi & Dependía de disponer de una red local cercana a la parcela o huerto. & Se adopta conectividad LTE para las estaciones remotas. \\
 \hline
@@ -106,8 +108,8 @@ Algunas decisiones no se limitaron a elegir un componente, sino que modificaron 
 \small
 \begin{tabular}{|p{0.30\textwidth}|p{0.26\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Cambio} & \textbf{Planteamiento inicial} & \textbf{Enfoque final} \\
+\rowcolor{URJCRed}
+\TVHead{Cambio} & \TVHead{Planteamiento inicial} & \TVHead{Enfoque final} \\
 \hline
 Papel de la Raspberry Pi & Posible elemento central de decisión y supervisión. & Nodo local de ingesta, almacenamiento, API y \textit{dashboard}. \\
 \hline

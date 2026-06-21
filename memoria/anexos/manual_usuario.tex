@@ -28,12 +28,13 @@ El \textit{dashboard} de TierraViva puede ser utilizado por dos tipos principale
 
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 \small
 \begin{tabular}{|p{0.28\textwidth}|p{0.58\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Perfil} & \textbf{Uso principal del sistema} \\
+\rowcolor{URJCRed}
+\TVHead{Perfil} & \TVHead{Uso principal del sistema} \\
 \hline
 Usuario no técnico & Consultar el estado de la parcela, comprobar si el suelo está seco o húmedo y revisar si la estación está actualizando datos. \\
 \hline
@@ -74,8 +75,8 @@ El \textit{dashboard} está organizado en bloques visuales para que el estado de
 \small
 \begin{tabular}{|p{0.30\textwidth}|p{0.55\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Zona del dashboard} & \textbf{Información mostrada} \\
+\rowcolor{URJCRed}
+\TVHead{Zona del dashboard} & \TVHead{Información mostrada} \\
 \hline
 Cabecera & Nombre del sistema, estado de conexión y selector de estación. \\
 \hline
@@ -125,8 +126,8 @@ Las tarjetas principales muestran la última lectura disponible para la estació
 \small
 \begin{tabular}{|p{0.26\textwidth}|p{0.22\textwidth}|p{0.38\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Variable} & \textbf{Unidad} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Variable} & \TVHead{Unidad} & \TVHead{Interpretación} \\
 \hline
 Humedad del suelo & \% & Variable principal para evaluar si el sustrato está seco, normal o húmedo. \\
 \hline
@@ -155,8 +156,8 @@ El \textit{dashboard} clasifica la humedad del suelo en tres estados: seco, norm
 \small
 \begin{tabular}{|p{0.24\textwidth}|p{0.28\textwidth}|p{0.34\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Estado} & \textbf{Condición} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Estado} & \TVHead{Condición} & \TVHead{Interpretación} \\
 \hline
 Seco & Humedad inferior al umbral bajo & El sustrato puede requerir riego según la lógica configurada en la estación. \\
 \hline
@@ -183,8 +184,8 @@ El \textit{dashboard} no solo muestra la última lectura, sino también su antig
 \small
 \begin{tabular}{|p{0.24\textwidth}|p{0.30\textwidth}|p{0.32\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Estado} & \textbf{Condición} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Estado} & \TVHead{Condición} & \TVHead{Interpretación} \\
 \hline
 En vivo & Lectura reciente & La estación está enviando datos y la Raspberry Pi los está actualizando correctamente. \\
 \hline
@@ -211,8 +212,8 @@ El \textit{dashboard} muestra el estado del relé recibido desde la estación. E
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.28\textwidth}|p{0.38\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Valor} & \textbf{Estado mostrado} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Valor} & \TVHead{Estado mostrado} & \TVHead{Interpretación} \\
 \hline
 0 & OFF & El relé está apagado y la bomba no debería estar activa. \\
 \hline
@@ -237,8 +238,8 @@ El campo de evento permite interpretar el estado interno de la estación. La Tab
 \small
 \begin{tabular}{|c|p{0.28\textwidth}|p{0.42\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Código} & \textbf{Evento} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Evento} & \TVHead{Interpretación} \\
 \hline
 100 & \texttt{idle} & Estación en reposo, sin riego activo. \\
 \hline
@@ -269,8 +270,8 @@ El campo de diagnóstico aporta información auxiliar sobre el estado del ciclo 
 \small
 \begin{tabular}{|c|p{0.28\textwidth}|p{0.42\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Código} & \textbf{Etiqueta} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Etiqueta} & \TVHead{Interpretación} \\
 \hline
 200 & OK & Funcionamiento correcto. \\
 \hline
@@ -312,8 +313,8 @@ El resumen histórico muestra estadísticas de las últimas 24 horas para la est
 \small
 \begin{tabular}{|p{0.30\textwidth}|p{0.55\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Dato histórico} & \textbf{Utilidad} \\
+\rowcolor{URJCRed}
+\TVHead{Dato histórico} & \TVHead{Utilidad} \\
 \hline
 Número de muestras & Permite comprobar si la estación está enviando datos con regularidad. \\
 \hline
@@ -372,8 +373,8 @@ Una vez instalado el sistema, el uso habitual puede resumirse en los siguientes 
 \scriptsize
 \begin{tabular}{|p{0.28\textwidth}|p{0.32\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Situación observada} & \textbf{Interpretación probable} & \textbf{Actuación recomendada} \\
+\rowcolor{URJCRed}
+\TVHead{Situación observada} & \TVHead{Interpretación probable} & \TVHead{Actuación recomendada} \\
 \hline
 El \textit{dashboard} muestra ``Sin datos'' & No hay lecturas almacenadas para la estación seleccionada. & Comprobar que la estación publica en ThingSpeak y que \texttt{main.py} está ejecutándose. \\
 \hline

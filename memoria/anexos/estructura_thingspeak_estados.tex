@@ -15,12 +15,13 @@ Para evitar mezclar datos de distintas ubicaciones, cada estación debe utilizar
 
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.25}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
 \small
 \begin{tabular}{|p{0.22\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Estación} & \textbf{Variable de canal} & \textbf{Uso en TierraViva} \\
+\rowcolor{URJCRed}
+\TVHead{Estación} & \TVHead{Variable de canal} & \TVHead{Uso en TierraViva} \\
 \hline
 \texttt{A} & \texttt{THINGSPEAK\_CHANNEL\_A} & Canal asociado a la primera estación remota. \\
 \hline
@@ -43,8 +44,8 @@ Cada canal de ThingSpeak dispone de ocho campos. TierraViva utiliza los cinco pr
 \small
 \begin{tabular}{|p{0.14\textwidth}|p{0.26\textwidth}|p{0.44\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Campo} & \textbf{Nombre interno} & \textbf{Descripción} \\
+\rowcolor{URJCRed}
+\TVHead{Campo} & \TVHead{Nombre interno} & \TVHead{Descripción} \\
 \hline
 \texttt{field1} & \texttt{soil\_moisture\_pct} & Humedad del suelo expresada en porcentaje. Es la variable principal para la decisión local de riego. \\
 \hline
@@ -98,8 +99,8 @@ El campo \texttt{field6} indica el estado del relé en el momento de la publicac
 \small
 \begin{tabular}{|p{0.18\textwidth}|p{0.24\textwidth}|p{0.44\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Valor} & \textbf{Estado} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{Valor} & \TVHead{Estado} & \TVHead{Interpretación} \\
 \hline
 \texttt{0} & Relé apagado & La bomba no debería estar alimentada en el momento de la lectura publicada. \\
 \hline
@@ -124,8 +125,8 @@ El campo \texttt{field7} contiene el evento principal de la estación durante el
 \small
 \begin{tabular}{|p{0.16\textwidth}|p{0.26\textwidth}|p{0.44\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Código} & \textbf{Etiqueta} & \textbf{Significado} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Etiqueta} & \TVHead{Significado} \\
 \hline
 \texttt{100} & \texttt{idle} & Estación en reposo. No hay riego activo en el ciclo actual. \\
 \hline
@@ -156,8 +157,8 @@ El campo \texttt{field8} contiene un código auxiliar de diagnóstico. Este valo
 \small
 \begin{tabular}{|p{0.16\textwidth}|p{0.26\textwidth}|p{0.44\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Código} & \textbf{Etiqueta} & \textbf{Significado} \\
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Etiqueta} & \TVHead{Significado} \\
 \hline
 \texttt{200} & \texttt{OK} & Funcionamiento correcto en el ciclo actual. \\
 \hline
@@ -186,8 +187,8 @@ La interpretación más útil se obtiene combinando \texttt{relay\_state}, \text
 \scriptsize
 \begin{tabular}{|p{0.18\textwidth}|p{0.18\textwidth}|p{0.18\textwidth}|p{0.34\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{\texttt{relay\_state}} & \textbf{\texttt{system\_event}} & \textbf{\texttt{debug\_code}} & \textbf{Interpretación} \\
+\rowcolor{URJCRed}
+\TVHead{\texttt{relay\_state}} & \TVHead{\texttt{system\_event}} & \TVHead{\texttt{debug\_code}} & \TVHead{Interpretación} \\
 \hline
 \texttt{0} & \texttt{100} & \texttt{204} & Estación en reposo. No se activa el riego porque no se cumplen las condiciones necesarias. \\
 \hline
@@ -218,8 +219,8 @@ El ingestor \texttt{main.py} consulta la última entrada del canal ThingSpeak y 
 \small
 \begin{tabular}{|p{0.20\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Campo recibido} & \textbf{Nombre interno} & \textbf{Conversión esperada} \\
+\rowcolor{URJCRed}
+\TVHead{Campo recibido} & \TVHead{Nombre interno} & \TVHead{Conversión esperada} \\
 \hline
 \texttt{entry\_id} & \texttt{entry\_id} & Entero. \\
 \hline
@@ -262,8 +263,8 @@ Esta doble estrategia resulta útil durante la depuración y la evolución del p
 \scriptsize
 \begin{tabular}{|p{0.30\textwidth}|p{0.28\textwidth}|p{0.30\textwidth}|}
 \hline
-\rowcolor{gray!20}
-\textbf{Error} & \textbf{Efecto observable} & \textbf{Corrección recomendada} \\
+\rowcolor{URJCRed}
+\TVHead{Error} & \TVHead{Efecto observable} & \TVHead{Corrección recomendada} \\
 \hline
 Clave de escritura incorrecta & El canal no recibe nuevas entradas. & Revisar \texttt{THINGSPEAK\_API\_KEY} en el \textit{firmware}. \\
 \hline
