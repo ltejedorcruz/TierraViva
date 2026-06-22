@@ -1,102 +1,332 @@
 \chapter{Cronograma del proyecto}
 \label{anexo:cronograma}
 
-Este anexo recoge la planificación temporal seguida durante el desarrollo de TierraViva. El cronograma se ha estructurado por fases para reflejar la evolución real del proyecto, desde la definición inicial de la idea hasta la integración del prototipo, las pruebas de funcionamiento y la redacción final de la memoria.
+Este anexo recoge la planificación temporal seguida durante el desarrollo de TierraViva, desde el inicio del Trabajo de Fin de Grado a finales de agosto de 2025 hasta la entrega y defensa previstas en julio de 2026. El cronograma no se plantea como una secuencia rígida y lineal, sino como la reconstrucción ordenada del trabajo real realizado: definición inicial, revisión tecnológica, primeros prototipos, reajuste de arquitectura, implementación \textit{hardware} y \textit{software}, validación funcional, prueba en Agrolab Móstoles y redacción progresiva de la memoria.
 
-La planificación no debe interpretarse como una secuencia rígida y completamente lineal. Al tratarse de un proyecto de carácter experimental, con integración de hardware, comunicaciones móviles, servicios en la nube y software de supervisión, algunas tareas se han solapado y otras han requerido iteraciones adicionales. Esta forma de trabajo ha permitido adaptar el diseño a las limitaciones encontradas durante el desarrollo, manteniendo el objetivo principal del proyecto: construir un sistema funcional, defendible y técnicamente coherente para la monitorización y automatización del riego.
+TierraViva ha requerido integrar electrónica, \textit{firmware}, comunicaciones móviles, plataforma \textit{cloud}, base de datos, API, \textit{dashboard}, actuación física sobre bomba de agua y documentación técnica. Por ello, varias tareas se han desarrollado en paralelo y otras han requerido iteraciones, correcciones y cambios de enfoque.
+
+\section{Periodo de desarrollo}
+
+El desarrollo efectivo del proyecto se extiende desde finales de agosto de 2025 hasta julio de 2026. La entrega de la memoria se sitúa entre los días 6 y 11 de julio de 2026, y la defensa está prevista entre los días 21 y 24 de julio de 2026.
+
+\small
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|p{0.22\textwidth}|p{0.64\textwidth}|}
+\caption{Resumen temporal del desarrollo del proyecto TierraViva.}
+\label{cuadro:resumen_temporal_cronograma}\\
+\hline
+\rowcolor{URJCRed}
+\TVHead{Periodo} & \TVHead{Caracterización del trabajo realizado} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Periodo} & \TVHead{Caracterización del trabajo realizado} \\
+\hline
+\endhead
+
+Finales de agosto--octubre de 2025 & Inicio del TFG, definición de la idea, planificación inicial, primera propuesta al tutor y revisión bibliográfica. Septiembre y octubre tuvieron una dedicación más orientada a análisis, búsqueda de información y organización del alcance. \\
+\hline
+Noviembre--diciembre de 2025 & Consolidación del estado del arte, definición inicial de requisitos y arquitectura, primeros enfoques de prototipado local y selección inicial de tecnologías. \\
+\hline
+Enero--febrero de 2026 & Trabajo con Arduino, sensores y primeros montajes. Reajuste progresivo desde un enfoque más local hacia una arquitectura con estaciones remotas, conectividad LTE y ThingSpeak. Enero tuvo menor disponibilidad por exámenes. \\
+\hline
+Marzo--abril de 2026 & Desarrollo intensivo de comunicaciones, backend, base de datos, API y soporte multiestación. En abril se realizó una visita previa a Agrolab Móstoles junto con Ana Zazo, co-tutora del proyecto. \\
+\hline
+Mayo de 2026 & Consolidación del \textit{firmware} de estación, decisión local de riego, \textit{cooldown}, publicación HTTP, redacción seria de la memoria y cierre de los primeros capítulos técnicos. Mayo tuvo menor disponibilidad por exámenes, compensada con jornadas intensivas fuera del periodo de evaluación. \\
+\hline
+Junio de 2026 & Montaje de la estación B, versión final del \textit{dashboard}, ajustes eléctricos, validación funcional, prueba en Agrolab Móstoles el 22 de junio, fotografías, vídeo, evidencias y cierre de capítulos finales y anexos. \\
+\hline
+Julio de 2026 & Revisión final de memoria, formato, trazabilidad, entrega y preparación de la defensa. \\
+\hline
+\end{longtable}
+
+\normalsize
 
 \section{Fases principales del proyecto}
 
-El desarrollo de TierraViva se ha dividido en varias fases. Cada una de ellas responde a una necesidad concreta del proyecto y contribuye progresivamente a la construcción del prototipo final.
+La Tabla~\ref{cuadro:fases_cronograma} resume las fases principales del desarrollo. Se ha separado la planificación inicial del reajuste posterior de arquitectura porque este cambio fue relevante para el resultado final del prototipo.
 
-\begin{table}[H]
-\begin{center}
 \small
-\begin{tabular}{|p{0.16\textwidth}|p{0.25\textwidth}|p{0.47\textwidth}|}
+\renewcommand{\arraystretch}{1.17}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|p{0.12\textwidth}|p{0.20\textwidth}|p{0.56\textwidth}|}
+\caption{Fases principales del desarrollo de TierraViva.}
+\label{cuadro:fases_cronograma}\\
 \hline
 \rowcolor{URJCRed}
-\TVHead{Fase} & \TVHead{Periodo estimado} & \TVHead{Descripción} \\
+\TVHead{Fase} & \TVHead{Periodo} & \TVHead{Descripción} \\
 \hline
-Fase 1 & M1 & Definición inicial de la idea, análisis del problema y estudio de posibles enfoques para agricultura inteligente, monitorización ambiental y automatización del riego. \\
+\endfirsthead
+
 \hline
-Fase 2 & M1--M2 & Revisión de tecnologías de comunicación y primera arquitectura conceptual. Se valoraron alternativas como LoRaWAN, WiFi y conectividad móvil, teniendo en cuenta cobertura, complejidad, consumo y viabilidad para un prototipo académico. \\
+\rowcolor{URJCRed}
+\TVHead{Fase} & \TVHead{Periodo} & \TVHead{Descripción} \\
 \hline
-Fase 3 & M2--M3 & Reajuste del alcance del proyecto y definición de la arquitectura final basada en estaciones remotas con Arduino UNO, comunicación LTE mediante A7670E-LASA, ThingSpeak como plataforma intermedia y Raspberry Pi como nodo de supervisión. \\
+\endhead
+
+F1 & Ago.--sep. 2025 & Inicio del TFG, análisis del problema, motivación del proyecto y preparación de la primera propuesta formal al tutor. La idea se orientó desde el inicio hacia un sistema IoT aplicado al riego inteligente y a la supervisión ambiental. \\
 \hline
-Fase 4 & M3--M4 & Selección de componentes hardware: sensores ambientales, sensor de humedad del suelo, módulo LTE, relé, bomba de agua, alimentación y cableado. Elaboración de esquemas preliminares de conexión y criterios de seguridad eléctrica. \\
+F2 & Sep.--nov. 2025 & Revisión bibliográfica y estado del arte: IoT, agricultura de precisión, riego inteligente, redes de sensores, plataformas embebidas, conectividad en campo, protocolos de aplicación y plataformas \textit{cloud}. \\
 \hline
-Fase 5 & M4--M5 & Desarrollo inicial del firmware de estación. Integración de sensores, lectura de variables, validación básica de datos, activación del relé y envío de telemetría a ThingSpeak mediante peticiones HTTP. \\
+F3 & Sep.--dic. 2025 & Definición inicial de requisitos, arquitectura preliminar y alcance. Se estudiaron alternativas de sensorización, actuación, supervisión y comunicación, incluyendo enfoques locales basados en Raspberry Pi, puerto serie y MQTT. \\
 \hline
-Fase 6 & M5--M6 & Desarrollo del software de supervisión en Raspberry Pi: consulta de datos desde ThingSpeak, almacenamiento local en SQLite, API con FastAPI y primeros componentes del dashboard web. \\
+F4 & Dic. 2025--feb. 2026 & Primeras pruebas de prototipado: Arduino UNO compatible, sensores BME280, BH1750 y sensor capacitivo de humedad de suelo. Resolución de problemas de programación asociados al conversor USB-serie CH340G. \\
 \hline
-Fase 7 & M6--M7 & Integración de la lógica de riego automático. Definición de umbrales, tiempos máximos de activación, periodo de seguridad entre riegos, registro de eventos y mecanismos de protección frente a lecturas no válidas. \\
+F5 & Ene.--feb. 2026 & Reajuste progresivo de arquitectura hacia estaciones remotas con decisión local, conectividad LTE mediante A7670E-LASA y ThingSpeak como plataforma intermedia de telemetría. \\
 \hline
-Fase 8 & M7--M8 & Pruebas de integración del sistema completo: estación de campo, comunicación LTE, publicación de datos, consulta desde Raspberry Pi, visualización web y actuación sobre la bomba mediante relé. \\
+F6 & Mar.--abr. 2026 & Trabajo con A7670E-LASA, comandos AT, conectividad LTE, publicación HTTP, ThingSpeak, base de datos SQLite, API FastAPI, soporte multiestación y backend en Raspberry Pi. \\
 \hline
-Fase 9 & M8--M9 & Análisis de resultados, revisión de limitaciones, documentación técnica, elaboración de figuras, anexos, tablas y redacción final de la memoria. \\
+F7 & Mayo 2026 & Consolidación del \textit{firmware} de estación: lectura de sensores, modo seguro, confirmación de sequedad, \textit{cooldown}, decisión local de riego, actuación temporizada y publicación de estado. \\
 \hline
-\end{tabular}
-\caption{Fases principales del desarrollo de TierraViva.}
-\label{cuadro:fases_cronograma}
-\end{center}
-\end{table}
+F8 & Mayo--jun. 2026 & Redacción intensiva de memoria en paralelo al cierre técnico: capítulos de diseño, implementación, software, anexos técnicos, plan de pruebas, riesgos, trazabilidad y manuales. \\
+\hline
+F9 & Jun. 2026 & Montaje y prueba de la estación B, versión final del \textit{dashboard}, ajustes del bloque de bomba y alimentación, incorporación del condensador de \(2200~\mu\mathrm{F}\), capturas, logs y evidencias. \\
+\hline
+F10 & Jun. 2026 & Prueba funcional en Agrolab Móstoles. Hubo una visita previa en abril y una prueba final el 22 de junio, en la que se validó la estación B en entorno real de cultivo, se grabó vídeo y se recogió retroalimentación cualitativa. \\
+\hline
+F11 & Jun.--jul. 2026 & Cierre de resultados, discusión, conclusiones, revisión de coherencia, formato, anexos, entrega de la memoria y preparación de la defensa. \\
+\hline
+\end{longtable}
+
+\normalsize
 
 \section{Cronograma general}
 
-La Tabla \ref{cuadro:cronograma_general} resume la distribución temporal de las tareas principales.
+La Tabla~\ref{cuadro:cronograma_general} recoge la distribución temporal de las actividades principales. Se utiliza una marca \textbf{X} para indicar los meses en los que cada actividad tuvo una dedicación significativa. Algunas tareas aparecen en varios meses porque se desarrollaron de forma iterativa.
 
-\begin{table}[H]
-\begin{center}
+\begin{landscape}
 \scriptsize
-\begin{tabular}{|p{0.31\textwidth}|c|c|c|c|c|c|c|c|c|}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{3pt}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|p{0.31\linewidth}|c|c|c|c|c|c|c|c|c|c|c|c|}
+\caption{Cronograma general del proyecto TierraViva entre agosto de 2025 y julio de 2026.}
+\label{cuadro:cronograma_general}\\
 \hline
 \rowcolor{URJCRed}
-\TVHead{Actividad} & \TVHead{M1} & \TVHead{M2} & \TVHead{M3} & \TVHead{M4} & \TVHead{M5} & \TVHead{M6} & \TVHead{M7} & \TVHead{M8} & \TVHead{M9} \\
+\TVHead{Actividad} &
+\TVHead{Ago. 25} & \TVHead{Sep. 25} & \TVHead{Oct. 25} & \TVHead{Nov. 25} &
+\TVHead{Dic. 25} & \TVHead{Ene. 26} & \TVHead{Feb. 26} & \TVHead{Mar. 26} &
+\TVHead{Abr. 26} & \TVHead{May. 26} & \TVHead{Jun. 26} & \TVHead{Jul. 26} \\
 \hline
-Definición del problema y objetivos & X & X &  &  &  &  &  &  &  \\
+\endfirsthead
+
 \hline
-Estudio de alternativas tecnológicas & X & X & X &  &  &  &  &  &  \\
+\rowcolor{URJCRed}
+\TVHead{Actividad} &
+\TVHead{Ago. 25} & \TVHead{Sep. 25} & \TVHead{Oct. 25} & \TVHead{Nov. 25} &
+\TVHead{Dic. 25} & \TVHead{Ene. 26} & \TVHead{Feb. 26} & \TVHead{Mar. 26} &
+\TVHead{Abr. 26} & \TVHead{May. 26} & \TVHead{Jun. 26} & \TVHead{Jul. 26} \\
 \hline
-Reajuste de arquitectura y alcance &  & X & X &  &  &  &  &  &  \\
+\endhead
+
+Inicio del TFG, motivación y definición general de la idea & X & X &  &  &  &  &  &  &  &  &  &  \\
 \hline
-Selección y adquisición de componentes &  &  & X & X &  &  &  &  &  \\
+Primera propuesta formal al tutor &  & X &  &  &  &  &  &  &  &  &  &  \\
 \hline
-Diseño del cableado y montaje preliminar &  &  & X & X & X &  &  &  &  \\
+Revisión bibliográfica y estado del arte &  & X & X & X &  &  &  &  &  &  &  &  \\
 \hline
-Pruebas del módulo LTE A7670E-LASA &  &  &  & X & X &  &  &  &  \\
+Definición inicial de requisitos y arquitectura &  & X & X & X & X &  &  &  &  &  &  &  \\
 \hline
-Desarrollo del firmware de estación &  &  &  & X & X & X &  &  &  \\
+Análisis de alternativas de arquitectura IoT &  & X & X & X & X & X & X &  &  &  &  &  \\
 \hline
-Integración con ThingSpeak &  &  &  &  & X & X & X &  &  \\
+Primer enfoque local con Raspberry, puerto serie y MQTT &  &  &  & X & X & X &  &  &  &  &  &  \\
 \hline
-Desarrollo del backend en Raspberry Pi &  &  &  &  &  & X & X &  &  \\
+Reajuste hacia estaciones LTE y ThingSpeak &  &  &  &  &  & X & X & X & X &  &  &  \\
 \hline
-Desarrollo del dashboard web &  &  &  &  &  & X & X & X &  \\
+Selección y adquisición inicial de componentes &  &  &  & X & X & X & X &  &  &  &  &  \\
 \hline
-Lógica de riego automático y seguridad &  &  &  &  &  &  & X & X &  \\
+Compra de A7670E, relé, regulador y baterías &  &  &  &  &  &  & X &  &  &  &  &  \\
 \hline
-Pruebas de integración del prototipo &  &  &  &  &  &  & X & X & X \\
+Compra de bomba y depósito de agua &  &  &  &  &  &  &  &  &  &  & X &  \\
 \hline
-Análisis de resultados y limitaciones &  &  &  &  &  &  &  & X & X \\
+Preparación de Arduino UNO y resolución CH340G &  &  &  &  &  & X &  &  &  &  &  &  \\
 \hline
-Redacción y revisión de la memoria & X & X & X & X & X & X & X & X & X \\
+Validación de sensores BME280, BH1750 y humedad de suelo &  &  &  &  & X & X &  &  &  &  &  &  \\
 \hline
-\end{tabular}
-\caption{Cronograma general del proyecto TierraViva.}
-\label{cuadro:cronograma_general}
-\end{center}
-\end{table}
+Montaje físico inicial de la estación A &  &  &  &  &  & X & X &  &  &  &  &  \\
+\hline
+Trabajo con A7670E-LASA y comandos AT &  &  &  &  &  &  &  & X & X &  &  &  \\
+\hline
+Primera publicación correcta en ThingSpeak &  &  &  &  &  &  &  &  & X &  &  &  \\
+\hline
+Backend en Raspberry Pi &  &  &  &  &  &  &  & X & X & X &  &  \\
+\hline
+Diseño de base de datos SQLite &  &  &  &  &  &  &  & X & X &  &  &  \\
+\hline
+Implementación de API FastAPI &  &  &  &  &  &  &  & X & X &  &  &  \\
+\hline
+Soporte multiestación en backend y \textit{dashboard} &  &  &  &  &  &  &  & X & X &  & X &  \\
+\hline
+Primera demo básica de \textit{dashboard} &  &  &  &  &  & X &  &  &  &  &  &  \\
+\hline
+Segunda versión del \textit{dashboard} &  &  &  &  &  &  &  &  &  & X &  &  \\
+\hline
+Versión final del \textit{dashboard} &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Desarrollo del \textit{firmware} estable de estación &  &  &  &  &  &  &  & X & X & X &  &  \\
+\hline
+Decisión local de riego en \textit{firmware} &  &  &  &  &  &  &  &  &  & X & X &  \\
+\hline
+Actuación con relé, bomba, temporización y \textit{cooldown} &  &  &  &  &  &  &  &  &  & X & X &  \\
+\hline
+Logs de monitor serie de estación &  &  &  &  &  &  &  &  &  & X &  &  \\
+\hline
+Montaje de estación B &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Pruebas domésticas/laboratorio de estación B &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Ajustes eléctricos y condensador de \(2200~\mu\mathrm{F}\) &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Visita previa a Agrolab Móstoles &  &  &  &  &  &  &  &  & X &  &  &  \\
+\hline
+Prueba funcional en Agrolab Móstoles &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Grabación de vídeo, fotografías y capturas finales &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Redacción seria de memoria &  &  &  &  &  &  &  &  &  & X & X & X \\
+\hline
+Redacción de capítulos 1--6 &  &  &  &  &  &  &  &  &  & X & X &  \\
+\hline
+Elaboración de anexos técnicos &  &  &  &  &  &  &  &  &  & X & X & X \\
+\hline
+Redacción de capítulos 7 y 8 &  &  &  &  &  &  &  &  &  &  & X &  \\
+\hline
+Revisión final, formato, entrega y defensa &  &  &  &  &  &  &  &  &  &  & X & X \\
+\hline
+
+\end{longtable}
+\end{landscape}
+
+\section{Hitos principales}
+
+La Tabla~\ref{cuadro:hitos_cronograma} identifica los hitos más relevantes del proyecto. Estos hitos permiten entender la evolución técnica de TierraViva y muestran que el resultado final no fue una implementación directa desde una solución cerrada, sino una construcción progresiva con reajustes.
+
+\small
+\renewcommand{\arraystretch}{1.16}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|p{0.12\textwidth}|p{0.22\textwidth}|p{0.54\textwidth}|}
+\caption{Hitos principales alcanzados durante el desarrollo de TierraViva.}
+\label{cuadro:hitos_cronograma}\\
+\hline
+\rowcolor{URJCRed}
+\TVHead{Hito} & \TVHead{Periodo} & \TVHead{Resultado alcanzado} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Hito} & \TVHead{Periodo} & \TVHead{Resultado alcanzado} \\
+\hline
+\endhead
+
+H1 & Ago.--sep. 2025 & Inicio del TFG y definición de TierraViva como sistema IoT aplicado a riego inteligente. \\
+\hline
+H2 & Sep. 2025 & Entrega de la primera propuesta formal al tutor. \\
+\hline
+H3 & Sep.--nov. 2025 & Revisión bibliográfica y construcción del estado del arte sobre IoT, agricultura de precisión, riego inteligente y conectividad en campo. \\
+\hline
+H4 & Nov. 2025--ene. 2026 & Primer enfoque local con Raspberry Pi, puerto serie y MQTT, útil como aprendizaje técnico pero posteriormente reajustado. \\
+\hline
+H5 & Ene.--feb. 2026 & Decisión de avanzar hacia estaciones remotas con conectividad LTE, ThingSpeak y mayor autonomía del nodo de campo. \\
+\hline
+H6 & Ene. 2026 & Preparación de Arduino UNO compatible, instalación del controlador CH340G y validación de programación. \\
+\hline
+H7 & Dic. 2025--ene. 2026 & Validación inicial de sensores BME280, BH1750/GY-302 y sensor capacitivo de humedad de suelo. \\
+\hline
+H8 & Abr. 2026 & Primera publicación correcta en ThingSpeak mediante A7670E-LASA y HTTP. \\
+\hline
+H9 & Mar.--abr. 2026 & Desarrollo de backend en Raspberry Pi, base de datos SQLite, API FastAPI y soporte multiestación. \\
+\hline
+H10 & Mayo 2026 & Consolidación del \textit{firmware} de estación con lectura de sensores, modo seguro, \textit{cooldown}, decisión local y riego temporizado. \\
+\hline
+H11 & Junio 2026 & Montaje y prueba de la estación B, versión final del \textit{dashboard} y ajustes eléctricos del bloque de actuación. \\
+\hline
+H12 & 22 de junio de 2026 & Prueba funcional en Agrolab Móstoles con la estación B en entorno real de cultivo, grabación de vídeo, fotografías y recepción cualitativa. \\
+\hline
+H13 & Junio--julio 2026 & Cierre de memoria, anexos, resultados, discusión, conclusiones, entrega y preparación de defensa. \\
+\hline
+\end{longtable}
+
+\normalsize
+
+\section{Iteraciones, reajustes y problemas corregidos}
+
+El desarrollo incluyó varios reajustes relevantes. Estos cambios no se consideran desviaciones negativas, sino decisiones técnicas necesarias para alcanzar una solución más coherente con el objetivo final del TFG.
+
+\small
+\renewcommand{\arraystretch}{1.12}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|p{0.25\textwidth}|p{0.31\textwidth}|p{0.32\textwidth}|}
+\caption{Iteraciones, reajustes y problemas corregidos durante el desarrollo del proyecto.}
+\label{cuadro:iteraciones_cronograma}\\
+\hline
+\rowcolor{URJCRed}
+\TVHead{Iteración o problema} & \TVHead{Motivo} & \TVHead{Resultado o corrección aplicada} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Iteración o problema} & \TVHead{Motivo} & \TVHead{Resultado o corrección aplicada} \\
+\hline
+\endhead
+
+Reajuste desde arquitectura local hacia LTE/ThingSpeak & El enfoque inicial con Raspberry Pi, puerto serie y MQTT limitaba la validación de estaciones remotas en campo. & Se adoptó una arquitectura con estaciones autónomas, LTE, ThingSpeak y supervisión local posterior. \\
+\hline
+Decisión local de riego en el \textit{firmware} & Evitar depender de la nube, la Raspberry Pi o el \textit{dashboard} para accionar una bomba de agua. & La estación decide localmente y la supervisión queda separada del control crítico. \\
+\hline
+Problema de detección del Arduino compatible & La placa no aparecía inicialmente como puerto disponible por falta del controlador CH340G. & Se instaló el controlador correspondiente y se validó la carga de programas en Arduino IDE. \\
+\hline
+Estabilización de comunicación con A7670E-LASA & El módem requería pruebas de baudios, comandos AT, APN, registro LTE y publicación HTTP. & Se estabilizó la comunicación serie a \texttt{9600} baudios y se validó la publicación en ThingSpeak. \\
+\hline
+Separación entre publicación y control & ThingSpeak podía fallar temporalmente o no responder de forma inmediata. & La pérdida de publicación no bloquea la lógica local de riego ni genera una actuación insegura. \\
+\hline
+Evolución del \textit{dashboard} & La primera versión era suficiente para una demo, pero no para la supervisión final del sistema. & Se desarrolló una versión más completa con visualización, histórico, selección de estación y recursos gráficos. \\
+\hline
+Incorporación de estación B & Se quería demostrar que la arquitectura no dependía de una única estación física. & Se montó y probó una segunda estación, con configuración diferenciada y validación en Agrolab. \\
+\hline
+Ajustes en bloque de bomba y alimentación & La bomba introduce perturbaciones y exige una alimentación más robusta que la sensórica. & Se reforzó la documentación eléctrica y se incorporó un condensador de \(2200~\mu\mathrm{F}\) en la rama de la bomba. \\
+\hline
+Validación en Agrolab Móstoles & Era necesario probar el prototipo fuera del laboratorio y obtener evidencias reales de funcionamiento. & Se realizó una visita previa en abril y una prueba funcional el 22 de junio, con vídeo, fotografías y retroalimentación de usuarios. \\
+\hline
+\end{longtable}
+
+\normalsize
 
 \section{Dependencias entre tareas}
 
-Algunas tareas del cronograma dependían directamente de la finalización o estabilización de tareas previas. Las dependencias más relevantes fueron las siguientes:
+El desarrollo de TierraViva presentó dependencias claras entre bloques. Estas dependencias explican por qué algunas tareas tuvieron que resolverse antes de avanzar a fases posteriores.
 
 \begin{itemize}
-    \item La programación del firmware dependía de la selección definitiva de sensores, pines y componentes electrónicos.
-    \item La integración con ThingSpeak dependía de la estabilización de la comunicación LTE y de la definición de los campos de telemetría.
-    \item El backend de Raspberry Pi dependía de disponer de una estructura de datos estable para almacenar lecturas y eventos de riego.
-    \item El dashboard web dependía de la API local y de la definición de los estados relevantes del sistema.
-    \item Las pruebas de riego automático dependían de haber validado previamente la lectura de humedad del suelo, el relé y la actuación sobre la bomba.
+    \item La definición de la arquitectura final dependía de analizar previamente alternativas de comunicación, supervisión y actuación.
+    \item La validación del \textit{firmware} dependía de estabilizar la lectura de sensores, el pinado, la alimentación y el comportamiento del relé.
+    \item La publicación en ThingSpeak dependía de validar el A7670E-LASA, la tarjeta SIM, la cobertura, el APN, los comandos AT y la respuesta HTTP.
+    \item El diseño de la base de datos y la API dependía de fijar previamente la estructura de campos ThingSpeak, nombres internos y códigos de estado.
+    \item El \textit{dashboard} dependía de disponer de una API estable y de una estructura común para consultar estaciones diferenciadas.
+    \item Las pruebas de bomba dependían de haber validado antes alimentación, masa común, relé, temporización y lógica de seguridad.
+    \item La prueba en Agrolab Móstoles dependía de disponer de una estación funcional, comunicación validada, publicación de telemetría y evidencias suficientes para comprobar el flujo completo.
+    \item La redacción final de resultados y conclusiones dependía de cerrar antes la validación funcional, los anexos técnicos y la trazabilidad entre requisitos y pruebas.
 \end{itemize}
 
-Estas dependencias justifican que varias tareas se hayan desarrollado de forma iterativa. En especial, la integración entre hardware, comunicaciones y software requirió ciclos sucesivos de prueba, corrección y validación.
+Estas dependencias muestran que el proyecto no se desarrolló como una suma de tareas independientes, sino como una integración progresiva. Cada bloque condicionó al siguiente y obligó a revisar decisiones a medida que el prototipo pasaba de una idea inicial a un sistema físico funcional.
+
+\section{Redacción de la memoria}
+
+La memoria se desarrolló en paralelo al avance técnico del proyecto, aunque la redacción intensiva comenzó en mayo de 2026. Primero se trabajaron los capítulos de introducción, estado del arte, requisitos y arquitectura; después los capítulos de implementación \textit{hardware}, \textit{firmware} y software; posteriormente se elaboraron los anexos técnicos, manuales, plan de pruebas, gestión de riesgos y trazabilidad; y finalmente se cerraron los capítulos de validación, resultados, discusión y conclusiones.
+
+Esta forma de trabajo permitió que la documentación no se limitara a una descripción final del sistema, sino que recogiera también la evolución real del proyecto: decisiones descartadas, problemas encontrados, reajustes de arquitectura, validación por bloques, evidencias de funcionamiento y limitaciones detectadas.
+
+\section{Conclusión del cronograma}
+
+El cronograma refleja un desarrollo progresivo e iterativo desde finales de agosto de 2025 hasta julio de 2026. La primera parte del proyecto se centró en definir el problema, revisar tecnologías y plantear la arquitectura. La parte intermedia concentró el mayor trabajo técnico: sensores, Arduino, LTE, ThingSpeak, Raspberry Pi, SQLite, API, \textit{dashboard} y decisión local de riego. La fase final integró las estaciones, validó el sistema, generó evidencias, realizó la prueba en Agrolab Móstoles y cerró la memoria.
+
+La planificación seguida muestra que TierraViva no fue un montaje directo ni una implementación lineal. El proyecto evolucionó mediante pruebas, correcciones y decisiones técnicas justificadas, hasta alcanzar un prototipo funcional de extremo a extremo.
