@@ -1,0 +1,218 @@
+\chapter{Resultados, discusión y proyección del sistema}
+\label{cap:resultados_discusion_conclusiones}
+
+Tras la implementación y validación de TierraViva, este capítulo sintetiza los resultados obtenidos y discute el alcance real del sistema desarrollado. La finalidad no es repetir la implementación descrita en los capítulos anteriores, sino valorar el prototipo como una solución completa: qué se ha conseguido, qué decisiones han sido más relevantes, cómo se ha comportado en pruebas reales y qué mejoras permitirían evolucionarlo hacia una versión más robusta.
+
+TierraViva no se limita a una prueba aislada de sensores ni a una visualización de datos. El resultado final es un sistema IoT funcional formado por dos estaciones remotas, comunicación LTE, publicación en ThingSpeak, supervisión local en Raspberry Pi, almacenamiento en SQLite, API FastAPI, \textit{dashboard} web y actuación física sobre riego. Esta integración es el aspecto central del trabajo: el sistema mide, decide, actúa, publica, almacena y visualiza.
+
+\section{Resultados integrados del prototipo}
+\label{sec:resultados_integrados}
+
+El resultado principal del proyecto es la construcción y validación de un prototipo de riego inteligente basado en estaciones autónomas. Las estaciones A y B han sido montadas y probadas siguiendo una arquitectura equivalente, con sensórica ambiental y de suelo, módulo LTE A7670E-LASA, relé, bomba de agua y alimentación independiente.
+
+Cada estación ejecuta localmente el \textit{firmware} de adquisición, decisión y actuación. La Raspberry Pi no controla la bomba ni envía órdenes de riego, sino que actúa como nodo de supervisión: consulta ThingSpeak, almacena lecturas en SQLite, expone datos mediante API y sirve el \textit{dashboard}. Esta separación permite que la actuación crítica permanezca en la estación incluso si la supervisión o la comunicación fallan temporalmente.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\rowcolors{2}{TableRowSoft}{white}
+\begin{tabular}{|p{0.24\textwidth}|p{0.40\textwidth}|p{0.26\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{Bloque} & \TVHead{Resultado conseguido} & \TVHead{Evidencia asociada} \\
+\hline
+Estaciones remotas & Dos estaciones físicas implementadas, configuradas y probadas en entorno de laboratorio y Agrolab Móstoles. & Montaje físico, vídeo, monitor serie y prueba funcional en entorno real. \\
+\hline
+Sensorización & Lectura conjunta de humedad del suelo, temperatura, humedad relativa, presión y luminosidad. & Escaneo I2C, lecturas analógicas, monitor serie y telemetría publicada. \\
+\hline
+Decisión local & Evaluación de humedad, modo seguro, confirmación de sequedad y bloqueo por \textit{cooldown}. & Código de decisión local y registros de monitor serie. \\
+\hline
+Actuación & Activación de bomba mediante relé, actuación temporizada y apagado explícito. & Pruebas P11--P13 y evidencia de riego temporizado. \\
+\hline
+Comunicación LTE & Publicación mediante A7670E-LASA, comandos AT y HTTP. & Respuesta \texttt{+HTTPACTION: 0,200,3} y datos visibles en ThingSpeak. \\
+\hline
+Telemetría & Publicación estructurada en \texttt{field1}--\texttt{field8} con variables físicas y estados internos. & Canales ThingSpeak y anexo de estructura de estados. \\
+\hline
+Supervisión local & Ingesta desde ThingSpeak, almacenamiento SQLite, API FastAPI y \textit{dashboard} web. & Base de datos local, endpoints API y visualización en navegador. \\
+\hline
+Validación real & Prueba funcional con dos estaciones en Agrolab Móstoles, en zonas con diferente humedad de suelo. & Fotografías, vídeo, capturas, monitor serie y observación directa. \\
+\hline
+\end{tabular}
+\caption{Resultados integrados obtenidos en el prototipo TierraViva.}
+\label{tab:resultados_integrados_tierraviva}
+\end{table}
+
+El sistema validado cubre el flujo extremo a extremo planteado para el TFG: captación de datos, decisión local, actuación controlada, publicación remota, almacenamiento histórico, consulta mediante API y visualización en \textit{dashboard}.
+
+\section{Cumplimiento de objetivos, requisitos y pruebas}
+\label{sec:cumplimiento_objetivos_requisitos}
+
+El grado de cumplimiento del proyecto debe valorarse comparando los resultados con los objetivos y requisitos definidos durante el diseño. Por ello, en esta sección no se evalúa únicamente si el prototipo “funciona”, sino si cubre las funciones, restricciones y criterios operativos establecidos en el Capítulo~\ref{cap:capitulo3} y trazados posteriormente en el Anexo~\ref{anexo:trazabilidad_requisitos_pruebas}.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\rowcolors{2}{TableRowSoft}{white}
+\begin{tabular}{|p{0.19\textwidth}|p{0.32\textwidth}|p{0.26\textwidth}|p{0.13\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{Elemento evaluado} & \TVHead{Resultado observado} & \TVHead{Relación con requisitos/pruebas} & \TVHead{Estado} \\
+\hline
+Medición de variables & La estación mide humedad de suelo, temperatura, humedad relativa, presión y luminosidad. & RF-01, RF-02, RF-03; P02--P04, P16. & Cumplido \\
+\hline
+Comunicación remota & La estación publica telemetría mediante LTE/HTTP en ThingSpeak. & RF-04, RF-10; P05, P06, P16. & Cumplido \\
+\hline
+Identificación multiestación & Las estaciones A y B se gestionan mediante canales e identificadores diferenciados. & RF-05, RNF-07; P07, P08, P10, P16. & Cumplido \\
+\hline
+Almacenamiento histórico & La Raspberry Pi conserva lecturas en SQLite evitando duplicados por \texttt{entry\_id}. & RF-06; P07, P08, P16. & Cumplido \\
+\hline
+Visualización & El \textit{dashboard} muestra lecturas, estado, histórico, gráficas y selección de estación. & RF-07, RNF-08; P09, P10, P16. & Cumplido \\
+\hline
+Decisión local de riego & El riego se decide en el \textit{firmware}, no desde la nube ni desde la Raspberry Pi. & RF-08, RF-11, RNF-06; P13--P15. & Cumplido \\
+\hline
+Actuación segura & La bomba se activa por relé durante un tiempo limitado y se apaga explícitamente. & RF-09, ET-05, ET-08; P11, P12, P17. & Cumplido \\
+\hline
+Validación en entorno real & El prototipo se prueba en Agrolab Móstoles con dos estaciones y diferentes condiciones de humedad. & P17; validación funcional en entorno real. & Cumplido \\
+\hline
+\end{tabular}
+\caption{Cumplimiento de objetivos y requisitos a partir de las pruebas realizadas.}
+\label{tab:cumplimiento_objetivos_requisitos}
+\end{table}
+
+Esta tabla permite cerrar el recorrido completo del proyecto: los requisitos no quedan como una lista teórica de diseño, sino vinculados a bloques implementados y pruebas realizadas.
+
+\section{Discusión técnica de la arquitectura final}
+\label{sec:discusion_tecnica_arquitectura}
+
+La arquitectura final de TierraViva es el resultado de varias decisiones tomadas durante el desarrollo. La más importante ha sido mantener la actuación crítica en la estación. Esta decisión condiciona todo el sistema: la nube no ordena el riego, la Raspberry Pi no activa la bomba y el \textit{dashboard} no fuerza actuaciones. La estación mide y decide localmente, mientras que el resto de bloques supervisa, almacena y visualiza.
+
+Esta separación resulta especialmente adecuada en un sistema físico que actúa sobre agua. Si la decisión dependiera de la nube o de una conexión continua, una caída de red, una latencia elevada o una orden incorrecta podrían provocar un comportamiento no deseado. En TierraViva, una pérdida temporal de ThingSpeak afecta a la publicación de datos, pero no deja la bomba sin control.
+
+El uso de LTE mediante A7670E-LASA también ha sido una decisión relevante. Frente a una solución basada únicamente en WiFi, LTE permite que la estación funcione en zonas donde no existe infraestructura local de red. A cambio, introduce más complejidad: comandos AT, alimentación más exigente, consumo superior, necesidad de SIM, cobertura y gestión de errores. El prototipo ha permitido comprobar que esta complejidad es asumible dentro del alcance del TFG, siempre que se valide de forma incremental.
+
+ThingSpeak ha funcionado como una capa intermedia útil para telemetría. Su valor principal ha sido desacoplar las estaciones de la Raspberry Pi: la estación publica desde campo y la Raspberry consulta posteriormente. Sin embargo, ThingSpeak no se interpreta como núcleo de control ni como sistema de tiempo real. Su papel en TierraViva es recibir datos, conservarlos temporalmente y permitir su consulta.
+
+La Raspberry Pi aporta la parte de supervisión local. Al almacenar en SQLite, exponer una API y servir un \textit{dashboard}, el sistema gana trazabilidad, consulta histórica y una interfaz más adaptada al proyecto. Esta capa convierte una publicación aislada de sensores en un sistema supervisable.
+
+La existencia de dos estaciones montadas y probadas refuerza la validez de la arquitectura. Aunque TierraViva no se presenta como red agrícola de gran escala, sí demuestra que el modelo no queda restringido a un único nodo. La separación por identificadores y canales permite escalar conceptualmente a más estaciones, manteniendo una lógica común de supervisión.
+
+\section{Validación en Agrolab Móstoles y recepción cualitativa}
+\label{sec:validacion_recepcion_agrolab}
+
+La prueba funcional en Agrolab Móstoles tiene un valor especial dentro del proyecto porque traslada el prototipo fuera del entorno controlado de laboratorio. Agrolab Móstoles se enmarca en un Laboratorio de Agricultura Abierta impulsado por IMIDRA en colaboración con el Ayuntamiento de Móstoles, orientado a formación agraria, emprendimiento, agricultura social y prácticas de cultivo en un entorno real.
+
+Durante la prueba se desplegaron las dos estaciones en distintas zonas de cultivo, con condiciones de humedad diferentes. Esto permitió comprobar si la lectura del sensor era coherente con el estado del sustrato y si la lógica de riego respondía de forma razonable ante zonas más secas o más húmedas. La prueba no constituye una campaña agronómica prolongada, pero sí una validación funcional relevante en un contexto de uso real.
+
+Además de la comprobación técnica, la prueba permitió recoger impresiones espontáneas de personas usuarias del espacio. Estas observaciones no se presentan como encuesta formal ni como estudio estadístico, pero sí como una primera recepción cualitativa del prototipo por parte de personas familiarizadas con el riego, el cuidado de cultivos y las dificultades prácticas de mantener un huerto.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\rowcolors{2}{TableRowSoft}{white}
+\begin{tabular}{|p{0.36\textwidth}|p{0.50\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{Comentario u observación recibida} & \TVHead{Interpretación para TierraViva} \\
+\hline
+Varios usuarios preguntaron dónde se había comprado el sistema. & El prototipo fue percibido como un sistema funcional y reconocible, no únicamente como un montaje experimental. \\
+\hline
+Al conocer que el sistema había sido construido desde cero, el interés aumentó. & Refuerza el valor del trabajo de integración: electrónica, \textit{firmware}, comunicación, plataforma y actuación fueron desarrollados y ajustados durante el TFG. \\
+\hline
+Una usuaria comentó que le resultaría útil cuando se ausenta y necesita que alguien riegue por ella. & Confirma una necesidad práctica real: automatizar el riego en ausencias y reducir la dependencia de terceras personas. \\
+\hline
+Algunas personas preguntaron si podría montarse o adaptarse para sus casas o huertos. & Indica interés de uso más allá de la demostración académica, aunque el prototipo no se presente como producto comercial final. \\
+\hline
+Se valoró positivamente que el sistema pudiera adaptarse con batería, panel solar, depósito mayor o distinta configuración. & Refuerza la importancia de la modularidad como decisión de diseño y como línea futura. \\
+\hline
+Se sugirió que el sistema tenía potencial suficiente como para protegerse o desarrollarse más. & Aunque se trata de un comentario informal, muestra una percepción positiva del valor práctico del prototipo. \\
+\hline
+\end{tabular}
+\caption{Recepción cualitativa observada durante la prueba funcional en Agrolab Móstoles.}
+\label{tab:recepcion_cualitativa_agrolab}
+\end{table}
+
+Para conservar el carácter real de la prueba sin introducir un tono coloquial excesivo en la memoria, los comentarios se han incorporado de forma anonimizada y resumida. El elemento común en la recepción recibida fue claro: el interés no se centró solo en la tecnología, sino en la utilidad práctica. Los usuarios valoraron especialmente que el sistema pudiera regar cuando la persona no está presente, que se pudiera consultar su estado y que fuera adaptable a depósitos, alimentación o necesidades distintas.
+
+Esta recepción cualitativa refuerza una conclusión importante: TierraViva no solo resuelve un problema técnico de integración IoT, sino que conecta con una necesidad comprensible para usuarios reales de huertos urbanos y pequeñas zonas de cultivo. Esa conexión entre implementación técnica y utilidad percibida es uno de los resultados más relevantes de la prueba en Agrolab.
+
+\section{Limitaciones detectadas}
+\label{sec:limitaciones_detectadas}
+
+El prototipo ha cumplido los objetivos planteados, pero mantiene limitaciones que deben reconocerse para delimitar correctamente su alcance.
+
+La primera limitación es la calibración agronómica del sensor de humedad del suelo. El sistema permite diferenciar situaciones secas y húmedas y activar el riego según umbrales, pero una calibración completa requeriría analizar distintos sustratos, profundidades, cultivos, tiempos de infiltración y evolución de humedad tras cada riego.
+
+La segunda limitación es la dependencia de cobertura LTE y alimentación estable. El módulo A7670E-LASA permite independencia frente a WiFi local, pero requiere una alimentación robusta, una SIM operativa, cobertura suficiente y una gestión adecuada de errores. 
+
+Otra limitación es la robustez física. El montaje actual permite validar la arquitectura y el funcionamiento, pero una versión de campo prolongada requeriría encapsulado, conectores adecuados, protección frente a humedad, organización del cableado y mayor resistencia mecánica.
+
+Por último, la prueba en Agrolab Móstoles es una validación funcional en entorno real, no una certificación agronómica. No permite afirmar ahorros hídricos cuantificados, mejoras de rendimiento del cultivo ni comportamiento estacional. Estas conclusiones requerirían campañas de larga duración y mediciones comparativas.
+
+\section{Líneas futuras}
+\label{sec:lineas_futuras}
+
+Las líneas futuras de TierraViva se organizan en función de las limitaciones detectadas y de la recepción cualitativa obtenida durante la prueba en Agrolab.
+
+Una primera evolución sería mejorar la calibración agronómica del sensor de humedad. Para ello sería necesario trabajar con distintos tipos de suelo, diferentes profundidades de sensor y mediciones repetidas tras ciclos de riego. Esta calibración permitiría ajustar los umbrales de forma menos experimental y más vinculada al comportamiento real del sustrato.
+
+La segunda línea futura es la autonomía energética. La integración de panel solar, batería dimensionada y regulador de carga permitiría desplegar estaciones durante periodos más largos. Esta mejora fue especialmente coherente con los comentarios recibidos en Agrolab, donde se valoró la posibilidad de adaptar batería, alimentación y depósito a cada caso.
+
+Una tercera línea es incorporar configuración remota desde el \textit{dashboard}. Esta mejora permitiría modificar umbrales de humedad, duración de riego, frecuencia de envío o parámetros de \textit{cooldown} sin reprogramar el Arduino. No obstante, no debe plantearse como un simple botón añadido a la interfaz: implicaría diseñar un canal descendente seguro, validación de órdenes, persistencia de configuración y límites que impidan actuaciones peligrosas.
+
+También podría añadirse un modo de riego manual supervisado desde el \textit{dashboard}. Esta función permitiría activar un riego puntual bajo control del usuario, pero debería incorporar restricciones de seguridad: tiempo máximo, confirmación explícita, bloqueo por \textit{cooldown}, comprobación de estado de estación y registro del evento.
+
+Otra línea relevante es la incorporación de inteligencia artificial o modelos predictivos. En una versión futura, con suficiente histórico de humedad, meteorología, riegos y respuesta del suelo, podrían entrenarse modelos para anticipar necesidades de riego o ajustar umbrales dinámicamente. En el prototipo actual no se implementa IA porque no existe todavía un volumen de datos suficiente ni una campaña prolongada que permita validar predicciones de forma rigurosa.
+
+También se podrían integrar sensores adicionales: caudalímetro para estimar volumen aplicado, sensor de nivel de depósito para evitar activar la bomba sin agua, pH, conductividad eléctrica o sensores meteorológicos complementarios. Estas variables permitirían pasar de un sistema de riego basado principalmente en humedad de suelo a una supervisión agronómica más completa.
+
+Desde el punto de vista físico, una evolución natural sería diseñar una PCB propia, mejorar el encapsulado, emplear conectores estancos, ordenar el cableado y preparar una caja de campo. Estas mejoras no cambian la arquitectura conceptual, pero sí aumentarían la robustez y facilidad de instalación.
+
+Finalmente, el sistema podría evolucionar hacia una gestión multiestación más avanzada. Esto incluiría alta y baja de estaciones desde el \textit{dashboard}, comparación entre zonas de cultivo, reglas por estación, agrupación por parcelas y alertas de funcionamiento anómalo.
+
+\section{Alineación ambiental y social}
+\label{sec:alineacion_ambiental_social}
+
+La alineación de TierraViva con los Objetivos de Desarrollo Sostenible se entiende como una contribución potencial dentro del alcance de un prototipo académico. El sistema no cuantifica todavía ahorro hídrico ni demuestra una mejora agronómica prolongada, pero sí materializa una arquitectura orientada a medir condiciones reales del entorno, evitar actuaciones de riego puramente fijas, supervisar el estado del sistema y facilitar futuras optimizaciones basadas en datos.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.16}
+\rowcolors{2}{TableRowSoft}{white}
+\begin{tabular}{|p{0.13\textwidth}|p{0.32\textwidth}|p{0.43\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{ODS} & \TVHead{Relación con TierraViva} & \TVHead{Resultado o alcance real del prototipo} \\
+\hline
+ODS 2 & Agricultura más sostenible y apoyada en datos. & Las estaciones permiten observar humedad del suelo y variables ambientales para apoyar decisiones de riego más informadas. \\
+\hline
+ODS 6 & Uso más eficiente del agua. & El riego se activa por lógica local y durante un tiempo limitado, aunque no se cuantifica todavía ahorro hídrico. \\
+\hline
+ODS 12 & Uso responsable y adaptable de recursos. & El diseño modular permite adaptar batería, depósito, alimentación o número de estaciones según el escenario. \\
+\hline
+ODS 13 & Observación ambiental y adaptación futura. & El histórico de datos puede servir como base para analizar condiciones ambientales y mejorar reglas de riego en versiones posteriores. \\
+\hline
+\end{tabular}
+\caption{Alineación de TierraViva con los Objetivos de Desarrollo Sostenible dentro del alcance del prototipo.}
+\label{tab:alineacion_ods_tierraviva}
+\end{table}
+
+Desde el punto de vista social, la prueba en Agrolab Móstoles mostró que el sistema puede resultar comprensible y útil para usuarios no técnicos, especialmente por la posibilidad de supervisar el estado del riego, automatizar actuaciones durante ausencias y adaptar el montaje a distintas necesidades. Esta recepción refuerza que el valor del prototipo no reside solo en la integración tecnológica, sino también en su aplicabilidad en huertos urbanos y pequeñas zonas de cultivo.
+
+\section{Conclusiones finales}
+\label{sec:conclusiones_finales}
+
+El Trabajo de Fin de Grado ha permitido diseñar, implementar y validar TierraViva, un prototipo IoT de riego inteligente formado por dos estaciones remotas, comunicación LTE, telemetría en ThingSpeak, supervisión en Raspberry Pi, almacenamiento SQLite, API FastAPI, \textit{dashboard} web y actuación física mediante relé y bomba de agua.
+
+El sistema demuestra el ciclo completo de funcionamiento: mide variables del entorno y del suelo, interpreta la humedad mediante \textit{firmware}, decide localmente si debe regar, activa la bomba durante un tiempo limitado, publica su estado y permite supervisar los datos de forma local y remota. Esta integración confirma que el trabajo no se ha limitado a un módulo aislado, sino a una arquitectura funcional de extremo a extremo.
+
+La decisión de mantener el control crítico en la estación ha sido esencial. Gracias a ella, la pérdida de comunicación con ThingSpeak, la caída del nodo de supervisión o la ausencia del \textit{dashboard} no generan una actuación insegura de la bomba. Esta separación entre actuación local y supervisión remota es una de las aportaciones técnicas más importantes del proyecto.
+
+La validación en Agrolab Móstoles aporta una dimensión adicional: el sistema no solo funcionó en entorno controlado, sino que fue probado en zonas reales de cultivo, con dos estaciones montadas y ante usuarios potenciales. La recepción cualitativa obtenida mostró interés por la utilidad del sistema, especialmente para ausencias, supervisión remota y adaptación modular.
+
+TierraViva mantiene limitaciones: calibración agronómica todavía inicial, dependencia de cobertura LTE, consumo del módulo celular, ausencia de encapsulado definitivo y falta de campañas prolongadas. Sin embargo, estas limitaciones están identificadas y conducen a líneas futuras claras: energía solar, configuración remota, riego manual seguro, IA predictiva, sensores adicionales, encapsulado, PCB y gestión multiestación avanzada.
+
+En conjunto, TierraViva cumple los objetivos del TFG y constituye una base técnica sólida, funcional, estable, modular yescalable. No se presenta como producto comercial terminado, sino como un prototipo académico avanzado que demuestra la viabilidad de integrar sensórica, comunicaciones móviles, supervisión software y actuación local segura para riego inteligente.
