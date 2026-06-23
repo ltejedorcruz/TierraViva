@@ -2,11 +2,10 @@ import json
 import paho.mqtt.client as mqtt
 import database
 
-# Configuración (provisional: usamos hum_pct como “humedad” para el dashboard)
-UMBRAL_HUMEDAD_AIRE = 35.0  # %HR (esto NO es humedad del suelo; lo ajustaremos luego)
+UMBRAL_HUMEDAD_AIRE = 35.0  # %HR (esto NO es humedad del suelo)
 
 TOPIC_TELEMETRY = "tierraviva/stations/+/telemetry"
-TOPIC_ACTUADORES_BASE = "tierraviva/actuadores"  # dejamos ya TierraViva
+TOPIC_ACTUADORES_BASE = "tierraviva/actuadores"
 
 def on_message(client, userdata, msg):
     try:
@@ -23,7 +22,6 @@ def on_message(client, userdata, msg):
         lux = data.get("lux", None)
         pres_hpa = data.get("pres_hpa", None)
 
-        # Normalizamos tipos por si vienen como strings
         try:
             soil_raw = int(soil_raw) if soil_raw is not None else None
         except Exception:
@@ -54,7 +52,6 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print(f"Error procesando mensaje MQTT: {e} | payload={msg.payload!r}")
 
-# Inicio
 database.init_db()
 client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
 client.on_message = on_message
