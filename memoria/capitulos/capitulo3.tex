@@ -26,24 +26,30 @@ El término \textit{dashboard} se refiere a un panel web de supervisión que int
 
 En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requisitos funcionales considerados para el diseño del prototipo.
 
-\begin{table}[H]
-\centering
 \small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.12}
 \rowcolors{2}{TableRowSoft}{white}
 
-\makebox[\textwidth][c]{%
-\hspace*{-0.7cm}%
-\begin{tabular}{|
+\begin{longtable}{|
 >{\raggedright\arraybackslash}p{0.06\textwidth}|
->{\raggedright\arraybackslash}p{0.22\textwidth}|
->{\raggedright\arraybackslash}p{0.52\textwidth}|
->{\raggedright\arraybackslash}p{0.24\textwidth}|}
+>{\raggedright\arraybackslash}p{0.21\textwidth}|
+>{\raggedright\arraybackslash}p{0.48\textwidth}|
+>{\raggedright\arraybackslash}p{0.19\textwidth}|}
+\caption{Requisitos funcionales del sistema TierraViva}
+\label{cuadro:requisitos_funcionales}\\
 \hline
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Requisito} & \TVHead{Descripción} & \TVHead{Validación prevista} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Requisito} & \TVHead{Descripción} & \TVHead{Validación prevista} \\
+\hline
+\endhead
+
 RF-01 & Medición de humedad del suelo & El sistema debe obtener lecturas periódicas de la humedad del sustrato en la zona monitorizada. & Prueba con sensor capacitivo de humedad del suelo. \\
 \hline
 RF-02 & Medición ambiental & El sistema debe medir variables ambientales relevantes, incluyendo temperatura, humedad relativa y presión atmosférica. & Prueba con sensor ambiental. \\
@@ -66,12 +72,10 @@ RF-10 & Publicación de estado de actuación & La estación debe publicar el est
 \hline
 RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, \textit{cooldown} activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
 \hline
-\end{tabular}%
-}
 
-\caption{Requisitos funcionales del sistema TierraViva}
-\label{cuadro:requisitos_funcionales}
-\end{table}
+\end{longtable}
+
+\normalsize
 
 Los requisitos funcionales se agrupan en cuatro bloques. Los requisitos RF-01 a RF-03 cubren la adquisición de información en campo mediante sensores de suelo y ambiente. Los requisitos RF-04 a RF-07 definen el flujo de datos hacia la plataforma intermedia, el almacenamiento histórico y la visualización. Por último, RF-08, RF-09 y RF-10 incorporan la decisión local de riego, la actuación física y la publicación del estado operativo de cada estación.
 
@@ -201,64 +205,38 @@ La actualización del \textit{dashboard} puede realizarse con mayor frecuencia q
 \section{Metodología de trabajo}
 \label{sec:metodologia_trabajo}
 
-La metodología seguida en TierraViva se ha basado en un desarrollo incremental por bloques. En lugar de intentar construir el sistema completo desde el primer momento, se ha dividido el proyecto en fases más pequeñas, cada una orientada a validar una parte concreta de la arquitectura. Este enfoque resulta adecuado para un sistema IoT con sensores, comunicaciones, almacenamiento, visualización y actuación física, ya que permite aislar errores y reducir el riesgo de integración.
+La metodología seguida en TierraViva se ha basado en un desarrollo incremental por bloques. Este enfoque resulta adecuado para un sistema IoT que combina sensórica, comunicaciones, almacenamiento, visualización y actuación física, ya que permite validar cada parte por separado antes de integrarla en el sistema completo.
 
-La idea principal ha sido avanzar desde pruebas controladas hacia una arquitectura cada vez más cercana al funcionamiento final. Primero se analizaron las necesidades del problema y las alternativas tecnológicas disponibles. Después se desarrollaron prototipos parciales para comprobar sensores, comunicaciones, almacenamiento y visualización. Finalmente, las distintas partes se fueron conectando hasta formar una solución de monitorización y control más completa.
-
-Esta forma de trabajo también ha permitido documentar decisiones y cambios de enfoque. En un proyecto de este tipo, no todas las decisiones se pueden cerrar desde el principio, ya que algunas dependen de la disponibilidad real de hardware, de la facilidad de integración o de los resultados obtenidos en pruebas. Por ello, la metodología no se ha limitado a implementar una arquitectura previamente fija, sino que ha incorporado revisión, validación y corrección de decisiones durante el desarrollo.
-
-En la Tabla~\ref{cuadro:metodologia_fases} se resumen las fases principales seguidas durante el proyecto.
+El trabajo no se desarrolló como una implementación lineal de una arquitectura cerrada desde el inicio. Durante el proyecto se realizaron pruebas parciales, se descartaron alternativas, se reajustó la arquitectura y se documentaron incidencias técnicas. Esta forma de trabajo permitió reducir el riesgo de integración y justificar las decisiones adoptadas.
 
 \begin{table}[H]
 \centering
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
+\small
+\renewcommand{\arraystretch}{1.12}
 \rowcolors{2}{TableRowSoft}{white}
-
-\makebox[\textwidth][c]{%
-\hspace*{-0.7cm}%
-\begin{tabular}{|
->{\raggedright\arraybackslash}p{0.07\textwidth}|
->{\raggedright\arraybackslash}p{0.24\textwidth}|
->{\raggedright\arraybackslash}p{0.68\textwidth}|}
+\begin{tabular}{|p{0.20\textwidth}|p{0.68\textwidth}|}
 \hline
 \rowcolor{URJCRed}
-\TVHead{Fase} & \TVHead{Nombre} & \TVHead{Objetivo principal} \\
+\TVHead{Fase} & \TVHead{Objetivo principal} \\
 \hline
-1 & Análisis inicial del problema & Identificar la necesidad de monitorizar y controlar el riego en un entorno no supervisado de forma continua. \\
+Análisis y revisión tecnológica & Identificar el problema, revisar alternativas de sensorización, comunicación, plataformas embebidas y supervisión IoT. \\
 \hline
-2 & Revisión tecnológica & Estudiar alternativas de sensorización, plataformas embebidas, comunicaciones, almacenamiento, visualización y actuación. \\
+Diseño conceptual & Definir requisitos, arquitectura por bloques, separación entre control local y supervisión, y criterios de seguridad funcional. \\
 \hline
-3 & Diseño conceptual de la arquitectura & Definir los bloques principales del sistema y la relación entre estaciones autónomas de campo, plataforma intermedia, sistema de supervisión y actuador. \\
+Prototipado parcial & Validar sensores, Arduino, comunicación, almacenamiento, API y \textit{dashboard} mediante pruebas separadas. \\
 \hline
-4 & Prototipo local con Raspberry & Validar una primera cadena de adquisición, mensajería, almacenamiento y visualización mediante Raspberry Pi, MQTT, SQLite, FastAPI y \textit{dashboard}. \\
+Reajuste de arquitectura & Sustituir el enfoque local inicial por estaciones remotas con LTE, ThingSpeak y decisión local en \textit{firmware}. \\
 \hline
-5 & Validación de sensores & Comprobar el funcionamiento de los sensores de humedad de suelo, luminosidad y variables ambientales antes de integrarlos en una estación. \\
+Integración y validación & Conectar sensórica, comunicación, base de datos, API, \textit{dashboard}, relé, bomba y pruebas funcionales. \\
 \hline
-6 & Validación de comunicaciones & Probar la comunicación remota necesaria para publicar telemetría y estado desde las estaciones. \\
+Documentación y cierre & Registrar decisiones, problemas, evidencias, anexos técnicos, resultados, limitaciones y conclusiones. \\
 \hline
-7 & Elección de plataforma \textit{cloud} & Seleccionar una plataforma intermedia que permitiera publicar telemetría, consultar datos remotos y supervisar el estado de las estaciones de forma sencilla y verificable. \\
-\hline
-8 & Diseño de actuación local & Definir el control autónomo de la bomba de agua mediante relé, incluyendo reglas locales, tiempos máximos, \textit{cooldown} y estado seguro. \\
-\hline
-9 & Integración de subsistemas & Conectar adquisición, comunicación, supervisión, almacenamiento, visualización, decisión local y actuación en una arquitectura coherente. \\
-\hline
-10 & Validación experimental & Comprobar el funcionamiento del sistema mediante pruebas parciales, pruebas de estación autónoma y pruebas de supervisión extremo a extremo. \\
-\hline
-11 & Documentación de incidencias y decisiones & Registrar problemas encontrados, alternativas descartadas, cambios de enfoque y criterios técnicos adoptados. \\
-\hline
-\end{tabular}%
-}
-
-\caption{Fases principales de la metodología de trabajo}
+\end{tabular}
+\caption{Resumen de la metodología incremental seguida en TierraViva.}
 \label{cuadro:metodologia_fases}
 \end{table}
 
-Las primeras fases permitieron transformar la necesidad inicial en requisitos técnicos y revisar las alternativas de sensorización, comunicaciones, plataformas embebidas, almacenamiento y visualización. A partir de esa revisión se definió una arquitectura por bloques, con estaciones autónomas de campo, plataforma intermedia, sistema de supervisión y actuación local.
-
-El prototipo local previo con Raspberry Pi permitió validar una primera cadena de adquisición, almacenamiento, API y \textit{dashboard} antes de adoptar la arquitectura final con LTE y ThingSpeak. Posteriormente se validaron sensores, comunicaciones y actuación por separado, evitando mezclar problemas de cableado, alimentación, módem, \textit{backend} o lógica de riego en una única fase de integración.
-
-La integración final conectó adquisición, publicación de telemetría, almacenamiento local, visualización, decisión local y actuación sobre el relé. Durante este proceso se documentaron incidencias, alternativas descartadas y cambios de enfoque, especialmente la separación entre supervisión y control local. Esta decisión trasladó la lógica crítica de riego al \textit{firmware} de cada estación y dejó la Raspberry Pi como sistema de consulta, histórico y visualización.
+El cronograma detallado del proyecto se recoge en el Anexo~\ref{anexo:cronograma}, y el seguimiento de decisiones técnicas se documenta en el Anexo~\ref{anexo:seguimiento_decisiones}. En este capítulo interesa únicamente fijar el criterio metodológico: avanzar por bloques, validar antes de integrar y reajustar la arquitectura cuando las pruebas lo hicieron necesario.
 
 \section{Arquitectura general planteada}
 \label{sec:arquitectura_general_planteada}
