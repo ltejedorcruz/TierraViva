@@ -9,7 +9,7 @@ BAUDRATE = 115200
 MQTT_HOST = "127.0.0.1"
 MQTT_PORT = 1883
 
-BASE_TOPIC = "tierraviva/stations"  # topic del sistema
+BASE_TOPIC = "tierraviva/stations"
 
 def main():
     client = mqtt.Client()
@@ -19,7 +19,6 @@ def main():
     while True:
         try:
             with serial.Serial(SERIAL_PORT, BAUDRATE, timeout=2) as ser:
-                # Vacía líneas basura al arrancar el Arduino/serial
                 time.sleep(2)
                 ser.reset_input_buffer()
 
@@ -28,12 +27,10 @@ def main():
                     if not line:
                         continue
 
-                    # Comentarios/boot del Arduino
                     if line.startswith("#"):
                         print(f"BOOT: {line}")
                         continue
 
-                    # Solo aceptamos JSON en una línea
                     if not (line.startswith("{") and line.endswith("}")):
                         print(f"SKIP: {line}")
                         continue
