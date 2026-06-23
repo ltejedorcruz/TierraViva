@@ -5,56 +5,31 @@
 #include <Adafruit_BME280.h>
 #include <string.h>
 
-// ====
-// Módem LTE
-// ====
 SoftwareSerial modem(10, 11); // RX Arduino <- TX módem, TX Arduino -> RX módem
-
-// ====
-// Sensores
-// ====
 BH1750 lightMeter;
 Adafruit_BME280 bme;
 
-// ====
-// Configuración general
-// ====
+
 const char APN[] = "internet";
 const char THINGSPEAK_API_KEY[] = "****************";
-
 const int SOIL_PIN = A0;
 const int RELAY_PIN = 7;
-
-// Calibración sonda
 const int SOIL_DRY = 558;
 const int SOIL_WET = 211;
-
-// Relé típico activo en LOW
 const byte RELAY_ON = LOW;
 const byte RELAY_OFF = HIGH;
-
-// Tiempos
 const unsigned long SEND_INTERVAL_MS = 10000UL;
 const unsigned long NETWORK_RETRY_MS = 5000UL;
 const unsigned long LTE_WAIT_MAX_MS = 30000UL;
-
-// Riego
 const unsigned long IRRIGATION_SECONDS = 10UL;
 // const unsigned long COOLDOWN_MS = 30UL * 60UL * 1000UL; // 30 min
 const unsigned long COOLDOWN_MS = 60UL * 1000UL; // 60 segundos
-
-// Umbrales
 const int NORMAL_SOIL_THRESHOLD = 30;
 const int SAFE_SOIL_THRESHOLD = 15;
-
-// Confirmación de estado
 const byte SAFE_EXIT_VALID_CYCLES = 3;
 const byte NORMAL_CONFIRM_DRY_CYCLES = 2;
 const byte SAFE_CONFIRM_DRY_CYCLES = 1;
 
-// ====
-// Estado
-// ====
 bool mobileDataReady = false;
 long modemBaudDetected = -1;
 
@@ -88,9 +63,6 @@ char tsHum[8];
 char tsUrl[180];
 char httpResp[128];
 
-// ====
-// Utilidades serie del módem
-// ====
 void clearModemBuffer() {
   while (modem.available()) {
     modem.read();
@@ -139,9 +111,6 @@ bool sendATCommand(const char* cmd, char* response, size_t size, unsigned long t
   return readReply(response, size, timeoutMs);
 }
 
-// ====
-// Detección de baudios
-// ====
 bool probeBaud(long baud) {
   char resp[80];
 
@@ -178,9 +147,6 @@ long detectModemBaud() {
   return -1;
 }
 
-// ====
-// Fijar 9600 si hace falta
-// ====
 bool setModem9600IfNeeded(long detectedBaud) {
   if (detectedBaud < 0) return false;
 
@@ -212,9 +178,6 @@ bool setModem9600IfNeeded(long detectedBaud) {
   return true;
 }
 
-// ====
-// Red LTE
-// ====
 bool isNetworkRegistered() {
   char resp[120];
 
@@ -319,9 +282,6 @@ void printNetworkInfo() {
   printSignalPretty();
 }
 
-// ====
-// Lectura de sensores
-// ====
 int readSoilRaw() {
   long sum = 0;
 
@@ -382,9 +342,6 @@ void readSensors() {
   Serial.println(pressureHpa);
 }
 
-// ====
-// Modo seguro y decisión local
-// ====
 bool cooldownActive() {
   if (lastIrrigationEndMs == 0) return false;
   return (millis() - lastIrrigationEndMs) < COOLDOWN_MS;
@@ -522,9 +479,6 @@ bool sendThingSpeak() {
   return httpOk;
 }
 
-// ====
-// Setup
-// ====
 void setup() {
   Serial.begin(9600);
   delay(2500);
@@ -590,9 +544,6 @@ void setup() {
   Serial.println(F("Sistema listo"));
 }
 
-// ====
-// Loop principal
-// ====
 void loop() {
   if (!mobileDataReady) {
     Serial.println(F("Red no preparada. Reintentando..."));
