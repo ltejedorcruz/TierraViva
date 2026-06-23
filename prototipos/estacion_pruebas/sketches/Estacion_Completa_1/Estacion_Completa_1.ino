@@ -15,7 +15,7 @@ const char THINGSPEAK_API_KEY[] = "REEMPLAZAR_POR_WRITE_API_KEY";
 const int SOIL_PIN = A0;
 const int RELAY_PIN = 7;
 
-// Calibración inicial de tu sensor
+// Calibración inicial del sensor
 const int SOIL_DRY = 558;  // seco / aire
 const int SOIL_WET = 211;  // húmedo
 
@@ -144,7 +144,6 @@ bool sendThingSpeak(int soilPercent, float tempC, float humPct, float lux) {
     luxStr
   );
 
-  // Cerrar sesión previa si existe; ERROR es aceptable
   clearModemBuffer();
   modem.println("AT+HTTPTERM");
   waitForText("OK", 2000);
@@ -175,7 +174,6 @@ void setup() {
 
   pinMode(SOIL_PIN, INPUT);
 
-  // Muy importante para que el relé no se active al arrancar
   digitalWrite(RELAY_PIN, RELAY_OFF);
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, RELAY_OFF);
