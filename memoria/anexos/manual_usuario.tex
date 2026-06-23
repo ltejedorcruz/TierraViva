@@ -67,7 +67,14 @@ http://127.0.0.1:8000/
 
 \section{Vista general del \textit{dashboard}}
 
-El \textit{dashboard} está organizado en bloques visuales para que el estado del sistema pueda interpretarse rápidamente. La Tabla \ref{tab:zonas_dashboard} resume las zonas principales de la interfaz.
+El \textit{dashboard} está organizado en bloques visuales para que el estado del sistema pueda interpretarse rápidamente. La Figura~\ref{fig:manual_dashboard_vista_general} muestra una vista general de la interfaz final, y la Tabla~\ref{tab:zonas_dashboard} resume las zonas principales.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dashboard_final_vista_general.jpg}
+    \caption{Vista general del \textit{dashboard} web de TierraViva.}
+    \label{fig:manual_dashboard_vista_general}
+\end{figure}
 
 \begin{table}[H]
 \centering
@@ -101,7 +108,7 @@ Tabla de últimas lecturas & Registros recientes almacenados en SQLite. \\
 
 \section{Selección de estación}
 
-Si el sistema tiene más de una estación configurada, el \textit{dashboard} permite seleccionar la estación activa mediante un desplegable. En la configuración actual están disponibleslas estaciones \texttt{A} y \texttt{B}.
+Si el sistema tiene más de una estación configurada, el \textit{dashboard} permite seleccionar la estación activa mediante un desplegable. En la configuración actual están disponibles las estaciones \texttt{A} y \texttt{B}. El selector se encuentra en la zona superior derecha de la interfaz, junto al indicador de conexión.
 
 Al seleccionar una estación, el \textit{dashboard} actualiza:
 
@@ -303,9 +310,23 @@ El \textit{dashboard} incluye gráficas de evolución reciente para las variable
 
 Las gráficas se construyen a partir de las últimas lecturas almacenadas en SQLite. Si no existen datos suficientes, la gráfica mostrará un mensaje indicando que todavía no hay información disponible.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dashboard_graficas_estado.jpg}
+    \caption{Gráficas de evolución reciente del \textit{dashboard}, incluyendo variables ambientales, humedad del suelo y códigos de estado publicados por la estación.}
+    \label{fig:manual_dashboard_graficas_estado}
+\end{figure}
+
 \section{Resumen histórico}
 
 El resumen histórico muestra estadísticas de las últimas 24 horas para la estación seleccionada. Incluye número de muestras, fecha inicial y final de la ventana temporal, valores medios, mínimos y máximos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dashboard_resumen_historico.jpg}
+    \caption{Resumen histórico del \textit{dashboard}, con número de muestras, ventana temporal y valores agregados de las variables medidas.}
+    \label{fig:manual_dashboard_resumen_historico}
+\end{figure}
 
 \begin{table}[H]
 \centering
@@ -347,6 +368,13 @@ La tabla permite revisar:
 \end{itemize}
 
 Esta vista es útil para verificar si los datos evolucionan de forma coherente o si aparecen valores repetidos, ausentes o fuera de rango.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dashboard_tabla_ultimas_lecturas.jpg}
+    \caption{Tabla de últimas lecturas almacenadas y mostradas por el \textit{dashboard}.}
+    \label{fig:manual_dashboard_tabla_ultimas_lecturas}
+\end{figure}
 
 \section{Procedimiento de uso diario}
 
