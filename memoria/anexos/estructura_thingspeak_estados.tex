@@ -74,7 +74,7 @@ Esta estructura permite que cada entrada de ThingSpeak contenga una fotografía 
 
 La estación construye una petición HTTP de actualización del canal utilizando la clave de escritura y los ocho campos definidos. De forma conceptual, la petición tiene la siguiente estructura:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://api.thingspeak.com/update?
     api_key=<WRITE_API_KEY>
     &field1=<humedad_suelo>
@@ -85,7 +85,7 @@ http://api.thingspeak.com/update?
     &field6=<estado_rele>
     &field7=<evento_sistema>
     &field8=<codigo_debug>
-\end{verbatim}
+\end{terminaloutput}
 
 Las claves reales no deben aparecer en la memoria, en capturas ni en el repositorio. En la documentación se representan mediante marcadores como \texttt{<WRITE\_API\_KEY>}.
 

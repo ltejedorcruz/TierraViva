@@ -40,9 +40,9 @@ Las claves reales no deben incluirse en la memoria ni subirse al repositorio. En
 
 Para cada estación debe existir un canal ThingSpeak independiente. La correspondencia entre campos y variables se encuentra documentada en el Anexo~\ref{anexo:estructura_thingspeak_estados}. Como comprobación mínima, antes de integrar la estación se recomienda verificar que el canal acepta una escritura manual.
 
-\begin{verbatim}
+\begin{terminaloutput}
 https://api.thingspeak.com/update?api_key=<WRITE_KEY>&field1=35
-\end{verbatim}
+\end{terminaloutput}
 
 Si la petición es correcta, ThingSpeak devuelve un número de entrada. Después debe comprobarse en el canal que se ha registrado una nueva lectura.
 
@@ -50,9 +50,9 @@ Si la petición es correcta, ThingSpeak devuelve un número de entrada. Después
 
 El \textit{firmware} de la estación se encuentra en:
 
-\begin{verbatim}
+\begin{terminaloutput}
 Estacion/Estacion_A_final_Plus/Estacion_A_final_Plus.ino
-\end{verbatim}
+\end{terminaloutput}
 
 Antes de cargarlo en Arduino UNO deben revisarse, como mínimo, los siguientes parámetros:
 
@@ -166,38 +166,38 @@ Debe tenerse en cuenta que el nombre exacto del puerto serie puede variar según
 
 En primer lugar se actualiza el sistema y se instalan las herramientas básicas:
 
-\begin{verbatim}
+\begin{bashcode}
 sudo apt update
 sudo apt upgrade -y
 sudo apt install -y git python3 python3-venv python3-pip sqlite3
-\end{verbatim}
+\end{bashcode}
 
 Después se descarga el repositorio:
 
-\begin{verbatim}
+\begin{bashcode}
 cd /home/pi
 git clone https://github.com/ltejedorcruz/TierraViva.git
 cd TierraViva
-\end{verbatim}
+\end{bashcode}
 
 Si el repositorio ya existe, puede actualizarse mediante:
 
-\begin{verbatim}
+\begin{bashcode}
 cd /home/pi/TierraViva
 git pull
-\end{verbatim}
+\end{bashcode}
 
 \section{Configuración del fichero \texttt{.env}}
 
 El fichero \texttt{.env} debe crearse en la raíz del repositorio. Contiene la configuración local de estaciones, ThingSpeak y parámetros de ejecución.
 
-\begin{verbatim}
+\begin{bashcode}
 nano .env
-\end{verbatim}
+\end{bashcode}
 
 Un ejemplo de configuración es:
 
-\begin{verbatim}
+\begin{bashcode}
 TIERRAVIVA_HOME=/home/pi/TierraViva
 
 STATIONS=A,B
@@ -218,7 +218,7 @@ WEB_REFRESH_SECONDS=3
 DATA_STALE_SECONDS=90
 
 TIERRAVIVA_LOG_LEVEL=INFO
-\end{verbatim}
+\end{bashcode}
 
 El fichero \texttt{.env} no debe subirse al repositorio. Si accidentalmente se publica una clave real, debe regenerarse en ThingSpeak.
 
@@ -226,41 +226,41 @@ El fichero \texttt{.env} no debe subirse al repositorio. Si accidentalmente se p
 
 El \textit{dashboard} fuente se encuentra en el directorio:
 
-\begin{verbatim}
+\begin{terminaloutput}
 dashboard/
-\end{verbatim}
+\end{terminaloutput}
 
 La interfaz principal se concentra en el fichero:
 
-\begin{verbatim}
+\begin{terminaloutput}
 dashboard/index.html
-\end{verbatim}
+\end{terminaloutput}
 
 Este fichero incluye la estructura HTML, los estilos CSS embebidos y la lógica JavaScript necesaria para consultar la API y actualizar la interfaz. Los recursos gráficos se almacenan en:
 
-\begin{verbatim}
+\begin{terminaloutput}
 dashboard/images/
-\end{verbatim}
+\end{terminaloutput}
 
 La API sirve la interfaz desde el directorio de ejecución:
 
-\begin{verbatim}
+\begin{terminaloutput}
 frontend/
-\end{verbatim}
+\end{terminaloutput}
 
 Por tanto, antes de arrancar el sistema debe copiarse el contenido de \texttt{dashboard/} al directorio \texttt{frontend/}:
 
-\begin{verbatim}
+\begin{bashcode}
 mkdir -p frontend
 rsync -a dashboard/ frontend/
-\end{verbatim}
+\end{bashcode}
 
 Después de este paso debe existir, al menos:
 
-\begin{verbatim}
+\begin{terminaloutput}
 frontend/index.html
 frontend/images/
-\end{verbatim}
+\end{terminaloutput}
 
 No se requiere la existencia de carpetas \texttt{frontend/css/} ni \texttt{frontend/js/}, ya que los estilos y la lógica JavaScript están integrados en el propio fichero \texttt{index.html}. Esta organización simplifica el despliegue del prototipo y reduce el riesgo de rutas estáticas inconsistentes durante las pruebas.
 
@@ -268,23 +268,23 @@ No se requiere la existencia de carpetas \texttt{frontend/css/} ni \texttt{front
 
 Antes de utilizar el \textit{script} debe concederse permiso de ejecución:
 
-\begin{verbatim}
+\begin{bashcode}
 chmod +x tierraviva.sh
-\end{verbatim}
+\end{bashcode}
 
 La instalación inicial se realiza con:
 
-\begin{verbatim}
+\begin{bashcode}
 ./tierraviva.sh install
-\end{verbatim}
+\end{bashcode}
 
 Este comando prepara el entorno de ejecución del proyecto: crea el entorno virtual, instala dependencias, inicializa la base de datos y crea los directorios necesarios para la ejecución.
 
 Tras la instalación, se recomienda comprobar que el contenido de \texttt{dashboard/} está sincronizado con \texttt{frontend/}, especialmente el fichero \texttt{index.html} y el directorio \texttt{images/}:
 
-\begin{verbatim}
+\begin{bashcode}
 rsync -a dashboard/ frontend/
-\end{verbatim}
+\end{bashcode}
 
 La tabla \texttt{readings} almacena lecturas, \texttt{system\_state} conserva información de estado del sistema y \texttt{valve\_events} queda preparada para registrar eventos relacionados con la actuación.
 
@@ -292,9 +292,9 @@ La tabla \texttt{readings} almacena lecturas, \texttt{system\_state} conserva in
 
 El sistema se arranca mediante:
 
-\begin{verbatim}
+\begin{bashcode}
 ./tierraviva.sh start
-\end{verbatim}
+\end{bashcode}
 
 Este comando inicia los procesos principales:
 
@@ -305,50 +305,50 @@ Este comando inicia los procesos principales:
 
 Para detener el sistema se utiliza:
 
-\begin{verbatim}
+\begin{bashcode}
 ./tierraviva.sh stop
-\end{verbatim}
+\end{bashcode}
 
 Para reiniciarlo:
 
-\begin{verbatim}
+\begin{bashcode}
 ./tierraviva.sh restart
-\end{verbatim}
+\end{bashcode}
 
 Para consultar el estado:
 
-\begin{verbatim}
+\begin{bashcode}
 ./tierraviva.sh status
-\end{verbatim}
+\end{bashcode}
 
 Para revisar los \textit{logs}:
 
-\begin{verbatim}
+\begin{bashcode}
 ./tierraviva.sh logs
-\end{verbatim}
+\end{bashcode}
 
 \section{Comprobación de la API}
 
 Con el sistema arrancado, se comprueba primero el estado general de la API:
 
-\begin{verbatim}
+\begin{bashcode}
 curl http://127.0.0.1:8000/api/health
-\end{verbatim}
+\end{bashcode}
 
 También puede comprobarse desde navegador:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://<IP_RASPBERRY>:8000/api/health
-\end{verbatim}
+\end{terminaloutput}
 
 Otras comprobaciones útiles son:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://<IP_RASPBERRY>:8000/api/config
 http://<IP_RASPBERRY>:8000/api/latest?station=A
 http://<IP_RASPBERRY>:8000/api/readings?station=A&limit=20
 http://<IP_RASPBERRY>:8000/api/stats?station=A&hours=24
-\end{verbatim}
+\end{terminaloutput}
 
 La descripción completa de \textit{endpoints}, parámetros y respuestas se recoge en el Anexo~\ref{anexo:manual_api}.
 
@@ -356,15 +356,15 @@ La descripción completa de \textit{endpoints}, parámetros y respuestas se reco
 
 Una vez arrancada la API y copiado el \textit{dashboard} en \texttt{frontend/}, la interfaz web se abre desde:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://<IP_RASPBERRY>:8000/
-\end{verbatim}
+\end{terminaloutput}
 
 Si se accede desde la propia Raspberry Pi, puede utilizarse:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://127.0.0.1:8000/
-\end{verbatim}
+\end{terminaloutput}
 
 El \textit{dashboard} debe mostrar la estación seleccionada, la última lectura disponible, el estado de frescura, variables ambientales, estado de relé, eventos, gráficas y tabla de lecturas recientes.
 

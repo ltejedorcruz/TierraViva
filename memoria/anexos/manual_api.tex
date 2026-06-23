@@ -22,15 +22,15 @@ La versión actual de la API permite:
 
 Durante el despliegue local en Raspberry Pi, la API se sirve en el puerto \texttt{8000}. Desde la propia Raspberry Pi puede consultarse mediante:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://127.0.0.1:8000
-\end{verbatim}
+\end{terminaloutput}
 
 Desde otro equipo conectado a la misma red local:
 
-\begin{verbatim}
+\begin{terminaloutput}
 http://<IP_RASPBERRY>:8000
-\end{verbatim}
+\end{terminaloutput}
 
 \section{Convenciones generales}
 
@@ -114,9 +114,9 @@ Sirve la interfaz web principal del \textit{dashboard}.
 
 \subsection*{Petición}
 
-\begin{verbatim}
+\begin{terminaloutput}
 GET http://<IP_RASPBERRY>:8000/
-\end{verbatim}
+\end{terminaloutput}
 
 \subsection*{Respuesta esperada}
 
@@ -126,11 +126,11 @@ Si el fichero \texttt{frontend/index.html} existe, el navegador muestra el \text
 
 Si el fichero no existe, la API devuelve un error HTTP 404:
 
-\begin{verbatim}
+\begin{jsoncode}
 {
-  "detail": "No se encontró frontend/index.html"
+  "detail": "No se encontro frontend/index.html"
 }
-\end{verbatim}
+\end{jsoncode}
 
 \section{GET /api/config}
 
@@ -156,13 +156,13 @@ Devuelve la configuración activa de la API para una estación.
 
 \subsection*{Ejemplo}
 
-\begin{verbatim}
+\begin{terminaloutput}
 curl "http://127.0.0.1:8000/api/config?station=A"
-\end{verbatim}
+\end{terminaloutput}
 
 \subsection*{Respuesta esperada}
 
-\begin{verbatim}
+\begin{jsoncode}
 {
   "ok": true,
   "station_id": "A",
@@ -176,7 +176,7 @@ curl "http://127.0.0.1:8000/api/config?station=A"
   "last_ingest_ts": "2026-06-01T10:15:00Z",
   "last_entry_id": "125"
 }
-\end{verbatim}
+\end{jsoncode}
 
 \section{GET /api/latest}
 
@@ -202,13 +202,13 @@ Devuelve la última lectura almacenada para una estación.
 
 \subsection*{Ejemplo}
 
-\begin{verbatim}
+\begin{terminaloutput}
 curl "http://127.0.0.1:8000/api/latest?station=A"
-\end{verbatim}
+\end{terminaloutput}
 
 \subsection*{Respuesta con datos}
 
-\begin{verbatim}
+\begin{jsoncode}
 {
   "ok": true,
   "station_id": "A",
@@ -232,18 +232,18 @@ curl "http://127.0.0.1:8000/api/latest?station=A"
   "freshness": "fresh",
   "soil_state": "normal"
 }
-\end{verbatim}
+\end{jsoncode}
 
 \subsection*{Respuesta sin datos}
 
-\begin{verbatim}
+\begin{jsoncode}
 {
   "ok": false,
   "station_id": "A",
   "reading": null,
   "status": "sin_datos"
 }
-\end{verbatim}
+\end{jsoncode}
 
 \section{GET /api/readings}
 
@@ -271,13 +271,13 @@ Devuelve una lista de lecturas recientes almacenadas para una estación.
 
 \subsection*{Ejemplo}
 
-\begin{verbatim}
+\begin{terminaloutput}
 curl "http://127.0.0.1:8000/api/readings?station=A&limit=20"
-\end{verbatim}
+\end{terminaloutput}
 
 \subsection*{Respuesta esperada}
 
-\begin{verbatim}
+\begin{jsoncode}
 {
   "ok": true,
   "station_id": "A",
@@ -301,7 +301,7 @@ curl "http://127.0.0.1:8000/api/readings?station=A&limit=20"
     }
   ]
 }
-\end{verbatim}
+\end{jsoncode}
 
 \section{GET /api/stats}
 
@@ -329,15 +329,15 @@ Devuelve estadísticas agregadas de una estación durante una ventana temporal.
 
 \subsection*{Ejemplo}
 
-\begin{verbatim}
+\begin{terminaloutput}
 curl "http://127.0.0.1:8000/api/stats?station=A&hours=24"
-\end{verbatim}
+\end{terminaloutput}
 
 \subsection*{Respuesta esperada}
 
 La respuesta incluye el identificador de estación, la ventana temporal, el número de muestras y estadísticas agregadas de las variables medidas.
 
-\begin{verbatim}
+\begin{jsoncode}
 {
   "ok": true,
   "station_id": "A",
@@ -372,7 +372,7 @@ La respuesta incluye el identificador de estación, la ventana temporal, el núm
     "max": 1013.6
   }
 }
-\end{verbatim}
+\end{jsoncode}
 
 \section{GET /api/health}
 
@@ -398,13 +398,13 @@ Devuelve una comprobación básica del estado del servicio.
 
 \subsection*{Ejemplo}
 
-\begin{verbatim}
+\begin{terminaloutput}
 curl "http://127.0.0.1:8000/api/health?station=A"
-\end{verbatim}
+\end{terminaloutput}
 
 \subsection*{Respuesta esperada}
 
-\begin{verbatim}
+\begin{jsoncode}
 {
   "ok": true,
   "station_id": "A",
@@ -413,7 +413,7 @@ curl "http://127.0.0.1:8000/api/health?station=A"
   "frontend_exists": true,
   "has_data": true
 }
-\end{verbatim}
+\end{jsoncode}
 
 \section{Campos principales de una lectura}
 

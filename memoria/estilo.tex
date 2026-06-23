@@ -30,11 +30,7 @@
 \usepackage{longtable}
 \usepackage{pdflscape}
 
-% ============================================================
-% Colores corporativos y estilos visuales TierraViva / URJC
-% ============================================================
-
-% Rojo corporativo URJC
+% Rojo  URJC
 \definecolor{URJCRed}{HTML}{CB0017}
 \definecolor{URJCRedDark}{HTML}{9E0012}
 \definecolor{TableHeaderText}{HTML}{FFFFFF}
@@ -52,9 +48,16 @@
 \definecolor{ArduinoLine}{HTML}{858585}
 \definecolor{ArduinoFrame}{HTML}{3C3C3C}
 
-% ============================================================
-% Estilo de tablas
-% ============================================================
+% Colores para código estilo bash linux en modo oscuro
+\definecolor{TerminalBg}{HTML}{0C0C0C}
+\definecolor{TerminalText}{HTML}{DCDCDC}
+\definecolor{TerminalGreen}{HTML}{00C853}
+\definecolor{TerminalBlue}{HTML}{569CD6}
+\definecolor{TerminalCyan}{HTML}{4EC9B0}
+\definecolor{TerminalYellow}{HTML}{DCDCAA}
+\definecolor{TerminalOrange}{HTML}{CE9178}
+\definecolor{TerminalGray}{HTML}{858585}
+\definecolor{TerminalFrame}{HTML}{2D2D2D}
 
 % Cabeceras de tabla: fila roja con texto blanco y negrita
 \newcommand{\TVTableHeader}{%
@@ -83,9 +86,7 @@
     skip=6pt
 }
 
-% ============================================================
 % Lenguaje Arduino para listings
-% ============================================================
 
 \lstdefinelanguage{Arduino}{
     language=C++,
@@ -101,9 +102,7 @@
     morestring=[b]"
 }
 
-% ============================================================
 % Estilo de código oscuro tipo Arduino IDE
-% ============================================================
 
 \lstdefinestyle{arduinoDark}{
     backgroundcolor=\color{ArduinoBg},
@@ -131,6 +130,115 @@
     aboveskip=3mm,
     belowskip=3mm
 }
+
+% Lenguajes y estilos para terminal Raspberry Pi / Linux
+
+\lstdefinelanguage{RaspberryBash}{
+    morekeywords={
+        sudo,apt,update,upgrade,install,git,clone,cd,nano,chmod,curl,
+        mkdir,rsync,python3,pip,source,uvicorn,systemctl,tail,cat,grep,
+        echo,export,pull,start,stop,restart,status,logs
+    },
+    sensitive=true,
+    morecomment=[l]{\#},
+    morestring=[b]",
+    morestring=[b]'
+}
+
+\lstdefinelanguage{TerminalPlain}{}
+
+\lstdefinelanguage{JsonTerminal}{
+    morestring=[b]",
+    morekeywords={true,false,null},
+    sensitive=true
+}
+
+\lstdefinestyle{raspberryTerminal}{
+    language=RaspberryBash,
+    backgroundcolor=\color{TerminalBg},
+    basicstyle=\footnotesize\ttfamily\color{TerminalText},
+    keywordstyle=\color{TerminalGreen}\bfseries,
+    commentstyle=\color{TerminalGray}\itshape,
+    stringstyle=\color{TerminalOrange},
+    emph={
+        tierraviva.sh,main.py,api.py,database.py,index.html,
+        install,start,stop,restart,status,logs,
+        dashboard,frontend,images
+    },
+    emphstyle=\color{TerminalCyan}\bfseries,
+    frame=single,
+    rulecolor=\color{TerminalFrame},
+    framerule=0.5pt,
+    numbers=none,
+    showstringspaces=false,
+    columns=fullflexible,
+    keepspaces=true,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2,
+    captionpos=b,
+    xleftmargin=0.6em,
+    xrightmargin=0.4em,
+    framexleftmargin=0.6em,
+    aboveskip=2.5mm,
+    belowskip=2.5mm
+}
+
+\lstdefinestyle{raspberryOutput}{
+    language=TerminalPlain,
+    backgroundcolor=\color{TerminalBg},
+    basicstyle=\footnotesize\ttfamily\color{TerminalText},
+    frame=single,
+    rulecolor=\color{TerminalFrame},
+    framerule=0.5pt,
+    numbers=none,
+    showstringspaces=false,
+    columns=fullflexible,
+    keepspaces=true,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2,
+    xleftmargin=0.6em,
+    xrightmargin=0.4em,
+    framexleftmargin=0.6em,
+    aboveskip=2.5mm,
+    belowskip=2.5mm
+}
+
+\lstdefinestyle{jsonTerminal}{
+    language=JsonTerminal,
+    backgroundcolor=\color{TerminalBg},
+    basicstyle=\footnotesize\ttfamily\color{TerminalText},
+    keywordstyle=\color{TerminalBlue}\bfseries,
+    stringstyle=\color{TerminalOrange},
+    frame=single,
+    rulecolor=\color{TerminalFrame},
+    framerule=0.5pt,
+    numbers=none,
+    showstringspaces=false,
+    columns=fullflexible,
+    keepspaces=true,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2,
+    xleftmargin=0.6em,
+    xrightmargin=0.4em,
+    framexleftmargin=0.6em,
+    aboveskip=2.5mm,
+    belowskip=2.5mm
+}
+
+\lstnewenvironment{bashcode}[1][]
+{\lstset{style=raspberryTerminal,#1}}
+{}
+
+\lstnewenvironment{terminaloutput}[1][]
+{\lstset{style=raspberryOutput,#1}}
+{}
+
+\lstnewenvironment{jsoncode}[1][]
+{\lstset{style=jsonTerminal,#1}}
+{}
 
 % Estilo por defecto para todos los lstlisting
 \lstset{
