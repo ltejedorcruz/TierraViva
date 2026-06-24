@@ -187,6 +187,8 @@ cd /home/pi/TierraViva
 git pull
 \end{bashcode}
 
+El repositorio incluye un fichero \texttt{requirements.txt} con las dependencias Python necesarias para ejecutar la API y el proceso de ingesta. Durante la instalación, el script \texttt{tierraviva.sh} crea un entorno virtual e instala automáticamente dichas dependencias mediante \texttt{pip}.
+
 \section{Configuración del fichero \texttt{.env}}
 
 El fichero \texttt{.env} debe crearse en la raíz del repositorio. Contiene la configuración local de estaciones, ThingSpeak y parámetros de ejecución.
@@ -198,29 +200,33 @@ nano .env
 Un ejemplo de configuración es:
 
 \begin{bashcode}
-TIERRAVIVA_HOME=/home/pi/TierraViva
-
-STATIONS=A,B
-STATION_ID=A
-
 THINGSPEAK_CHANNEL_A=<CHANNEL_ID_A>
 THINGSPEAK_READ_KEY_A=<READ_KEY_A>
+THINGSPEAK_WRITE_KEY_A=<WRITE_KEY_A>
 
 THINGSPEAK_CHANNEL_B=<CHANNEL_ID_B>
 THINGSPEAK_READ_KEY_B=<READ_KEY_B>
+THINGSPEAK_WRITE_KEY_B=<WRITE_KEY_B>
 
 POLL_INTERVAL_SECONDS=30
 REQUEST_TIMEOUT_SECONDS=12
 
-SOIL_LOW_THRESHOLD=35
-SOIL_HIGH_THRESHOLD=45
-WEB_REFRESH_SECONDS=3
-DATA_STALE_SECONDS=90
+SOIL_DRY_THRESHOLD=558
+SOIL_WET_THRESHOLD=211
+IRRIGATION_DURATION_SECONDS=10
+MAX_IRRIGATION_SECONDS=30
+COOLDOWN_SECONDS=60
+COMMAND_TIMEOUT_SECONDS=600
+
+WEB_REFRESH_SECONDS=5
+DATA_STALE_SECONDS=1200
+API_HOST=0.0.0.0
+API_PORT=8000
 
 TIERRAVIVA_LOG_LEVEL=INFO
 \end{bashcode}
 
-El fichero \texttt{.env} no debe subirse al repositorio. Si accidentalmente se publica una clave real, debe regenerarse en ThingSpeak.
+Para facilitar la reproducción del sistema, el repositorio incluye un fichero \texttt{.env.example} con la estructura de variables de entorno requerida. Este fichero no contiene claves reales ni identificadores privados, sino una plantilla que debe copiarse a \texttt{.env} y completarse con los canales y claves de lectura de ThingSpeak correspondientes.
 
 \section{Preparación del \textit{dashboard}}
 
