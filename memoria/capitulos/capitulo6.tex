@@ -30,7 +30,7 @@ Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y Thi
     \vspace{-8pt}
 \end{wrapfigure}
 
-El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
+El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio \cite{tierraviva_github_mqtt}. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
 
 El enfoque MQTT no se mantuvo como arquitectura final porque dependía de un flujo más local y no resolvía de forma natural la publicación remota desde estaciones desplegadas fuera del entorno de laboratorio. La solución definitiva sustituye esa comunicación local por publicación LTE/HTTP en ThingSpeak, manteniendo la decisión de riego en el \textit{firmware} de cada estación y dejando la Raspberry Pi como nodo de supervisión, ingesta, almacenamiento, API y \textit{dashboard}.
 
@@ -105,7 +105,7 @@ El bloque de almacenamiento local de TierraViva se implementa mediante SQLite. S
 
 SQLite resulta adecuado para este prototipo porque funciona como una base de datos embebida, almacenada en un fichero local, sin necesidad de desplegar un servidor de base de datos adicional. En una Raspberry Pi esto simplifica la instalación y reduce el número de servicios que deben mantenerse activos. Para el alcance del TFG, donde el volumen de datos es moderado y la prioridad es validar el funcionamiento completo del sistema, esta solución ofrece un equilibrio razonable entre simplicidad, persistencia y capacidad de consulta \cite{sqlite_about}.
 
-La implementación se concentra en el módulo \texttt{database.py}, disponible en el repositorio del proyecto \cite{tierraviva_github}. Este módulo define la ubicación de la base de datos, crea los directorios necesarios, abre las conexiones SQLite y proporciona funciones de acceso para el resto del software. La base se almacena bajo el directorio de trabajo de TierraViva, concretamente en el fichero \texttt{tierraviva.db}, dentro de la carpeta de datos configurada para la Raspberry Pi.
+La implementación se concentra en el módulo \texttt{database.py}, disponible en el repositorio del proyecto \cite{tierraviva_github}. Este módulo define la ubicación de la base de datos, crea los directorios necesarios, abre las conexiones SQLite mediante la biblioteca \texttt{sqlite3} de Python \cite{python_sqlite3_docs} y proporciona funciones auxiliares de inserción, consulta y actualización de estado. La base se almacena bajo el directorio de trabajo de TierraViva, concretamente en el fichero \texttt{tierraviva.db}, dentro de la carpeta de datos configurada para la Raspberry Pi.
 
 El acceso a la base de datos se encapsula mediante una función de conexión. Esta función no solo abre el fichero SQLite, sino que también configura la conexión para devolver filas accesibles por nombre de columna y activa opciones como \texttt{journal\_mode=WAL} y \texttt{foreign\_keys}. El modo WAL, \textit{Write-Ahead Logging}, mejora el comportamiento cuando existen lecturas y escrituras próximas en el tiempo, algo habitual en TierraViva porque el proceso de ingesta escribe datos mientras la API puede estar consultándolos para el \textit{dashboard}.
 
@@ -273,7 +273,7 @@ La API local de TierraViva se implementa con FastAPI y actúa como capa de servi
     \vspace{-8pt}
 \end{wrapfigure}
 
-La API se ejecuta localmente en la Raspberry Pi mediante Uvicorn. No se comunica con los sensores, no accede al puerto serie de Arduino y no envía órdenes de riego a las estaciones. Trabaja únicamente sobre la información ya ingerida desde ThingSpeak y almacenada en SQLite. Esta separación mantiene la coherencia de la arquitectura final: las estaciones miden y actúan localmente, mientras que la Raspberry Pi supervisa, almacena y sirve información.
+La API se ejecuta localmente en la Raspberry Pi mediante Uvicorn, servidor ASGI utilizado para desplegar aplicaciones FastAPI \cite{uvicorn_docs}. No se comunica con los sensores, no accede al puerto serie de Arduino y no envía órdenes de riego a las estaciones. Trabaja únicamente sobre la información ya ingerida desde ThingSpeak y almacenada en SQLite. Esta separación mantiene la coherencia de la arquitectura final: las estaciones miden y actúan localmente, mientras que la Raspberry Pi supervisa, almacena y sirve información.
 
 La Figura~\ref{fig:fastapi_capa_servicio} representa el papel de FastAPI dentro del sistema software.
 
@@ -284,7 +284,7 @@ La Figura~\ref{fig:fastapi_capa_servicio} representa el papel de FastAPI dentro 
 \label{fig:fastapi_capa_servicio}
 \end{figure}
 
-Desde el punto de vista de diseño, la API cumple cuatro responsabilidades principales:
+La API cumple cuatro responsabilidades principales:
 
 \begin{itemize}
     \item consultar las funciones de acceso a datos definidas en \texttt{database.py};
@@ -325,7 +325,7 @@ La API expone un conjunto reducido de \textit{endpoints} orientados a supervisi�
 
 Uno de los aspectos más relevantes de la API es que no se limita a devolver registros crudos de la base de datos. Algunas respuestas incorporan información calculada que simplifica el trabajo del \textit{dashboard}. Por ejemplo, a partir de la última lectura puede calcularse la antigüedad del dato, una etiqueta de frescura y una clasificación básica de humedad del suelo. De este modo, la interfaz no necesita repetir lógica de interpretación en JavaScript.
 
-La API también ayuda a separar responsabilidades en la visualización. El \textit{dashboard} solicita datos ya estructurados, mientras que la API concentra las reglas de consulta y preparación de respuesta. Esta decisión reduce acoplamiento entre \textit{frontend} y base de datos, y facilita la depuración: si una lectura aparece incorrecta en la interfaz, puede comprobarse primero la respuesta JSON de la API antes de revisar la capa visual.
+La API también ayuda a separar responsabilidades en la visualización. El \textit{dashboard} solicita datos ya estructurados, mientras que la API concentra las reglas de consulta y preparación de respuesta. Así se reduce el acoplamiento entre \textit{frontend} y base de datos, y facilita la depuración: si una lectura aparece incorrecta en la interfaz, puede comprobarse primero la respuesta JSON de la API antes de revisar la capa visual.
 
 La referencia completa de \textit{endpoints}, parámetros, ejemplos de respuesta, validaciones y códigos HTTP se incluye en el Anexo~\ref{anexo:manual_api}. El uso de estos \textit{endpoints} desde el punto de vista del usuario final se describe en el Anexo~\ref{anexo:manual_usuario}.
 

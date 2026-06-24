@@ -22,7 +22,7 @@ Cada estación ejecuta localmente el \textit{firmware} de adquisición, decisió
 \rowcolor{URJCRed}
 \TVHead{Bloque} & \TVHead{Resultado conseguido} & \TVHead{Evidencia asociada} \\
 \hline
-Estaciones remotas & Dos estaciones físicas implementadas, configuradas y probadas en entorno de laboratorio y Agrolab Móstoles. & Montaje físico, vídeo, monitor serie y prueba funcional en entorno real. \\
+Estaciones remotas & Dos estaciones físicas implementadas, configuradas. La estación B se empleó además en la prueba funcional en Agrolab Móstoles. & Montaje físico, vídeo, monitor serie y prueba funcional en entorno real. \\
 \hline
 Sensorización & Lectura conjunta de humedad del suelo, temperatura, humedad relativa, presión y luminosidad. & Escaneo I2C, lecturas analógicas, monitor serie y telemetría publicada. \\
 \hline
@@ -36,7 +36,7 @@ Telemetría & Publicación estructurada en \texttt{field1}--\texttt{field8} con 
 \hline
 Supervisión local & Ingesta desde ThingSpeak, almacenamiento SQLite, API FastAPI y \textit{dashboard} web. & Base de datos local, endpoints API y visualización en navegador. \\
 \hline
-Validación real & Prueba funcional con dos estaciones en Agrolab Móstoles, en zonas con diferente humedad de suelo. & Fotografías, vídeo, capturas, monitor serie y observación directa. \\
+Validación real & Prueba funcional de una estación en Agrolab Móstoles, en zonas con diferente humedad de suelo. & Fotografías, vídeo, capturas, monitor serie y observación directa. \\
 \hline
 \end{tabular}
 \caption{Resultados integrados obtenidos en el prototipo TierraViva.}
@@ -74,7 +74,7 @@ Decisión local de riego & El riego se decide en el \textit{firmware}, no desde 
 \hline
 Actuación segura & La bomba se activa por relé durante un tiempo limitado y se apaga explícitamente. & RF-09, ET-05, ET-08; P11, P12, P17. & Cumplido \\
 \hline
-Validación en entorno real & El prototipo se prueba en Agrolab Móstoles con dos estaciones y diferentes condiciones de humedad. & P17; validación funcional en entorno real. & Cumplido \\
+Validación en entorno real & El prototipo se prueba en Agrolab Móstoles con la estación B, en un entorno real de cultivo y diferentes condiciones de humedad. & P17; validación funcional en entorno real. & Cumplido \\
 \hline
 \end{tabular}
 \caption{Cumplimiento de objetivos y requisitos a partir de las pruebas realizadas.}
@@ -86,9 +86,9 @@ Esta tabla permite cerrar el recorrido completo del proyecto: los requisitos no 
 \section{Discusión técnica de la arquitectura final}
 \label{sec:discusion_tecnica_arquitectura}
 
-La arquitectura final de TierraViva es el resultado de varias decisiones tomadas durante el desarrollo. La más importante ha sido mantener la actuación crítica en la estación. Esta decisión condiciona todo el sistema: la nube no ordena el riego, la Raspberry Pi no activa la bomba y el \textit{dashboard} no fuerza actuaciones. La estación mide y decide localmente, mientras que el resto de bloques supervisa, almacena y visualiza.
+La arquitectura final de TierraViva es el resultado de varias decisiones tomadas durante el desarrollo. La más importante ha sido mantener la actuación crítica en la estación. Ese reparto condiciona todo el sistema: la nube no ordena el riego, la Raspberry Pi no activa la bomba y el \textit{dashboard} no fuerza actuaciones. La estación mide y decide localmente, mientras que el resto de bloques supervisa, almacena y visualiza.
 
-Esta separación resulta especialmente adecuada en un sistema físico que actúa sobre agua. Si la decisión dependiera de la nube o de una conexión continua, una caída de red, una latencia elevada o una orden incorrecta podrían provocar un comportamiento no deseado. En TierraViva, una pérdida temporal de ThingSpeak afecta a la publicación de datos, pero no deja la bomba sin control.
+En un sistema que actúa sobre agua, esta separación es especialmente importante. Si la decisión dependiera de la nube o de una conexión continua, una caída de red, una latencia elevada o una orden incorrecta podrían provocar un comportamiento no deseado. En TierraViva, una pérdida temporal de ThingSpeak afecta a la publicación de datos, pero no deja la bomba sin control.
 
 El uso de LTE mediante A7670E-LASA también ha sido una decisión relevante. Frente a una solución basada únicamente en WiFi, LTE permite que la estación funcione en zonas donde no existe infraestructura local de red. A cambio, introduce más complejidad: comandos AT, alimentación más exigente, consumo superior, necesidad de SIM, cobertura y gestión de errores. El prototipo ha permitido comprobar que esta complejidad es asumible dentro del alcance del TFG, siempre que se valide de forma incremental.
 
@@ -158,7 +158,7 @@ Las líneas futuras de TierraViva se organizan en función de las limitaciones d
 
 Una primera evolución sería mejorar la calibración agronómica del sensor de humedad. Para ello sería necesario trabajar con distintos tipos de suelo, diferentes profundidades de sensor y mediciones repetidas tras ciclos de riego. Esta calibración permitiría ajustar los umbrales de forma menos experimental y más vinculada al comportamiento real del sustrato.
 
-La segunda línea futura es la autonomía energética. La integración de panel solar, batería dimensionada y regulador de carga permitiría desplegar estaciones durante periodos más largos. Esta mejora fue especialmente coherente con los comentarios recibidos en Agrolab, donde se valoró la posibilidad de adaptar batería, alimentación y depósito a cada caso.
+La segunda línea futura es la autonomía energética. La integración de panel solar, batería dimensionada y regulador de carga permitiría desplegar estaciones durante periodos más largos. Existen además iniciativas abiertas que exploran soluciones de riego alimentadas por energía solar en contextos comunitarios, como OSPIT \cite{apc2024,ospit2024}, por lo que esta línea encaja de forma natural con la evolución de TierraViva. Esta mejora fue especialmente coherente con los comentarios recibidos en Agrolab, donde se valoró la posibilidad de adaptar batería, alimentación y depósito a cada caso.
 
 Una tercera línea es incorporar configuración remota desde el \textit{dashboard}. Esta mejora permitiría modificar umbrales de humedad, duración de riego, frecuencia de envío o parámetros de \textit{cooldown} sin reprogramar el Arduino. No obstante, no debe plantearse como un simple botón añadido a la interfaz: implicaría diseñar un canal descendente seguro, validación de órdenes, persistencia de configuración y límites que impidan actuaciones peligrosas.
 
@@ -168,7 +168,7 @@ Otra línea relevante es la incorporación de inteligencia artificial o modelos 
 
 También se podrían integrar sensores adicionales: caudalímetro para estimar volumen aplicado, sensor de nivel de depósito para evitar activar la bomba sin agua, pH, conductividad eléctrica o sensores meteorológicos complementarios. Estas variables permitirían pasar de un sistema de riego basado principalmente en humedad de suelo a una supervisión agronómica más completa.
 
-Desde el punto de vista físico, una evolución natural sería diseñar una PCB propia, mejorar el encapsulado, emplear conectores estancos, ordenar el cableado y preparar una caja de campo. Estas mejoras no cambian la arquitectura conceptual, pero sí aumentarían la robustez y facilidad de instalación.
+Físicamente, una evolución natural sería diseñar una PCB propia, mejorar el encapsulado, emplear conectores estancos, ordenar el cableado y preparar una caja de campo. Estas mejoras no cambian la arquitectura conceptual, pero sí aumentarían la robustez y facilidad de instalación.
 
 Finalmente, el sistema podría evolucionar hacia una gestión multiestación más avanzada. Esto incluiría alta y baja de estaciones desde el \textit{dashboard}, comparación entre zonas de cultivo, reglas por estación, agrupación por parcelas y alertas de funcionamiento anómalo.
 
@@ -211,8 +211,8 @@ El sistema demuestra el ciclo completo de funcionamiento: mide variables del ent
 
 La decisión de mantener el control crítico en la estación ha sido esencial. Gracias a ella, la pérdida de comunicación con ThingSpeak, la caída del nodo de supervisión o la ausencia del \textit{dashboard} no generan una actuación insegura de la bomba. Esta separación entre actuación local y supervisión remota es una de las aportaciones técnicas más importantes del proyecto.
 
-La validación en Agrolab Móstoles aporta una dimensión adicional: el sistema no solo funcionó en entorno controlado, sino que fue probado en zonas reales de cultivo, con dos estaciones montadas y ante usuarios potenciales. La recepción cualitativa obtenida mostró interés por la utilidad del sistema, especialmente para ausencias, supervisión remota y adaptación modular.
+La validación en Agrolab Móstoles aporta una dimensión adicional: el sistema no solo funcionó en entorno controlado, sino que fue probado en una zona real de cultivo y ante usuarios potenciales. La recepción cualitativa obtenida mostró interés por la utilidad del sistema, especialmente para ausencias, supervisión remota y adaptación modular.
 
 TierraViva mantiene limitaciones: calibración agronómica todavía inicial, dependencia de cobertura LTE, consumo del módulo celular, ausencia de encapsulado definitivo y falta de campañas prolongadas. Sin embargo, estas limitaciones están identificadas y conducen a líneas futuras claras: energía solar, configuración remota, riego manual seguro, IA predictiva, sensores adicionales, encapsulado, PCB y gestión multiestación avanzada.
 
-En conjunto, TierraViva cumple los objetivos del TFG y constituye una base técnica sólida, funcional, estable, modular yescalable. No se presenta como producto comercial terminado, sino como un prototipo académico avanzado que demuestra la viabilidad de integrar sensórica, comunicaciones móviles, supervisión software y actuación local segura para riego inteligente.
+En conjunto, TierraViva cumple los objetivos del TFG y constituye una base técnica sólida, funcional, estable, modular y escalable. No se presenta como producto comercial terminado, sino como un prototipo académico avanzado que demuestra la viabilidad de integrar sensórica, comunicaciones móviles, supervisión software y actuación local segura para riego inteligente.

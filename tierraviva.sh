@@ -4,10 +4,11 @@
 # ============================================================
 #  Uso:
 #    ./tierraviva.sh install    → Instalar dependencias y crear BD
-#    ./tierraviva.sh start      → Arrancar ingestor + API (foreground)
-#    ./tierraviva.sh status     → Ver estado de los servicios
-#    ./tierraviva.sh stop       → Parar servicios systemd
-#    ./tierraviva.sh logs       → Ver logs de los servicios
+#    ./tierraviva.sh start      → Arrancar ingestor + API
+#    ./tierraviva.sh status     → Ver estado de los procesos
+#    ./tierraviva.sh stop       → Parar procesos gestionados por PID
+#    ./tierraviva.sh restart    → Reiniciar procesos
+#    ./tierraviva.sh logs       → Ver logs de ejecución
 # ============================================================
 set -Eeuo pipefail
 
@@ -69,11 +70,14 @@ activate_venv() {
 sync_frontend() {
   mkdir -p "$FRONTEND_DIR"
 
-  if [ -f "$ROOT_DIR/index.html" ]; then
+  if [ -d "$ROOT_DIR/dashboard" ]; then
+    cp -r "$ROOT_DIR/dashboard/"* "$FRONTEND_DIR/"
+    msg "Dashboard copiado/actualizado en frontend/"
+  elif [ -f "$ROOT_DIR/index.html" ]; then
     cp "$ROOT_DIR/index.html" "$FRONTEND_DIR/index.html"
     msg "index.html copiado/actualizado en frontend/index.html"
   else
-    msg "AVISO: no existe $ROOT_DIR/index.html, no se pudo copiar al frontend."
+    msg "AVISO: no existe dashboard/ ni index.html; no se pudo preparar el frontend."
   fi
 }
 

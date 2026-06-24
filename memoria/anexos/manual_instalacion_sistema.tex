@@ -248,11 +248,13 @@ La API sirve la interfaz desde el directorio de ejecución:
 frontend/
 \end{terminaloutput}
 
-Por tanto, antes de arrancar el sistema debe copiarse el contenido de \texttt{dashboard/} al directorio \texttt{frontend/}:
+Durante la instalación, el script \texttt{tierraviva.sh} sincroniza automáticamente el contenido de \texttt{dashboard/} con el directorio \texttt{frontend/}, que es el directorio servido por FastAPI. Esta copia incluye el fichero \texttt{index.html} y los recursos gráficos almacenados en \texttt{dashboard/images/}.
+
+Si se desea realizar esta operación manualmente, o repetirla después de modificar el dashboard, puede ejecutarse:
 
 \begin{bashcode}
 mkdir -p frontend
-rsync -a dashboard/ frontend/
+cp -r dashboard/* frontend/
 \end{bashcode}
 
 Después de este paso debe existir, al menos:
@@ -280,10 +282,11 @@ La instalación inicial se realiza con:
 
 Este comando prepara el entorno de ejecución del proyecto: crea el entorno virtual, instala dependencias, inicializa la base de datos y crea los directorios necesarios para la ejecución.
 
-Tras la instalación, se recomienda comprobar que el contenido de \texttt{dashboard/} está sincronizado con \texttt{frontend/}, especialmente el fichero \texttt{index.html} y el directorio \texttt{images/}:
+Tras la instalación, conviene comprobar que el dashboard se ha sincronizado correctamente con \texttt{frontend/}, especialmente el fichero \texttt{index.html} y el directorio \texttt{images/}:
 
 \begin{bashcode}
-rsync -a dashboard/ frontend/
+ls frontend/
+ls frontend/images
 \end{bashcode}
 
 La tabla \texttt{readings} almacena lecturas, \texttt{system\_state} conserva información de estado del sistema y \texttt{valve\_events} queda preparada para registrar eventos relacionados con la actuación.
@@ -427,9 +430,9 @@ La Raspberry no recupera datos & Canal o clave de lectura incorrectos. & Revisar
 \hline
 La API no arranca & Entorno virtual o dependencias no preparados. & Ejecutar \texttt{./tierraviva.sh install}. \\
 \hline
-El \textit{dashboard} no carga & No existe \texttt{frontend/index.html} o no se ha sincronizado el contenido de \texttt{dashboard/}. & Ejecutar \texttt{rsync -a dashboard/ frontend/} y comprobar que existen \texttt{frontend/index.html} y \texttt{frontend/images/}. \\
+El \textit{dashboard} no carga & No existe \texttt{frontend/index.html} o no se ha sincronizado el contenido de \texttt{dashboard/}. & Ejecutar \texttt{./tierraviva.sh install} o, de forma manual, \texttt{cp -r dashboard/* frontend/}. Comprobar que existen \texttt{frontend/index.html} y \texttt{frontend/images/}. \\
 \hline
-El \textit{dashboard} carga sin logotipos o imágenes & No se ha copiado correctamente el directorio \texttt{images/}. & Repetir \texttt{rsync -a dashboard/ frontend/} y revisar que existen los ficheros gráficos en \texttt{frontend/images/}. \\
+El \textit{dashboard} carga sin logotipos o imágenes & No se ha copiado correctamente el directorio \texttt{images/}. & Repetir \texttt{cp -r dashboard/* frontend/} y revisar que existen los ficheros gráficos en \texttt{frontend/images/}. \\
 \hline
 No hay registros en SQLite & La estación no ha publicado o el ingestor no está activo. & Revisar ThingSpeak y \textit{logs} de \texttt{main.py}. \\
 \hline

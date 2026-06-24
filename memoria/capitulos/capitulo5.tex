@@ -67,6 +67,8 @@ Una vez identificado el conversor \texttt{CH340G}, se instaló el controlador co
 
 La primera validación fue el ejemplo \textit{Blink}, utilizado para comprobar la cadena completa de programación: detección USB, selección de placa, selección de puerto, compilación, carga y ejecución en el microcontrolador. La prueba fue correcta, por lo que la placa quedó preparada para integrar sensores, módem LTE y relé.
 
+La identificación del ATmega328P y la correspondencia de pines del Arduino UNO se comprobaron tomando como referencia la documentación técnica y el esquema de pines de la placa \cite{arduino_uno_r3_datasheet,arduino_uno_r3_pinout}.
+
 Esta incidencia se conserva en la memoria porque afecta a la reproducibilidad del prototipo. El uso de placas compatibles reduce el coste, pero puede exigir instalar controladores adicionales. Las evidencias de configuración y carga se recogen dentro del plan de pruebas del Anexo~\ref{anexo:plan_pruebas}.
 
 \section{Integración de sensores}
@@ -413,7 +415,7 @@ Masa común & Garantiza una referencia eléctrica válida para señales y comuni
 \label{tab:criterios_seguridad_actuacion}
 \end{table}
 
-Antes de conectar los módulos electrónicos, el LM2596 debe ajustarse y verificarse con multímetro. Esta comprobación evita aplicar una tensión incorrecta al Arduino, sensores o módem. El módulo A7670E-LASA requiere especial atención porque los módulos de comunicación celular pueden presentar picos de consumo durante el registro en red y la transmisión de datos; por ello se incorporan condensadores de estabilización próximos a su entrada de alimentación.
+Antes de conectar los módulos electrónicos, el LM2596 debe ajustarse y verificarse con multímetro, siguiendo las recomendaciones básicas de uso del módulo reductor \cite{azdelivery_lm2596s_manual}. Esta comprobación evita aplicar una tensión incorrecta al Arduino, sensores o módem. El módulo A7670E-LASA requiere especial atención porque los módulos de comunicación celular pueden presentar picos de consumo durante el registro en red y la transmisión de datos; por ello se incorporan condensadores de estabilización próximos a su entrada de alimentación.
 
 Desde el punto de vista funcional, la bomba se activa únicamente durante el intervalo configurado por \textit{firmware}. Ante una lectura inválida, una condición interna incoherente o un periodo de \textit{cooldown} activo, la estación mantiene la bomba apagada y publica los códigos de estado correspondientes cuando la comunicación está disponible.
 

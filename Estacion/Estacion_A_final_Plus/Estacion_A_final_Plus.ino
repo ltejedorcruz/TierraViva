@@ -596,6 +596,6 @@ void loop() {
     Serial.println(F("ThingSpeak ERROR"));
   }
 
-  Serial.println(F("Esperando 30 segundos..."));
+  Serial.println(F("Esperando 10 segundos..."));
   delay(SEND_INTERVAL_MS);
 }

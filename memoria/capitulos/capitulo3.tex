@@ -284,7 +284,7 @@ BH1750 / GY-302 & Luminosidad ambiente en lux. & Proporciona medida digital de l
 
 La elección de estos sensores responde a criterios prácticos: bajo coste, disponibilidad, documentación accesible, compatibilidad con Arduino y posibilidad de validar el sistema sin instrumentación industrial. El detalle de componentes se recoge en el Anexo~\ref{anexo:materiales}; el conexionado eléctrico, en el Anexo~\ref{anexo:esquemas_electricos}; y la estrategia de validación, en los Anexos~\ref{anexo:plan_pruebas} y \ref{anexo:trazabilidad_requisitos_pruebas}.
 
-En conjunto, la combinación seleccionada cubre una variable principal de decisión, la humedad del suelo, y varias variables ambientales de contexto. Sensores más avanzados, como caudal, nivel de depósito, conductividad eléctrica o pH, quedan como posibles ampliaciones futuras.
+La combinación seleccionada cubre una variable principal de decisión, la humedad del suelo, y varias variables ambientales de contexto. Sensores más avanzados, como caudal, nivel de depósito, conductividad eléctrica o pH, quedan como posibles ampliaciones futuras.
 
 \section{Elección de plataforma de control local y supervisión}
 \label{sec:eleccion_plataformas_control}
@@ -483,7 +483,7 @@ El detalle de la arquitectura final, incluyendo canales de ThingSpeak, flujo de 
 
 La selección de materiales se ha realizado buscando un equilibrio entre funcionalidad, coste, disponibilidad y facilidad de integración. Al tratarse de un prototipo de TFG, se han utilizado módulos habituales en sistemas IoT y prototipos electrónicos, evitando componentes industriales cerrados que aumentarían el coste y dificultarían la reproducción del montaje.
 
-Desde el punto de vista funcional, el sistema se organiza en bloques de sensórica, control local, comunicación, supervisión, actuación y alimentación. La sensórica se basa en un sensor capacitivo de humedad de suelo, BME280 y BH1750/GY-302; el control local se realiza con Arduino UNO; la comunicación remota con A7670E-LASA y tarjeta SIM; la supervisión con Raspberry Pi 5; y la actuación mediante relé y bomba de agua de 12 V.
+Funcionalmente, el sistema se organiza en bloques de sensórica, control local, comunicación, supervisión, actuación y alimentación. La sensórica se basa en un sensor capacitivo de humedad de suelo, BME280 y BH1750/GY-302; el control local se realiza con Arduino UNO; la comunicación remota con A7670E-LASA y tarjeta SIM; la supervisión con Raspberry Pi 5; y la actuación mediante relé y bomba de agua de 12 V.
 
 El inventario completo, las referencias comerciales, cantidades, precios, imágenes y observaciones de compra se recogen en el Anexo~\ref{anexo:materiales}. El conexionado eléctrico se documenta en el Anexo~\ref{anexo:esquemas_electricos}, y la validación asociada a sensores, comunicación, actuación y flujo extremo a extremo se desarrolla en los Anexos~\ref{anexo:plan_pruebas} y \ref{anexo:trazabilidad_requisitos_pruebas}.
 
