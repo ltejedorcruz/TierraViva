@@ -1,16 +1,16 @@
 \chapter{Implementación \textit{hardware} y \textit{firmware} de estaciones}
 \label{cap:implementacion_hardware_firmware}
 
-Una vez definida la arquitectura final del sistema, este capítulo describe la implementación \textit{hardware} y \textit{firmware} de las estaciones de campo de TierraViva. El propósito no es repetir las decisiones de diseño ya justificadas en capítulos anteriores, sino documentar cómo se preparó, conectó y validó cada bloque de la estación: controlador, sensores, comunicación LTE, publicación de telemetría, actuación sobre el riego y alimentación.
-
 \begin{wrapfigure}{r}{0.22\textwidth}
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.20\textwidth]{figs/arduino_logo.png}
-    \caption{Logo Arduino}
+    \caption{Logotipo de Arduino. Fuente: documentación oficial de marca de Arduino \cite{arduino_logo_guidelines}.}
     \label{fig:logo_arduino}
     \vspace{-8pt}
 \end{wrapfigure}
+
+Una vez definida la arquitectura final del sistema, este capítulo describe la implementación \textit{hardware} y \textit{firmware} de las estaciones de campo de TierraViva. El propósito no es repetir las decisiones de diseño ya justificadas en capítulos anteriores, sino documentar cómo se preparó, conectó y validó cada bloque de la estación: controlador, sensores, comunicación LTE, publicación de telemetría, actuación sobre el riego y alimentación.
 
 En la arquitectura final, la estación no es un simple nodo que obedece instrucciones externas. Cada estación mide, evalúa reglas locales, acciona el riego cuando corresponde y publica su estado operativo. Por ello, la implementación \textit{hardware} y el \textit{firmware} tienen un papel central dentro del prototipo.
 
@@ -21,7 +21,7 @@ La Figura~\ref{fig:flujo_implementacion_estacion} resume la secuencia seguida du
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.65\textwidth]{figs_png/flujo_implementacion_estacion.png}%
     }
-    \caption{Secuencia de implementación de una estación TierraViva.}
+    \caption{Secuencia de implementación de una estación TierraViva. Elaboración propia.}
     \label{fig:flujo_implementacion_estacion}
 \end{figure}
 
@@ -81,7 +81,7 @@ La Figura~\ref{fig:topologia_sensores_estacion} resume esta organización. Los s
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.8\textwidth]{figs_png/topologia_sensores_estacion.png}%
     }
-    \caption{Topología de sensórica de una estación TierraViva.}
+    \caption{Topología de sensórica de una estación TierraViva. Elaboración propia.}
     \label{fig:topologia_sensores_estacion}
 \end{figure}
 
@@ -128,7 +128,7 @@ La Figura~\ref{fig:ciclo_firmware_estacion} sintetiza el ciclo lógico ejecutado
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.8\textwidth]{figs_png/ciclo_firmware_estacion.png}%
     }
-    \caption{Ciclo lógico del \textit{firmware} de estación.}
+    \caption{Ciclo lógico del \textit{firmware} de estación. Elaboración propia.}
     \label{fig:ciclo_firmware_estacion}
 \end{figure}
 
@@ -358,7 +358,7 @@ El \textit{firmware} interpreta el código HTTP 200 como confirmación funcional
 
 \end{tikzpicture}
 }
-\caption{Confirmación funcional de publicación HTTP desde la estación hacia ThingSpeak.}
+\caption{Confirmación funcional de publicación HTTP desde la estación hacia ThingSpeak. Elaboración propia.}
 \label{fig:confirmacion_http_thingspeak}
 \end{figure}
 
@@ -379,7 +379,7 @@ La Figura~\ref{fig:alimentacion_actuacion_estacion} resume la distribución elé
     \makebox[\textwidth][c]{%
         \includegraphics[width=0.8\textwidth]{figs_png/alimentacion_actuacion_estacion.png}%
     }
-\caption{Distribución de alimentación y actuación en una estación TierraViva.}
+\caption{Distribución de alimentación y actuación en una estación TierraViva. Elaboración propia.}
 \label{fig:alimentacion_actuacion_estacion}
 \end{figure}
 

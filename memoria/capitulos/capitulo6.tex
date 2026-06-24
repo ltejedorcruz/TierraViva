@@ -1,16 +1,16 @@
 \chapter{Implementación software en Raspberry Pi y nube}
 \label{cap:implementacion_software_raspberry_nube}
 
-Una vez descrita la implementación hardware y \textit{firmware} de las estaciones de campo, este capítulo se centra en la parte software que permite supervisar el sistema desde la Raspberry Pi y conservar un histórico de funcionamiento.  El papel de la Raspberry Pi consiste en consultar la información publicada por las estaciones en ThingSpeak, normalizar las lecturas recibidas, almacenarlas en una base de datos local y exponerlas mediante una API y un \textit{dashboard} web. Esta separación permite mantener el comportamiento autónomo de las estaciones incluso si la Raspberry Pi está apagada, sin conexión o en mantenimiento.
-
 \begin{wrapfigure}{r}{0.22\textwidth}
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.20\textwidth]{figs/logo_raspberry.png}
-    \caption{Logo Raspberry Pi}
+    \caption{Logotipo de Raspberry Pi. Fuente: normas oficiales de marca de Raspberry Pi \cite{raspberrypi_trademark_rules}.}
     \label{fig:logo_raspberry}
     \vspace{-8pt}
 \end{wrapfigure}
+
+Una vez descrita la implementación hardware y \textit{firmware} de las estaciones de campo, este capítulo se centra en la parte software que permite supervisar el sistema desde la Raspberry Pi y conservar un histórico de funcionamiento.  El papel de la Raspberry Pi consiste en consultar la información publicada por las estaciones en ThingSpeak, normalizar las lecturas recibidas, almacenarlas en una base de datos local y exponerlas mediante una API y un \textit{dashboard} web. Esta separación permite mantener el comportamiento autónomo de las estaciones incluso si la Raspberry Pi está apagada, sin conexión o en mantenimiento.
 
 El software desarrollado no apareció directamente en su forma final. Antes de cerrar la arquitectura remota basada en LTE y ThingSpeak, se implementó un prototipo local con MQTT para validar la cadena básica de adquisición, transporte, almacenamiento y visualización de datos. Dicho prototipo no forma parte de la arquitectura definitiva, pero resulta relevante porque permitió detectar necesidades reales del sistema, comprobar la utilidad de una arquitectura desacoplada y reducir el riesgo antes de trabajar con comunicaciones móviles y con ThingSpeak como plataforma intermedia.
 
@@ -21,16 +21,16 @@ El código asociado al proyecto se conserva en el repositorio público TierraViv
 
 Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna. Esta fase no pretendía resolver todavía el despliegue en campo, sino validar de forma controlada la cadena software básica del sistema: adquisición de telemetría, transporte de mensajes, almacenamiento local, API y visualización web.
 
-El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
-
 \begin{wrapfigure}{l}{0.32\textwidth}
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.30\textwidth]{figs/mosquitto-logo.png}
-    \caption{Logo MQTT Mosquitto, utilizado en el prototipo local previo.}
+    \caption{Logotipo de Eclipse Mosquitto, utilizado en el prototipo local previo. Fuente: sitio oficial de Eclipse Mosquitto \cite{eclipse_mosquitto_official}.}
     \label{fig:logo_mqtt}
     \vspace{-8pt}
 \end{wrapfigure}
+
+El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
 
 El enfoque MQTT no se mantuvo como arquitectura final porque dependía de un flujo más local y no resolvía de forma natural la publicación remota desde estaciones desplegadas fuera del entorno de laboratorio. La solución definitiva sustituye esa comunicación local por publicación LTE/HTTP en ThingSpeak, manteniendo la decisión de riego en el \textit{firmware} de cada estación y dejando la Raspberry Pi como nodo de supervisión, ingesta, almacenamiento, API y \textit{dashboard}.
 
@@ -43,7 +43,7 @@ La evolución desde el prototipo MQTT hasta la arquitectura final se recoge como
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.30\textwidth]{figs/thingspeak_logo.png}
-    \caption{Logo ThingSpeak}
+    \caption{Logotipo de ThingSpeak. Fuente: documentación oficial de MathWorks \cite{mathworks_thingspeak_product}.}
     \label{fig:logo_thingspeak}
     \vspace{-8pt}
 \end{wrapfigure}
@@ -96,7 +96,7 @@ En resumen, la lectura de ThingSpeak transforma la plataforma \textit{cloud} en 
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.30\textwidth]{figs/sqlite_logo.jpeg}
-    \caption{Logo SQLite}
+    \caption{Logotipo de SQLite. Fuente: sitio oficial de SQLite \cite{sqlite_about}.}
     \label{fig:logo_sqlite}
     \vspace{-8pt}
 \end{wrapfigure}
@@ -219,7 +219,7 @@ La Figura~\ref{fig:er_tierraviva_sqlite} resume el modelo entidad--relación sim
 
 \end{tikzpicture}%
 }
-\caption{Modelo entidad--relación simplificado de la base de datos SQLite utilizada por TierraViva en la Raspberry Pi.}
+\caption{Modelo entidad--relación simplificado de la base de datos SQLite utilizada por TierraViva en la Raspberry Pi. Elaboración propia.}
 \label{fig:er_tierraviva_sqlite}
 \end{figure}
 
@@ -268,7 +268,7 @@ La API local de TierraViva se implementa con FastAPI y actúa como capa de servi
     \vspace{-12pt}
     \centering
     \includegraphics[width=0.24\textwidth]{figs/fast_api_logo.png}
-    \caption{Logo FastAPI}
+    \caption{Logotipo de FastAPI. Fuente: documentación oficial de FastAPI \cite{fastapi_docs}.}
     \label{fig:logo_fastapi}
     \vspace{-8pt}
 \end{wrapfigure}
@@ -280,7 +280,7 @@ La Figura~\ref{fig:fastapi_capa_servicio} representa el papel de FastAPI dentro 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.92\textwidth]{figs_png/api_flujo.png}
-\caption{Papel de FastAPI como capa de servicio entre SQLite y los clientes de consulta.}
+\caption{Papel de FastAPI como capa de servicio entre SQLite y los clientes de consulta. Elaboración propia.}
 \label{fig:fastapi_capa_servicio}
 \end{figure}
 
@@ -361,7 +361,7 @@ La Figura~\ref{fig:dashboard_final_vista_general} muestra una vista general del 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.96\textwidth]{figs/dashboard_final_vista_general.jpg}
-    \caption[\textit{Dashboard} final de TierraViva]{\textit{Dashboard} final de TierraViva. La interfaz integra selector de estación, estado de conexión, lecturas actuales, eventos de sistema, códigos de diagnóstico, resumen histórico, gráficas y tabla de últimas lecturas.}
+    \caption[\textit{Dashboard} final de TierraViva]{\textit{Dashboard} final de TierraViva. La interfaz integra selector de estación, estado de conexión, lecturas actuales, eventos de sistema, códigos de diagnóstico, resumen histórico, gráficas y tabla de últimas lecturas. Captura propia.}
     \label{fig:dashboard_final_vista_general}
 \end{figure}
 

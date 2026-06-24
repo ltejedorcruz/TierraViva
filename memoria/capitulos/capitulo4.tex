@@ -19,7 +19,7 @@ La Figura~\ref{fig:arquitectura_final_tierraviva} muestra la arquitectura final 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figs/arquitecturaFinalTierraViva.png}
-\caption{Arquitectura final de TierraViva con decisión local en las estaciones.}
+\caption{Arquitectura final de TierraViva con decisión local en las estaciones. Elaboración propia.}
 \label{fig:arquitectura_final_tierraviva}
 \end{figure}
 
@@ -74,7 +74,7 @@ La Figura~\ref{fig:cap4_bloques_estacion_campo} resume esta configuración. El o
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_4_2_bloques_estacion_campo.jpeg}
-    \caption{Bloques funcionales internos de una estación de campo. Cada estación integra adquisición de datos, decisión local, comunicación LTE/HTTP, actuación mediante relé y bomba de agua, y alimentación regulada.}
+    \caption{Bloques funcionales internos de una estación de campo. Cada estación integra adquisición de datos, decisión local, comunicación LTE/HTTP, actuación mediante relé y bomba de agua, y alimentación regulada. Elaboración propia.}
     \label{fig:cap4_bloques_estacion_campo}
 \end{figure}
 
@@ -92,7 +92,7 @@ El Arduino UNO se comunica con el A7670E-LASA mediante UART y comandos AT. Desde
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_4_3_secuencia_lte_http.jpeg}
-    \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA.}
+    \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA. Elaboración propia.}
     \label{fig:cap4_secuencia_lte_http}
 \end{figure}
 
@@ -110,7 +110,7 @@ La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.90\textwidth]{figs/thingspeak_canales_tierraviva.png}
-\caption{Canales ThingSpeak creados para las estaciones de TierraViva.}
+\caption{Canales ThingSpeak creados para las estaciones de TierraViva. Captura propia.}
 \label{fig:thingspeak_canales_tierraviva}
 \end{figure}
 
@@ -130,7 +130,7 @@ Esta separación mantiene la coherencia del sistema distribuido. Las estaciones 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_4_5_pipeline_raspberry_supervision.png}
-    \caption{Flujo de software de supervisión en Raspberry Pi.}
+    \caption{Flujo de software de supervisión en Raspberry Pi. Elaboración propia.}
     \label{fig:cap4_pipeline_raspberry_supervision}
 \end{figure}
 
@@ -150,7 +150,7 @@ El criterio inicial se basa en una regla verificable de humedad del suelo. La es
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_4_6_decision_local_riego.jpeg}
-    \caption{Lógica conceptual de decisión local de riego en cada estación.}
+    \caption{Lógica conceptual de decisión local de riego en cada estación. Elaboración propia.}
     \label{fig:cap4_decision_local_riego}
 \end{figure}
 
@@ -166,7 +166,7 @@ El modo seguro define el comportamiento que debe adoptar la estación cuando no 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_4_7_modo_seguro_estacion.png}
-    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, fallo de publicación, \textit{cooldown} o finalización del tiempo de riego, el sistema prioriza mantener el relé desactivado y la bomba apagada.}
+    \caption{Principio de modo seguro aplicado en las estaciones de TierraViva. Ante reinicio, lectura inválida, fallo de publicación, \textit{cooldown} o finalización del tiempo de riego, el sistema prioriza mantener el relé desactivado y la bomba apagada. Elaboración propia.}
     \label{fig:cap4_modo_seguro_estacion}
 \end{figure}
 

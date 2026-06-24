@@ -5,7 +5,7 @@ Este capítulo recoge los fundamentos tecnológicos que sirven de base para el d
 
 El capítulo no busca valorar cada tecnología de forma aislada, sino explicar qué aporta cada una dentro de una arquitectura de riego inteligente. Por eso se presta atención tanto a sus ventajas como a sus restricciones prácticas: consumo, cobertura, facilidad de integración, dependencia de infraestructura y capacidad de validación dentro del alcance del TFG.
 
-\section{Arquitecturas IoT}
+\section{Arquitectura funcional de sistemas IoT}
 \label{sec:arquitecturas_iot}
 
 El concepto de Internet de las Cosas (IoT, del inglés \textit{Internet of Things}) hace referencia a la interconexión de objetos físicos o virtuales capaces de identificarse, comunicarse y participar en servicios digitales. La recomendación del Sector de Normalización de las Telecomunicaciones de la Unión Internacional de Telecomunicaciones (ITU-T, del inglés \textit{International Telecommunication Union -- Telecommunication Standardization Sector}) Y.2060 define IoT como una infraestructura global para la sociedad de la información que permite ofrecer servicios avanzados mediante la interconexión de cosas físicas y virtuales a través de tecnologías interoperables \cite{itu_y2060}. Esta definición resulta adecuada para TierraViva porque sitúa IoT como una arquitectura completa: adquisición de datos, comunicación, procesamiento, almacenamiento, visualización y, cuando procede, actuación física.
@@ -15,7 +15,7 @@ Desde un punto de vista práctico, un sistema IoT conecta el mundo físico con e
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{figs/figura_2_1_cadena_funcional_iot.png}
-    \caption{Cadena funcional básica de un sistema IoT. El sistema capta información del entorno mediante sensorización, la transmite a través de una red, la almacena, la procesa y, cuando procede, actúa sobre el mundo físico cerrando el bucle de control.}
+    \caption{Cadena funcional básica de un sistema IoT. El sistema capta información del entorno mediante sensorización, la transmite a través de una red, la almacena, la procesa y, cuando procede, actúa sobre el mundo físico cerrando el bucle de control. Elaboración propia.}
     \label{fig:cap2_cadena_funcional_iot}
 \end{figure}
 
@@ -32,7 +32,7 @@ Las arquitecturas IoT suelen representarse por capas. Una división sencilla dis
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figs/figura_2_2_arquitectura_iot_capas.png}
-    \caption{Arquitectura IoT organizada por capas funcionales.}
+    \caption{Arquitectura IoT organizada por capas funcionales. Elaboración propia.}
     \label{fig:cap2_arquitectura_iot_capas}
 \end{figure}
 
@@ -55,7 +55,7 @@ La monitorización ambiental permite pasar de una decisión basada en intuición
 
 Cuando la monitorización se conecta con un mecanismo de actuación, el sistema pasa a formar parte del control del proceso. En ese punto aparecen requisitos adicionales: reglas claras, límites de seguridad y comportamiento seguro ante fallo. En riego, una actuación incorrecta puede traducirse en pérdida de agua, daño al cultivo o funcionamiento indebido del actuador encargado de impulsar o permitir el paso del agua.
 
-Los sistemas de riego inteligente basados en IoT suelen combinar nodos de medida, comunicaciones, almacenamiento de datos, procesamiento y actuación. Boursianis et al. presentan en \textit{IEEE Sensors Journal}, revista del \textit{Institute of Electrical and Electronics Engineers} (IEEE), una plataforma de riego inteligente para agricultura de precisión basada en IoT, planteada como un sistema formado por varios subsistemas coordinados \cite{boursianis2021smart_irrigation}. Esta línea de trabajo es relevante porque desplaza el foco desde el sensor aislado hacia la arquitectura completa.
+Los sistemas de riego inteligente basados en IoT suelen combinar nodos de medida, comunicaciones, almacenamiento de datos, procesamiento y actuación. Por ejemplo, Boursianis et al. presentan en \textit{IEEE Sensors Journal}, revista del \textit{Institute of Electrical and Electronics Engineers} (IEEE), una plataforma de riego inteligente para agricultura de precisión basada en IoT, planteada como un sistema formado por varios subsistemas coordinados \cite{boursianis2021smart_irrigation}. Esta línea de trabajo es relevante porque desplaza el foco desde el sensor aislado hacia la arquitectura completa.
 
 En TierraViva este enfoque se concreta en una decisión sencilla pero importante: no basta con medir humedad o temperatura, la estación debe convertir esas lecturas en una actuación local limitada y segura. La literatura sobre agricultura inteligente resalta que el valor de IoT no está únicamente en instalar sensores, sino en integrar monitorización, comunicación, procesamiento, almacenamiento, supervisión y toma de decisiones dentro de una arquitectura fiable \cite{shafi2019,soussi2024smart,abioye2020}. Por ello, la eficiencia del sistema depende tanto de la calidad de las medidas como de la forma en que una lectura se transforma en una acción de riego controlada.
 
@@ -107,7 +107,7 @@ Los nodos de campo suelen tener recursos limitados. Pueden funcionar con baterí
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{figs/figura_2_3_nodo_iot_componentes.png}
-    \caption{Componentes básicos de un nodo IoT. Un nodo integra sensores para observar el entorno, actuadores para ejecutar acciones, una unidad de procesamiento, un subsistema de comunicaciones y una fuente de energía que condiciona su autonomía.}
+    \caption{Componentes básicos de un nodo IoT. Un nodo integra sensores para observar el entorno, actuadores para ejecutar acciones, una unidad de procesamiento, un subsistema de comunicaciones y una fuente de energía que condiciona su autonomía. Elaboración propia.}
     \label{fig:cap2_nodo_iot_componentes}
 \end{figure}
 
@@ -211,7 +211,7 @@ El tráfico típico de estos sistemas suele ser reducido: humedad, temperatura, 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_2_5_criterios_comunicacion_iot.png}
-    \caption{Criterios principales para seleccionar una tecnología de comunicación en un sistema IoT. La elección depende del equilibrio entre alcance, consumo energético, volumen de datos, frecuencia de envío, número de nodos y movilidad del escenario de aplicación.}
+    \caption{Criterios principales para seleccionar una tecnología de comunicación en un sistema IoT. La elección depende del equilibrio entre alcance, consumo energético, volumen de datos, frecuencia de envío, número de nodos y movilidad del escenario de aplicación. Elaboración propia.}
     \label{fig:cap2_criterios_comunicacion_iot}
 \end{figure}
 
@@ -308,7 +308,7 @@ En una arquitectura IoT, la plataforma \textit{cloud} actúa como punto intermed
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_2_6_edge_fog_cloud.png}
-    \caption{Distribución del procesamiento en arquitecturas IoT. El procesamiento puede situarse cerca del dispositivo, en el borde de la red, en capas intermedias tipo fog o en plataformas cloud, según los requisitos de latencia, ancho de banda, autonomía, disponibilidad de conectividad y capacidad de análisis.}
+    \caption{Distribución del procesamiento en arquitecturas IoT. El procesamiento puede situarse cerca del dispositivo, en el borde de la red, en capas intermedias tipo fog o en plataformas cloud, según los requisitos de latencia, ancho de banda, autonomía, disponibilidad de conectividad y capacidad de análisis. Elaboración propia.}
     \label{fig:cap2_edge_fog_cloud}
 \end{figure}
 
@@ -316,7 +316,7 @@ Una función habitual de estas plataformas es almacenar telemetría, es decir, m
 
 Una API (\textit{Application Programming Interface}) es una interfaz programable que una plataforma ofrece para que otros desarrollos software puedan acceder a su funcionalidad de forma controlada. En una plataforma IoT, la API puede permitir escribir telemetría, consultar lecturas, recuperar históricos o integrar esos datos en aplicaciones propias. No debe confundirse la API con el protocolo utilizado para acceder a ella: HTTP, MQTT o CoAP transportan la información, mientras que la API define operaciones, parámetros, autenticación, formatos y respuestas.
 
-ThingSpeak es una plataforma de análisis IoT que permite agregar, visualizar y analizar flujos de datos en la nube \cite{thingspeak_docs}. Su estructura se basa en canales y campos, y ofrece una interfaz programable documentada para escribir y leer datos mediante mecanismos como HTTP o MQTT \cite{thingspeak_write_data,thingspeak_read_data}. En TierraViva, su sencillez resulta útil porque permite comprobar pronto si las estaciones publican datos correctamente, antes de invertir esfuerzo en una infraestructura \textit{cloud} propia más compleja.
+ThingSpeak es una plataforma de análisis IoT de la empresa MathWorks\textsuperscript{\textregistered} que permite agregar, visualizar y analizar flujos de datos en la nube \cite{mathworks_thingspeak_product}. Su estructura se basa en canales y campos, y ofrece una interfaz programable documentada para escribir y leer datos mediante mecanismos como HTTP o MQTT \cite{thingspeak_write_data,thingspeak_read_data}. En TierraViva, su sencillez resulta útil porque permite comprobar pronto si las estaciones publican datos correctamente, antes de invertir esfuerzo en una infraestructura \textit{cloud} propia más compleja.
 
 Existen alternativas como Ubidots, Adafruit IO, Blynk, ThingsBoard o una plataforma propia con \textit{broker} MQTT, base de datos y herramienta de visualización \cite{ubidots_basics,adafruit_io_api,blynk_datastreams,thingsboard_telemetry}. La diferencia principal no está solo en la estética de los paneles, sino en la forma de organizar dispositivos, variables, históricos, autenticación, reglas, límites de uso y posibilidades de integración.
 

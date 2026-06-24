@@ -1,8 +1,45 @@
 \chapter{Métodos, materiales y decisiones de diseño}
 \label{cap:capitulo3}
-Este capítulo concreta el diseño de TierraViva a partir del marco técnico descrito en el capítulo anterior. Aquí se fijan los requisitos del sistema, se explican los criterios de elección y se documentan las decisiones que han guiado el prototipo: qué debe medir cada estación, cómo se comunica, qué papel conserva la Raspberry Pi y qué condiciones deben cumplirse antes de actuar sobre el riego.
 
-A diferencia del estado del arte, el análisis se centra ya en el proyecto desarrollado. Algunas decisiones se tomaron de forma incremental, a medida que se validaban sensores, comunicaciones y software de supervisión. Por ello, el capítulo no se limita a enumerar materiales, sino que justifica por qué TierraViva adopta una arquitectura distribuida con decisión local en las estaciones.
+Este capítulo concreta el diseño de TierraViva a partir del marco técnico descrito en el capítulo anterior. Aquí se fijan los requisitos del sistema, se explica la metodología seguida y se documentan las decisiones que han guiado el diseño del prototipo, tales como las variables a medir en el entorno físico, la tecnología de comunicación inalámbrica empleada, el rol de cada elemento dentro de la solución completa y las condiciones que deben cumplirse para actuar sobre el riego.
+
+A diferencia del estado del arte, el análisis se centra ya en el proyecto desarrollado. El capítulo se organiza de forma progresiva: primero se presenta la metodología de trabajo y se definen los requisitos del sistema; después se justifican las principales decisiones tecnológicas; y, finalmente, se sintetiza la arquitectura general resultante. Algunas decisiones se tomaron de forma incremental, a medida que se validaban sensores, comunicaciones y software de supervisión, por lo que la memoria recoge también los reajustes realizados durante el desarrollo.
+
+\section{Metodología de trabajo}
+\label{sec:metodologia_trabajo}
+
+La metodología seguida en TierraViva se ha basado en un desarrollo incremental por bloques. Este enfoque resulta adecuado para un sistema IoT que combina sensórica, comunicaciones, almacenamiento, visualización y actuación física, ya que permite validar cada parte por separado antes de integrarla en el sistema completo.
+
+El trabajo no se desarrolló como una implementación lineal de una arquitectura cerrada desde el inicio. Durante el proyecto se realizaron pruebas parciales, se descartaron alternativas, se reajustó la arquitectura y se documentaron incidencias técnicas. Esta forma de trabajo permitió reducir el riesgo de integración y justificar las decisiones adoptadas.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.12}
+\rowcolors{2}{TableRowSoft}{white}
+\begin{tabular}{|p{0.20\textwidth}|p{0.68\textwidth}|}
+\hline
+\rowcolor{URJCRed}
+\TVHead{Fase} & \TVHead{Objetivo principal} \\
+\hline
+Análisis y revisión tecnológica & Identificar el problema, revisar alternativas de sensorización, comunicación, plataformas embebidas y supervisión IoT. \\
+\hline
+Diseño conceptual & Definir requisitos, arquitectura por bloques, separación entre control local y supervisión, y criterios de seguridad funcional. \\
+\hline
+Prototipado parcial & Validar sensores, plataforma de control, comunicación, almacenamiento, servicios de consulta e interfaz de supervisión mediante pruebas separadas. \\
+\hline
+Reajuste de arquitectura & Sustituir el enfoque local inicial por estaciones remotas con comunicación inalámbrica, plataforma intermedia de telemetría y decisión local en \textit{firmware}. \\
+\hline
+Integración y validación & Conectar sensórica, comunicación, almacenamiento, servicios de consulta, interfaz de supervisión, relé, bomba y pruebas funcionales. \\
+\hline
+Documentación y cierre & Registrar decisiones, problemas, evidencias, anexos técnicos, resultados, limitaciones y conclusiones. \\
+\hline
+\end{tabular}
+\caption{Resumen de la metodología incremental seguida en TierraViva.}
+\label{cuadro:metodologia_fases}
+\end{table}
+
+El cronograma detallado del proyecto se recoge en el Anexo~\ref{anexo:cronograma}, y el seguimiento de decisiones técnicas se documenta en el Anexo~\ref{anexo:seguimiento_decisiones}. En este capítulo interesa únicamente fijar el criterio metodológico: avanzar por bloques, validar antes de integrar y reajustar la arquitectura cuando las pruebas lo hicieron necesario.
 
 \section{Requisitos funcionales del sistema}
 \label{sec:requisitos_funcionales}
@@ -18,11 +55,11 @@ Para facilitar la trazabilidad del sistema, los requisitos funcionales se identi
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_3_1_requisitos_funcionales.png}
-    \caption{Relación entre los requisitos funcionales y el ciclo completo de funcionamiento del sistema. TierraViva debe medir, publicar telemetría, registrar histórico, visualizar el estado, decidir localmente y actuar sobre el riego de forma segura.}
+    \caption{Relación entre los requisitos funcionales y el ciclo completo de funcionamiento del sistema. TierraViva debe medir, publicar telemetría, registrar histórico, visualizar el estado, decidir localmente y actuar sobre el riego de forma segura. Elaboración propia.}
     \label{fig:cap3_requisitos_funcionales}
 \end{figure}
 
-El término \textit{dashboard} se refiere a un panel web de supervisión que integra, en una misma interfaz, lecturas recientes, estado del sistema, históricos y eventos relevantes del prototipo.
+En este capítulo se utiliza el término interfaz de supervisión para referirse, de forma general, a la capa visual que permitirá consultar lecturas recientes, estado del sistema, históricos y eventos relevantes del prototipo.
 
 En la Tabla~\ref{cuadro:requisitos_funcionales} se recogen los principales requisitos funcionales considerados para el diseño del prototipo.
 
@@ -60,15 +97,15 @@ RF-04 & Envío remoto de telemetría & Las estaciones de campo deben enviar sus 
 \hline
 RF-05 & Identificación de estación & Cada lectura debe poder asociarse a la estación de origen, permitiendo distinguir los datos de distintas zonas o nodos. & Comprobación de registros diferenciados por estación. \\
 \hline
-RF-06 & Almacenamiento histórico & El sistema debe registrar las lecturas recibidas para conservar un histórico de funcionamiento. & Verificación de inserciones en SQLite. \\
+RF-06 & Almacenamiento histórico & El sistema debe registrar las lecturas recibidas para conservar un histórico de funcionamiento. & Verificación de inserciones en la base de datos local. \\
 \hline
-RF-07 & Visualización del estado & El sistema debe ofrecer una interfaz de consulta que permita ver las últimas lecturas y el estado general del prototipo. & Prueba de \textit{dashboard} web en navegador. \\
+RF-07 & Visualización del estado & El sistema debe ofrecer una interfaz de consulta que permita ver las últimas lecturas y el estado general del prototipo. & Prueba de interfaz web de supervisión en navegador. \\
 \hline
 RF-08 & Decisión local de riego & Cada estación debe evaluar localmente si las condiciones medidas justifican una actuación sobre el riego. & Prueba de regla local de humedad, \textit{cooldown} y estado seguro. \\
 \hline
 RF-09 & Actuación local sobre el riego & La estación debe accionar físicamente el sistema de riego mediante relé y bomba de agua durante un tiempo limitado por \textit{firmware}. & Prueba controlada con relé y bomba/carga de prueba. \\
 \hline
-RF-10 & Publicación de estado de actuación & La estación debe publicar el estado del relé, el evento de sistema y un código auxiliar de diagnóstico que permitan conocer si se ha producido una actuación, una situación de reposo, un error, un estado seguro o un bloqueo por \textit{cooldown}. & Verificación de \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code} en ThingSpeak. \\
+RF-10 & Publicación de estado de actuación & La estación debe publicar información suficiente para identificar el estado del actuador, el evento principal del sistema y posibles condiciones de diagnóstico, como actuación, reposo, error, estado seguro o bloqueo temporal. & Comprobación de la publicación e interpretación de estados en la plataforma intermedia de telemetría. \\
 \hline
 RF-11 & Seguridad de funcionamiento & El sistema debe desactivar o mantener apagada la bomba ante error de sensor, lectura inválida, fallo de comunicación, reinicio, \textit{cooldown} activo o tiempo máximo excedido. & Pruebas de modo seguro, reinicio y límites de actuación. \\
 \hline
@@ -88,12 +125,12 @@ La relación completa entre requisitos, pruebas y evidencias de validación se d
 
 Los requisitos no funcionales describen las condiciones de calidad que debe cumplir el sistema, más allá de las funciones concretas indicadas en el apartado anterior. En TierraViva estos requisitos son especialmente importantes porque el proyecto no consiste únicamente en que cada bloque funcione de forma aislada, sino en que el conjunto pueda integrarse, probarse, ampliarse y defenderse como un prototipo de ingeniería.
 
-El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. No se pretende desarrollar un producto industrial cerrado, pero sí una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta. Para facilitar su trazabilidad, los requisitos no funcionales se identifican con el prefijo RNF (requisito no funcional). La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
+El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. Por ello, se plantea como una solución suficientemente robusta, ordenada y reproducible como para demostrar el funcionamiento completo de la arquitectura propuesta dentro del alcance académico del TFG. Para facilitar su trazabilidad, los requisitos no funcionales se identifican con el prefijo RNF (requisito no funcional). La Tabla~\ref{cuadro:requisitos_no_funcionales} resume los principales requisitos no funcionales considerados.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs/figura_3_2_requisitos_no_funcionales.png}
-    \caption{Requisitos no funcionales considerados en el diseño del prototipo. Estos criterios permiten evaluar la calidad técnica del sistema más allá de las funciones implementadas.}
+    \includegraphics[width=0.95\textwidth]{figs/figura_3_2_requisitos_no_funcionales.png}
+    \caption{Requisitos no funcionales considerados en el diseño del prototipo. Estos criterios permiten evaluar la calidad técnica del sistema más allá de las funciones implementadas. Elaboración propia.}
     \label{fig:cap3_requisitos_no_funcionales}
 \end{figure}
 
@@ -132,7 +169,7 @@ RNF-09 & Adecuación académica & El alcance debe ser realizable dentro del tiem
 \end{center}
 \end{table}
 
-Estos requisitos no funcionales condicionan la arquitectura del proyecto. La modularidad, la reproducibilidad y la facilidad de depuración justifican la separación entre estación de campo, plataforma intermedia, Raspberry Pi, API y \textit{dashboard}. Esta división permite probar cada bloque de forma independiente y reduce el riesgo de que un fallo en una capa impida validar el conjunto.
+Estos requisitos no funcionales condicionan la arquitectura del proyecto. La modularidad, la reproducibilidad y la facilidad de depuración justifican la separación entre estación de campo, plataforma intermedia, sistema de supervisión, API e interfaz web. Esta división permite probar cada bloque de forma independiente y reduce el riesgo de que un fallo en una capa impida validar el conjunto.
 
 El bajo coste y la adecuación académica orientan la selección de componentes hacia módulos accesibles, documentados y suficientes para demostrar el funcionamiento del sistema. La escalabilidad se plantea de forma limitada pero necesaria: el sistema debe poder trabajar con más de una estación sin rediseñar por completo la arquitectura.
 
@@ -148,7 +185,7 @@ Las especificaciones temporales (ET) no se plantean como valores rígidos e inmo
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figs/figura_3_3_especificaciones_temporales.png}
-    \caption{Especificaciones temporales y operativas iniciales del sistema.}
+    \caption{Especificaciones temporales y operativas iniciales del sistema. Elaboración propia.}
     \label{fig:cap3_especificaciones_temporales}
 \end{figure}
 
@@ -175,7 +212,7 @@ ET-01 & Periodo de lectura de sensores & Configurable & Las estaciones toman med
 \hline
 ET-02 & Frecuencia de envío de telemetría & Configurable & Cada estación envía sus datos de forma periódica, evitando tráfico innecesario en funcionamiento normal. \\
 \hline
-ET-03 & Frecuencia de actualización del \textit{dashboard} & 3--5 s & La interfaz consulta el estado con mayor frecuencia que la llegada real de nuevos datos. \\
+ET-03 & Frecuencia de actualización de la interfaz de supervisión & 3--5 s & La interfaz consulta el estado con mayor frecuencia que la llegada real de nuevos datos. \\
 \hline
 ET-04 & Intervalo de evaluación local & Configurable & Cada estación evalúa periódicamente sus lecturas y comprueba si se cumplen las condiciones locales de riego. \\
 \hline
@@ -183,7 +220,7 @@ ET-05 & Tiempo máximo de bomba activa & Limitado en pruebas; ajustable en \text
 \hline
 ET-06 & Tiempo mínimo entre riegos & Configurable & Se aplica un periodo de espera para evitar actuaciones repetidas en poco tiempo. \\
 \hline
-ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & La Raspberry Pi y el \textit{dashboard} deben identificar lecturas antiguas u \textit{offline} cuando no se reciben publicaciones recientes de una estación. \\
+ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & El sistema de supervisión y la interfaz web deben identificar lecturas antiguas u \textit{offline} cuando no se reciben publicaciones recientes de una estación. \\
 \hline
 ET-08 & Estado seguro por defecto & Bomba apagada & Al arrancar, ante error de lectura, fallo de comunicación o condición no verificable, la estación mantiene desactivado el riego. \\
 \hline
@@ -200,71 +237,7 @@ ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actua
 
 Los parámetros temporales se definen como valores configurables del \textit{firmware}. Durante las pruebas pueden emplearse intervalos reducidos para acelerar la validación, mientras que en un funcionamiento más estable conviene utilizar periodos más conservadores. En particular, el tiempo máximo de bomba activa no debe interpretarse como una recomendación agronómica general, sino como un límite de seguridad del prototipo. Su valor debe ser deliberadamente conservador durante la validación y ajustarse posteriormente a partir de pruebas de caudal, tipo de cultivo, volumen de agua aplicado y evolución real de la humedad del suelo. Lo importante desde el punto de vista de diseño no es fijar un único valor definitivo, sino garantizar ciclos controlados, detección de datos antiguos en supervisión y actuación de la bomba siempre limitada temporalmente.
 
-La actualización del \textit{dashboard} puede realizarse con mayor frecuencia que la publicación de las estaciones, pero no debe interpretarse como una nueva medida en cada refresco. La actuación física queda gobernada por el \textit{firmware} de la estación, que debe mantener la bomba apagada ante lecturas inválidas, reinicios, pérdida de comunicación o estados no verificables.
-
-\section{Metodología de trabajo}
-\label{sec:metodologia_trabajo}
-
-La metodología seguida en TierraViva se ha basado en un desarrollo incremental por bloques. Este enfoque resulta adecuado para un sistema IoT que combina sensórica, comunicaciones, almacenamiento, visualización y actuación física, ya que permite validar cada parte por separado antes de integrarla en el sistema completo.
-
-El trabajo no se desarrolló como una implementación lineal de una arquitectura cerrada desde el inicio. Durante el proyecto se realizaron pruebas parciales, se descartaron alternativas, se reajustó la arquitectura y se documentaron incidencias técnicas. Esta forma de trabajo permitió reducir el riesgo de integración y justificar las decisiones adoptadas.
-
-\begin{table}[H]
-\centering
-\small
-\renewcommand{\arraystretch}{1.12}
-\rowcolors{2}{TableRowSoft}{white}
-\begin{tabular}{|p{0.20\textwidth}|p{0.68\textwidth}|}
-\hline
-\rowcolor{URJCRed}
-\TVHead{Fase} & \TVHead{Objetivo principal} \\
-\hline
-Análisis y revisión tecnológica & Identificar el problema, revisar alternativas de sensorización, comunicación, plataformas embebidas y supervisión IoT. \\
-\hline
-Diseño conceptual & Definir requisitos, arquitectura por bloques, separación entre control local y supervisión, y criterios de seguridad funcional. \\
-\hline
-Prototipado parcial & Validar sensores, Arduino, comunicación, almacenamiento, API y \textit{dashboard} mediante pruebas separadas. \\
-\hline
-Reajuste de arquitectura & Sustituir el enfoque local inicial por estaciones remotas con LTE, ThingSpeak y decisión local en \textit{firmware}. \\
-\hline
-Integración y validación & Conectar sensórica, comunicación, base de datos, API, \textit{dashboard}, relé, bomba y pruebas funcionales. \\
-\hline
-Documentación y cierre & Registrar decisiones, problemas, evidencias, anexos técnicos, resultados, limitaciones y conclusiones. \\
-\hline
-\end{tabular}
-\caption{Resumen de la metodología incremental seguida en TierraViva.}
-\label{cuadro:metodologia_fases}
-\end{table}
-
-El cronograma detallado del proyecto se recoge en el Anexo~\ref{anexo:cronograma}, y el seguimiento de decisiones técnicas se documenta en el Anexo~\ref{anexo:seguimiento_decisiones}. En este capítulo interesa únicamente fijar el criterio metodológico: avanzar por bloques, validar antes de integrar y reajustar la arquitectura cuando las pruebas lo hicieron necesario.
-
-\section{Arquitectura general planteada}
-\label{sec:arquitectura_general_planteada}
-
-A partir de los requisitos definidos en los apartados anteriores, la arquitectura general de TierraViva se plantea como un sistema IoT distribuido, formado por estaciones autónomas de campo, una plataforma intermedia de comunicación y un sistema de supervisión basado en Raspberry Pi. El objetivo de esta arquitectura es separar claramente la adquisición de datos, la decisión local, la actuación física, la publicación de telemetría, el almacenamiento histórico y la visualización.
-
-La arquitectura se ha diseñado teniendo en cuenta una restricción importante: las estaciones de campo no están conectadas físicamente a la Raspberry Pi. Por tanto, no se puede asumir una comunicación directa mediante USB, puerto serie o red local entre ambos extremos. Las estaciones deben poder enviar datos de forma remota mediante el módulo LTE, y la Raspberry debe consultar esa información desde la plataforma intermedia. Esto condiciona el diseño completo del sistema y evita que el riego dependa de una conexión local o de una orden enviada desde la Raspberry.
-
-En términos generales, el sistema se divide en cuatro bloques principales:
-
-\begin{itemize}
-    \item \textbf{Estaciones autónomas de campo}: encargadas de medir las variables del entorno, evaluar reglas locales de riego, accionar la bomba mediante relé y publicar telemetría y estado.
-    \item \textbf{Capa de comunicaciones y plataforma intermedia}: responsable de recibir los datos publicados por las estaciones y hacerlos accesibles para consulta remota.
-    \item \textbf{Sistema de supervisión}: implementado sobre Raspberry Pi, encargado de consultar datos, almacenarlos, exponer una API y servir el \textit{dashboard}.
-    \item \textbf{Interfaz de usuario}: orientada a visualizar el estado del sistema, revisar el histórico y supervisar las actuaciones realizadas por las estaciones.
-\end{itemize}
-
-La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general de la arquitectura planteada.
-
-\begin{figure}[H]
-  \hspace{-0.5cm}\centerline{\resizebox{1.2\textwidth}{!}{\includegraphics{figs/arquitecturaTierraViva.png}}}
-  \caption{Arquitectura general planteada para TierraViva.}
-\label{fig:arquitectura_general_tierraviva}
-\end{figure}
-
-La división de responsabilidades es el punto central de esta arquitectura. Las estaciones de campo interactúan con el entorno físico, toman la decisión local de riego y publican telemetría. ThingSpeak actúa como plataforma intermedia de comunicación. La Raspberry Pi consulta los datos, mantiene el histórico, expone la API y sirve el \textit{dashboard}, sin convertirse en el elemento responsable de decidir la activación de la bomba.
-
-El detalle de la arquitectura final, incluyendo canales de ThingSpeak, flujo de telemetría y papel de cada bloque, se desarrolla en el Capítulo~\ref{cap:capitulo4}. Los flujos visuales de funcionamiento se recogen en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
+La actualización de la interfaz de supervisión puede realizarse con mayor frecuencia que la publicación de las estaciones, pero no debe interpretarse como una nueva medida en cada refresco. La actuación física queda gobernada por el \textit{firmware} de la estación, que debe mantener la bomba apagada ante lecturas inválidas, reinicios, pérdida de comunicación o estados no verificables.
 
 \section{Elección de variables y sensores}
 \label{sec:eleccion_variables_sensores}
@@ -276,7 +249,7 @@ En TierraViva se combinan variables del suelo y variables ambientales. La humeda
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_6_variables_sensores.png}
-    \caption{Variables seleccionadas para la monitorización de TierraViva. La humedad del suelo se utiliza como variable principal para la decisión local de riego, mientras que temperatura, humedad relativa, presión y luminosidad aportan contexto ambiental.}
+    \caption{Variables seleccionadas para la monitorización de TierraViva. La humedad del suelo se utiliza como variable principal para la decisión local de riego, mientras que temperatura, humedad relativa, presión y luminosidad aportan contexto ambiental. Elaboración propia.}
     \label{fig:cap3_variables_sensores}
 \end{figure}
 
@@ -316,16 +289,16 @@ En conjunto, la combinación seleccionada cubre una variable principal de decisi
 \section{Elección de plataforma de control local y supervisión}
 \label{sec:eleccion_plataformas_control}
 
-La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un lado, las estaciones de campo necesitan una plataforma sencilla y cercana al hardware, capaz de leer sensores, comunicarse con el módulo LTE, aplicar reglas locales de riego y controlar el relé de la bomba. Por otro lado, el sistema necesita una plataforma con mayor capacidad software para consultar datos, almacenarlos, exponer una API y servir el \textit{dashboard} web. Esta segunda plataforma no actúa como cerebro del riego, sino como sistema de supervisión e histórico. Esta diferencia de funciones justifica el uso combinado de Arduino UNO y Raspberry Pi 5, en lugar de concentrar todo el sistema en una única plataforma.
+La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un lado, las estaciones de campo necesitan una plataforma sencilla y cercana al hardware, capaz de leer sensores, comunicarse con un módulo de comunicaciones, aplicar reglas locales de riego y controlar el relé de la bomba. Por otro lado, el sistema necesita una plataforma con mayor capacidad software para consultar datos, almacenarlos, exponer una API y servir una interfaz web de supervisión. Esta segunda plataforma no actúa como cerebro del riego, sino como sistema de supervisión e histórico. Esta diferencia de funciones justifica el uso combinado de Arduino UNO y Raspberry Pi 5, en lugar de concentrar todo el sistema en una única plataforma.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_7_plataformas_control_supervision.png}
-    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5.}
+    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5. Elaboración propia.}
     \label{fig:cap3_plataformas_control_supervision}
 \end{figure}
 
-Arduino UNO se ha seleccionado como plataforma principal de las estaciones de campo porque ofrece una integración directa con sensores, bus I2C, entrada analógica, comunicación serie con el módem LTE y control digital del relé. Sus prestaciones son limitadas frente a plataformas más modernas, pero suficientes para las tareas previstas en el nodo de campo: medir, aplicar reglas locales, comunicarse y actuar sobre la bomba \cite{arduino_uno_rev3_specs}.
+Arduino UNO se ha seleccionado como plataforma principal de las estaciones de campo porque ofrece una integración directa con sensores, bus I2C, entrada analógica, comunicación serie con el módulo de comunicaciones y control digital del relé. Sus prestaciones son limitadas frente a plataformas más modernas, pero suficientes para las tareas previstas en el nodo de campo: medir, aplicar reglas locales, comunicarse y actuar sobre la bomba \cite{arduino_uno_rev3_specs}.
 
 La Raspberry Pi 5 se utiliza como sistema de supervisión, no como controlador físico del riego. Su mayor capacidad permite ejecutar procesos software, mantener una base de datos local, servir una API y alojar el \textit{dashboard} web \cite{raspberry_pi5_product_brief}. Esta separación evita concentrar en un único dispositivo tareas muy distintas y permite que la estación mantenga un comportamiento seguro aunque la Raspberry no esté disponible.
 
@@ -348,7 +321,7 @@ Relación con sensores & Lectura directa de sensores analógicos y digitales. & 
 \hline
 Actuación & Decisión local y control del relé asociado a la bomba. & No participa en la actuación física ni genera órdenes de riego. \\
 \hline
-Capacidad software & \textit{firmware} sencillo y tareas embebidas. & Sistema operativo, API, base de datos y \textit{dashboard}. \\
+Capacidad software & \textit{firmware} sencillo y tareas embebidas. & Sistema operativo, API, base de datos e interfaz web de supervisión. \\
 \hline
 Consumo y arranque & Menor consumo y arranque inmediato. & Mayor consumo y arranque dependiente del sistema operativo. \\
 \hline
@@ -416,7 +389,7 @@ Se valoraron alternativas como \textit{brokers} MQTT accesibles desde Internet, 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.78\textwidth]{figs/figura_3_9_thingspeak_capa_intermedia.png}
-    \caption{Uso de ThingSpeak como capa intermedia entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi.}
+    \caption{Uso de ThingSpeak como capa intermedia entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi. Elaboración propia.}
     \label{fig:cap3_thingspeak_capa_intermedia}
 \end{figure}
 
@@ -434,7 +407,7 @@ La Raspberry Pi se ha seleccionado como sistema de supervisión software de Tier
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_10_arquitectura_software_raspberry.png}
-    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el \textit{dashboard} web.}
+    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el \textit{dashboard} web. Elaboración propia.}
     \label{fig:cap3_arquitectura_software_raspberry}
 \end{figure}
 
@@ -442,7 +415,7 @@ La arquitectura software de supervisión se apoya en tres bloques principales: a
 
 FastAPI se selecciona como \textit{framework} para construir la API de supervisión en Python \cite{fastapi_docs}. Su papel dentro de TierraViva es actuar como capa intermedia entre la base de datos y la interfaz web, evitando que el \textit{dashboard} acceda directamente a SQLite o a los detalles internos de almacenamiento. La API permite consultar datos mediante peticiones HTTP y deja preparada la arquitectura para que otros clientes puedan reutilizar la misma información en futuras ampliaciones.
 
-El \textit{dashboard} web constituye la capa de presentación del sistema. Su objetivo es mostrar de forma comprensible las últimas lecturas, el estado de las estaciones y la información operativa publicada por cada nodo. De esta manera, la Raspberry Pi no se limita a almacenar datos, sino que los transforma en información útil para supervisar el comportamiento del prototipo.
+El \textit{dashboard} web constituye la capa de presentación del sistema. En TierraViva, este término se utiliza para referirse al panel web de supervisión que integra, en una misma interfaz, lecturas recientes, estado del sistema, históricos y eventos relevantes del prototipo. Su objetivo es mostrar de forma comprensible las últimas lecturas, el estado de las estaciones y la información operativa publicada por cada nodo. De esta manera, la Raspberry Pi no se limita a almacenar datos, sino que los transforma en información útil para supervisar el comportamiento del prototipo.
 
 La implementación concreta de estos bloques, incluyendo la estructura de los \textit{scripts}, los \textit{endpoints} expuestos, el modelo de datos y la evolución desde el prototipo local previo, se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
 
@@ -476,6 +449,34 @@ FastAPI & Exposición de datos mediante \textit{endpoints} HTTP. & Facilita crea
 La lógica de decisión de riego no se mantiene en la Raspberry Pi en la arquitectura final. Aunque este dispositivo tiene capacidad suficiente para aplicar reglas más complejas, se ha decidido desplazar la decisión crítica al nodo de campo. Esta elección reduce la dependencia de la red y evita que la actuación física dependa de un comando remoto.
 
 La Raspberry conserva un papel relevante como sistema de supervisión: consulta los datos publicados, mantiene un histórico local, expone la API y sirve el \textit{dashboard}. La implementación concreta de estos bloques se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}. La referencia de \textit{endpoints} se recoge en el Anexo~\ref{anexo:manual_api}, y el uso de la interfaz por parte del usuario se documenta en el Anexo~\ref{anexo:manual_usuario}.
+
+\section{Arquitectura general planteada}
+\label{sec:arquitectura_general_planteada}
+
+A partir de los requisitos, las especificaciones operativas y las elecciones tecnológicas descritas en los apartados anteriores, la arquitectura general de TierraViva se plantea como un sistema IoT distribuido, formado por estaciones autónomas de campo, ThingSpeak como plataforma intermedia de telemetría y una Raspberry Pi como sistema local de supervisión. El objetivo de esta arquitectura es separar claramente la adquisición de datos, la decisión local, la actuación física, la publicación de telemetría, el almacenamiento histórico y la visualización.
+
+La arquitectura se ha diseñado teniendo en cuenta una restricción importante: las estaciones de campo no están conectadas físicamente a la Raspberry Pi. Por tanto, no se puede asumir una comunicación directa mediante USB, puerto serie o red local entre ambos extremos. Las estaciones deben poder enviar datos de forma remota mediante el módulo LTE, y la Raspberry debe consultar esa información desde la plataforma intermedia. Esto condiciona el diseño completo del sistema y evita que el riego dependa de una conexión local o de una orden enviada desde la Raspberry.
+
+En términos generales, el sistema se divide en cuatro bloques principales:
+
+\begin{itemize}
+    \item \textbf{Estaciones autónomas de campo}: encargadas de medir las variables del entorno, evaluar reglas locales de riego, accionar la bomba mediante relé y publicar telemetría y estado.
+    \item \textbf{Capa de comunicaciones y plataforma intermedia}: responsable de recibir los datos publicados por las estaciones y hacerlos accesibles para consulta remota.
+    \item \textbf{Sistema de supervisión}: implementado sobre Raspberry Pi, encargado de consultar datos, almacenarlos, exponer una API y servir el \textit{dashboard}.
+    \item \textbf{Interfaz de usuario}: orientada a visualizar el estado del sistema, revisar el histórico y supervisar las actuaciones realizadas por las estaciones.
+\end{itemize}
+
+La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general de la arquitectura planteada.
+
+\begin{figure}[H]
+  \hspace{-0.5cm}\centerline{\resizebox{1.2\textwidth}{!}{\includegraphics{figs/arquitecturaTierraViva.png}}}
+  \caption{Arquitectura general planteada para TierraViva. Elaboración propia.}
+\label{fig:arquitectura_general_tierraviva}
+\end{figure}
+
+La división de responsabilidades es el punto central de esta arquitectura. Las estaciones de campo interactúan con el entorno físico, toman la decisión local de riego y publican telemetría. ThingSpeak actúa como plataforma intermedia de comunicación. La Raspberry Pi consulta los datos, mantiene el histórico, expone la API y sirve el \textit{dashboard}, sin convertirse en el elemento responsable de decidir la activación de la bomba.
+
+El detalle de la arquitectura final, incluyendo canales de ThingSpeak, flujo de telemetría y papel de cada bloque, se desarrolla en el Capítulo~\ref{cap:capitulo4}. Los flujos visuales de funcionamiento se recogen en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}.
 
 \section{Materiales empleados}
 \label{sec:materiales_empleados}
