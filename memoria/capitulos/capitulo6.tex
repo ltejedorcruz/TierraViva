@@ -21,6 +21,8 @@ El código asociado al proyecto se conserva en el repositorio público TierraViv
 
 Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna. Esta fase no pretendía resolver todavía el despliegue en campo, sino validar de forma controlada la cadena software básica del sistema: adquisición de telemetría, transporte de mensajes, almacenamiento local, API y visualización web.
 
+El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
+
 \begin{wrapfigure}{l}{0.32\textwidth}
     \vspace{-12pt}
     \centering
@@ -29,8 +31,6 @@ Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y Thi
     \label{fig:logo_mqtt}
     \vspace{-8pt}
 \end{wrapfigure}
-
-El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
 
 El enfoque MQTT no se mantuvo como arquitectura final porque dependía de un flujo más local y no resolvía de forma natural la publicación remota desde estaciones desplegadas fuera del entorno de laboratorio. La solución definitiva sustituye esa comunicación local por publicación LTE/HTTP en ThingSpeak, manteniendo la decisión de riego en el \textit{firmware} de cada estación y dejando la Raspberry Pi como nodo de supervisión, ingesta, almacenamiento, API y \textit{dashboard}.
 
@@ -92,8 +92,6 @@ En resumen, la lectura de ThingSpeak transforma la plataforma \textit{cloud} en 
 \section{Base de datos SQLite}
 \label{sec:base_datos_sqlite}
 
-El bloque de almacenamiento local de TierraViva se implementa mediante SQLite. Su función es conservar en la Raspberry Pi una copia estructurada de la información recibida desde ThingSpeak, de forma que el \textit{dashboard} y la API no dependan únicamente de consultar la plataforma \textit{cloud} en tiempo real. Esta base de datos permite mantener un histórico de lecturas, registrar eventos de riego o actuación, conservar estados internos del sistema y facilitar tareas de depuración durante las pruebas.
-
 \begin{wrapfigure}{r}{0.32\textwidth}
     \vspace{-12pt}
     \centering
@@ -102,6 +100,8 @@ El bloque de almacenamiento local de TierraViva se implementa mediante SQLite. S
     \label{fig:logo_sqlite}
     \vspace{-8pt}
 \end{wrapfigure}
+
+El bloque de almacenamiento local de TierraViva se implementa mediante SQLite. Su función es conservar en la Raspberry Pi una copia estructurada de la información recibida desde ThingSpeak, de forma que el \textit{dashboard} y la API no dependan únicamente de consultar la plataforma \textit{cloud} en tiempo real. Esta base de datos permite mantener un histórico de lecturas, registrar eventos de riego o actuación, conservar estados internos del sistema y facilitar tareas de depuración durante las pruebas.
 
 SQLite resulta adecuado para este prototipo porque funciona como una base de datos embebida, almacenada en un fichero local, sin necesidad de desplegar un servidor de base de datos adicional. En una Raspberry Pi esto simplifica la instalación y reduce el número de servicios que deben mantenerse activos. Para el alcance del TFG, donde el volumen de datos es moderado y la prioridad es validar el funcionamiento completo del sistema, esta solución ofrece un equilibrio razonable entre simplicidad, persistencia y capacidad de consulta \cite{sqlite_about}.
 
