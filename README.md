@@ -2,12 +2,6 @@
   <img src="docs/assets/tierraviva_banner.svg" alt="TierraViva banner" width="100%"/>
 </p>
 
-<p align="center">
-  <img src="dashboard/images/TierraViva_Logo.jpeg" alt="Logo TierraViva" width="165"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="dashboard/images/logo_urjc.png" alt="Universidad Rey Juan Carlos" width="255"/>
-</p>
-
 <h3 align="center">
   Prototipo IoT distribuido para supervisar el entorno, registrar telemetría y apoyar el riego con criterio de ingeniería
 </h3>
