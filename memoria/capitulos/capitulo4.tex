@@ -82,23 +82,23 @@ Desde el punto de vista arquitectónico, cada estación se organiza en cuatro bl
 
 El detalle de \textit{firmware} y control del relé se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}. El conexionado eléctrico, la alimentación y la integración física de sensores, módem, relé y bomba se documentan en el Anexo~\ref{anexo:esquemas_electricos}. Los materiales empleados se recogen en el Anexo~\ref{anexo:materiales}.
 
-\section{Arquitectura de comunicaciones LTE/HTTP}
+\section{Solución de comunicaciones}
 \label{sec:arquitectura_comunicaciones_lte_http}
 
-La comunicación de las estaciones de campo se basa en el módulo LTE A7670E-LASA y en el uso de peticiones HTTP hacia ThingSpeak. Esta arquitectura permite que cada estación publique telemetría y estado desde una ubicación remota sin depender de una red WiFi local ni de una conexión física con la Raspberry Pi.
+La solución de comunicaciones de las estaciones de campo se basa en el módulo LTE A7670E-LASA y en el uso de peticiones HTTP hacia ThingSpeak. Esta solución permite que cada estación publique telemetría y estado desde una ubicación remota sin depender de una red WiFi local ni de una conexión física con la Raspberry Pi.
 
-El Arduino UNO se comunica con el A7670E-LASA mediante UART y comandos AT. Desde el punto de vista arquitectónico, el módem actúa como interfaz de salida a Internet de la estación: permite comprobar conectividad móvil, establecer el contexto de datos y enviar la actualización HTTP al canal ThingSpeak correspondiente.
+Desde el punto de vista de capas, el Arduino UNO se comunica localmente con el A7670E-LASA mediante UART y comandos AT. A partir de esos comandos, el módem gestiona el registro en la red móvil LTE, establece el contexto de datos y proporciona conectividad IP. Sobre esta conectividad se utiliza TCP como capa de transporte y HTTP como protocolo de aplicación para enviar la actualización al canal ThingSpeak correspondiente. De de transporte y HTTP como protocolo de aplicación para enviar la actualización al canal ThingSpeak correspondiente. De este modo, aunque el \textit{firmware} trabaje principalmente con comandos AT y peticiones HTTP, la comunicación efectiva hacia la plataforma se apoya en la pila LTE/IP/TCP/HTTP.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_4_3_secuencia_lte_http.jpeg}
-    \caption{Secuencia funcional de comunicación LTE/HTTP mediante el módulo A7670E-LASA. Elaboración propia.}
+    \caption{Secuencia funcional de comunicación LTE/IP/TCP/HTTP mediante el módulo A7670E-LASA. Elaboración propia.}
     \label{fig:cap4_secuencia_lte_http}
 \end{figure}
 
-La comunicación se utiliza en sentido ascendente: las estaciones publican medidas, estado del relé, evento de sistema y código auxiliar de diagnóstico. La Raspberry Pi consulta posteriormente esa información desde ThingSpeak, pero no envía órdenes de riego a las estaciones. Esta decisión simplifica el sistema y evita que información antigua en la nube pueda condicionar una actuación física.
+El flujo implementado en esta primera versión es ascendente: las estaciones publican medidas, estado del relé, evento de sistema y código auxiliar de diagnóstico, y la Raspberry Pi consulta posteriormente esa información desde ThingSpeak. Esta organización resulta adecuada para supervisión, ya que la decisión crítica de riego no depende de la respuesta inmediata de un sistema externo, sino de la evaluación local realizada por la estación.
 
-La arquitectura LTE/HTTP no proporciona comunicación en tiempo real estricto, pero resulta adecuada para supervisión. La decisión crítica de riego no depende de la respuesta inmediata de un sistema externo, sino de la evaluación local realizada por la estación. El detalle de inicialización del módem, pruebas con comandos AT e integración en \textit{firmware} se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
+La solución LTE/IP/TCP/HTTP no proporciona comunicación en tiempo real estricto, pero sí permite completar el flujo necesario para el prototipo: publicación remota de telemetría, consulta desde la Raspberry Pi, almacenamiento histórico y visualización web. El detalle de inicialización del módem, pruebas con comandos AT e integración en \textit{firmware} se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
 \section{ThingSpeak como capa intermedia}
 \label{sec:thingspeak_capa_intermedia}
@@ -116,7 +116,9 @@ La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt
 
 Cada publicación incluye humedad del suelo, variables ambientales, estado del relé, evento de sistema y código auxiliar de diagnóstico. Mantener la misma estructura en ambos canales simplifica el \textit{firmware} y la lógica de supervisión, ya que la Raspberry puede aplicar el mismo proceso de lectura para las estaciones A y B.
 
-En fases anteriores se valoró utilizar ThingSpeak también como mecanismo de control descendente desde la Raspberry hacia las estaciones. Esta opción se descartó porque obligaba a gestionar órdenes remotas, evitar repeticiones, descartar información obsoleta y garantizar que una entrada antigua no provocase una actuación no deseada. En la arquitectura final, ThingSpeak se reserva para telemetría y estado, no para transportar órdenes de riego.
+En fases anteriores se valoró utilizar ThingSpeak también como mecanismo de control descendente desde la Raspberry Pi hacia las estaciones. Esta posibilidad habría permitido incorporar una capacidad centralizada de configuración o actuación, por ejemplo para modificar parámetros de riego, enviar órdenes supervisadas o ajustar el comportamiento de las estaciones desde una capa superior. Sin embargo, esta opción se descartó para esta primera versión de TierraViva porque obligaba a gestionar órdenes remotas, evitar repeticiones, descartar información obsoleta y garantizar que una entrada antigua no provocase una actuación no deseada, elevando sensiblemente la complejidad del sistema completo más allá del alcance de este trabajo.
+
+En la arquitectura final, ThingSpeak se reserva para telemetría y estado, no para transportar órdenes de riego. La incorporación de un canal descendente de configuración o control se considera una ampliación razonable para futuras versiones, siempre que se acompañe de mecanismos de identificación de comandos, confirmación de ejecución, control de duplicados, caducidad de órdenes y límites de seguridad en la estación.
 
 La estructura completa de campos, nombres internos y códigos publicados se documenta en el Anexo~\ref{anexo:estructura_thingspeak_estados}. La lectura e interpretación de esos datos desde Raspberry Pi se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
 

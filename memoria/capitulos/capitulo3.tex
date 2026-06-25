@@ -48,7 +48,7 @@ Los requisitos funcionales definen las capacidades que debe proporcionar el sist
 
 La definición de estos requisitos permite separar con claridad qué debe hacer el sistema de cómo se implementa cada parte. Esta distinción es importante porque las decisiones tecnológicas concretas se justifican en apartados posteriores. En este punto se describe el comportamiento esperado del prototipo y la forma prevista de comprobar que cada función queda cubierta durante la validación.
 
-El sistema se plantea a partir de estaciones de campo capaces de obtener medidas del entorno, evaluar localmente reglas sencillas de riego y enviar la información a una plataforma intermedia. A partir de esos datos, el sistema de supervisión debe poder registrar el histórico, visualizar el estado del prototipo y mostrar las actuaciones realizadas por cada estación. La estación de campo debe ejecutar la actuación de forma autónoma y segura, evitando activaciones indefinidas, riegos repetidos o estados peligrosos ante lecturas inválidas, errores de comunicación o fallos eléctricos.
+El sistema se plantea a partir de estaciones de campo capaces de obtener medidas del entorno, evaluar localmente reglas sencillas de riego y enviar la información a una plataforma intermedia. En el prototipo se contemplan dos estaciones sensoras-actuadoras, denominadas TierraViva\_A y TierraViva\_B, con el fin de validar que la arquitectura puede diferenciar el origen de las lecturas y supervisar más de un nodo de campo. A partir de esos datos, el sistema de supervisión debe poder registrar el histórico, visualizar el estado del prototipo y mostrar las actuaciones realizadas por cada estación. La estación de campo debe ejecutar la actuación de forma autónoma y segura, evitando activaciones indefinidas, riegos repetidos o estados peligrosos ante lecturas inválidas, errores de comunicación o fallos eléctricos.
 
 Para facilitar la trazabilidad del sistema, los requisitos funcionales se identifican con el prefijo RF (requisito funcional). 
 
@@ -95,7 +95,7 @@ RF-03 & Medición de luminosidad & El sistema debe registrar la luminosidad o ni
 \hline
 RF-04 & Envío remoto de telemetría & Las estaciones de campo deben enviar sus medidas a una plataforma remota para que puedan ser consultadas posteriormente. & Prueba de comunicación remota y recepción en plataforma \textit{cloud}. \\
 \hline
-RF-05 & Identificación de estación & Cada lectura debe poder asociarse a la estación de origen, permitiendo distinguir los datos de distintas zonas o nodos. & Comprobación de registros diferenciados por estación. \\
+RF-05 & Identificación de estación & Cada lectura debe poder asociarse a la estación de origen, permitiendo distinguir los datos de las estaciones TierraViva\_A y TierraViva\_B o de futuros nodos añadidos. & Comprobación de registros diferenciados por estación. \\
 \hline
 RF-06 & Almacenamiento histórico & El sistema debe registrar las lecturas recibidas para conservar un histórico de funcionamiento. & Verificación de inserciones en la base de datos local. \\
 \hline
@@ -393,7 +393,7 @@ Se valoraron alternativas como \textit{brokers} MQTT accesibles desde Internet, 
     \label{fig:cap3_thingspeak_capa_intermedia}
 \end{figure}
 
-En TierraViva se utilizan canales diferenciados para cada estación, lo que permite separar los datos de TierraViva\_A y TierraViva\_B. Cada publicación contiene medidas ambientales, estado del relé, evento de sistema y código auxiliar de diagnóstico. Esta organización facilita la trazabilidad, evita mezclar lecturas de distintas estaciones y permite que la Raspberry Pi consulte los datos de forma independiente.
+En TierraViva se utilizan canales diferenciados para cada estación, lo que permite separar los datos de las dos estaciones sensoras-actuadoras definidas para el prototipo: TierraViva\_A y TierraViva\_B. Cada publicación contiene medidas ambientales, estado del relé, evento de sistema y código auxiliar de diagnóstico. Esta organización facilita la trazabilidad, evita mezclar lecturas de distintas estaciones y permite que la Raspberry Pi consulte los datos de forma independiente.
 
 ThingSpeak presenta limitaciones que deben asumirse. No es una plataforma de tiempo real estricto y su uso introduce dependencia de conectividad, latencia y disponibilidad del servicio. Sin embargo, estas limitaciones no comprometen la actuación física del riego, ya que la decisión crítica se ejecuta localmente en cada estación. La nube se reserva para telemetría, histórico, supervisión y diagnóstico.
 
@@ -402,7 +402,7 @@ La estructura concreta de canales, campos y códigos publicados se desarrolla en
 \section{Elección de arquitectura software de supervisión en Raspberry Pi}
 \label{sec:eleccion_arquitectura_software_raspberry}
 
-La Raspberry Pi se ha seleccionado como sistema de supervisión software de TierraViva. Su función no es sustituir a las estaciones de campo, leer directamente los sensores ni decidir la activación de la bomba, sino consultar la información publicada por las estaciones, registrar un histórico local y ofrecer una interfaz de consulta. En TierraViva, esta separación evita que un fallo del sistema de supervisión afecte directamente a la bomba.
+La Raspberry Pi se ha seleccionado como sistema de supervisión software de TierraViva. Su función es consultar la información publicada por las estaciones, registrar un histórico local y ofrecer una interfaz de consulta. Este papel queda claramente diferenciado del de las estaciones de campo, que se encargan de leer directamente los sensores, transmitir las lecturas y decidir localmente la activación de la bomba. En TierraViva, esta separación evita que un fallo del sistema de supervisión afecte directamente a la actuación física sobre el riego.
 
 \begin{figure}[H]
     \centering
@@ -473,6 +473,8 @@ La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general 
   \caption{Arquitectura general planteada para TierraViva. Elaboración propia.}
 \label{fig:arquitectura_general_tierraviva}
 \end{figure}
+
+Como puede observarse en la Figura~\ref{fig:arquitectura_general_tierraviva}, la arquitectura planteada no incorpora órdenes de retorno desde el sistema de supervisión hacia las estaciones sensoras-actuadoras. Las estaciones toman sus decisiones localmente a partir de la configuración previamente cargada en el \textit{firmware}, mientras que ThingSpeak y la Raspberry Pi se emplean para telemetría, almacenamiento, consulta y visualización. Esta decisión limita la capacidad de modificar el comportamiento de las estaciones de forma remota, pero reduce la complejidad del primer prototipo y evita que la actuación física dependa de comandos enviados desde capas externas. En futuras versiones podría incorporarse un mecanismo de configuración centralizada, de forma que determinados parámetros u órdenes pudieran definirse desde el sistema de supervisión y transmitirse posteriormente a las estaciones de campo.
 
 La división de responsabilidades es el punto central de esta arquitectura. Las estaciones de campo interactúan con el entorno físico, toman la decisión local de riego y publican telemetría. ThingSpeak actúa como plataforma intermedia de comunicación. La Raspberry Pi consulta los datos, mantiene el histórico, expone la API y sirve el \textit{dashboard}, sin convertirse en el elemento responsable de decidir la activación de la bomba.
 

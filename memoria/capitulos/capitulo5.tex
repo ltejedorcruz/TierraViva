@@ -10,9 +10,9 @@
     \vspace{-8pt}
 \end{wrapfigure}
 
-Una vez definida la arquitectura final del sistema, este capítulo describe la implementación \textit{hardware} y \textit{firmware} de las estaciones de campo de TierraViva. El propósito no es repetir las decisiones de diseño ya justificadas en capítulos anteriores, sino documentar cómo se preparó, conectó y validó cada bloque de la estación: controlador, sensores, comunicación LTE, publicación de telemetría, actuación sobre el riego y alimentación.
+Una vez definida la arquitectura final del sistema, este capítulo documenta la implementación \textit{hardware} y \textit{firmware} de las estaciones de campo de TierraViva. Se describe cómo se preparó, conectó y validó cada bloque de la estación: controlador, sensores, comunicación LTE, publicación de telemetría, actuación sobre el riego y alimentación.
 
-En la arquitectura final, la estación no es un simple nodo que obedece instrucciones externas. Cada estación mide, evalúa reglas locales, acciona el riego cuando corresponde y publica su estado operativo. Por ello, la implementación \textit{hardware} y el \textit{firmware} tienen un papel central dentro del prototipo.
+En la arquitectura final, cada estación funciona como un nodo sensor-actuador autónomo: mide variables del entorno, evalúa reglas locales, acciona el riego cuando corresponde y publica su estado operativo. Por ello, la implementación \textit{hardware} y el \textit{firmware} tienen un papel central dentro del prototipo.
 
 La Figura~\ref{fig:flujo_implementacion_estacion} resume la secuencia seguida durante la implementación de cada estación. El desarrollo se abordó por bloques para reducir riesgos: primero se verificó la placa de control, después la sensórica, posteriormente la comunicación LTE/HTTP y, finalmente, la actuación y alimentación del sistema de riego.
 
@@ -119,7 +119,7 @@ La integración conjunta confirmó que el sensor analógico no interfería con e
 \section{\textit{Firmware} de adquisición}
 \label{sec:firmware_adquisicion}
 
-Una vez comprobado el funcionamiento de los sensores, el siguiente paso consistió en organizar el \textit{firmware} de adquisición de la estación. Este \textit{firmware} no se limita a leer variables y enviarlas a la nube, sino que también incorpora la lógica local mínima necesaria para decidir si debe activarse el riego.
+Una vez comprobado el funcionamiento de los sensores, el siguiente paso consistió en organizar el \textit{firmware} de adquisición de la estación. Este \textit{firmware} combina la lectura de variables, la preparación de telemetría y la lógica local necesaria para decidir si debe activarse el riego.
 
 El \textit{firmware} se organiza en varios bloques funcionales. En primer lugar, se inicializan los sensores y el módem LTE. Después, en cada ciclo de ejecución, se leen las variables ambientales y de suelo. A partir de esas lecturas, se actualiza el estado interno de seguridad de la estación y se decide si procede activar el riego. Por último, la estación publica una actualización en ThingSpeak con las medidas y el estado operativo.
 
@@ -310,7 +310,7 @@ El resultado de esta fase fue la integración estable del A7670E-LASA dentro de 
 \section{Envío de datos a ThingSpeak}
 \label{sec:envio_datos_thingspeak}
 
-Una vez integrados los sensores y validado el módulo LTE, la estación publica su telemetría en ThingSpeak mediante una petición HTTP de actualización de canal \cite{thingspeak_write_data}. El \textit{firmware} construye la petición con la clave de escritura y los campos correspondientes a las variables medidas y al estado operativo de la estación.
+Una vez integrados los sensores y validado el módulo LTE, la estación publica su telemetría en ThingSpeak mediante una petición HTTP GET de actualización de canal \cite{thingspeak_write_data}. El \textit{firmware} construye la URL de escritura con la clave de actualización del canal y los campos correspondientes a las variables medidas y al estado operativo de la estación. En la secuencia AT utilizada, esta operación se ejecuta mediante \texttt{AT+HTTPACTION=0}, donde el valor \texttt{0} corresponde a una operación HTTP GET.
 
 La correspondencia completa entre \texttt{field1}--\texttt{field8}, variables internas y códigos de estado se documenta en el Anexo~\ref{anexo:estructura_thingspeak_estados}. En este capítulo interesa destacar el criterio de implementación: la publicación se considera correcta únicamente cuando el módem informa de una respuesta HTTP con código 200.
 
@@ -360,11 +360,11 @@ El \textit{firmware} interpreta el código HTTP 200 como confirmación funcional
 
 \end{tikzpicture}
 }
-\caption{Confirmación funcional de publicación HTTP desde la estación hacia ThingSpeak. Elaboración propia.}
+\caption{Confirmación funcional de publicación HTTP GET desde la estación hacia ThingSpeak. Elaboración propia.}
 \label{fig:confirmacion_http_thingspeak}
 \end{figure}
 
-Aunque en el lenguaje informal pueda interpretarse como una confirmación o acuse de recibo de la publicación, no se trata de un ACK de nivel TCP, sino de una comprobación a nivel de aplicación basada en el código de respuesta HTTP devuelto por ThingSpeak.
+La publicación de datos desde la estación se confirma a nivel de aplicación mediante el código de respuesta HTTP devuelto por ThingSpeak. Una vez habilitada la conectividad IP sobre LTE y ejecutada la petición HTTP GET, el \textit{firmware} interpreta la respuesta \texttt{+HTTPACTION: 0,200,len} como una publicación correcta, al indicar que la operación GET ha recibido un código HTTP 200.
 
 Los reintentos se plantean de forma controlada: si una publicación falla, la estación vuelve a intentarlo en el siguiente ciclo de telemetría, evitando bucles indefinidos que puedan bloquear el \textit{firmware} o aumentar el consumo. Además, un fallo de publicación no afecta directamente a la seguridad del riego, ya que la decisión de actuación permanece en la estación. La consecuencia principal de una pérdida temporal de conectividad es la ausencia de una muestra en la nube, no la pérdida del control local de la bomba.
 
