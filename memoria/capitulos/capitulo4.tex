@@ -3,7 +3,7 @@
 
 Una vez definidos los requisitos, los materiales y las principales decisiones de diseño, este capítulo presenta la arquitectura final de TierraViva. A diferencia del capítulo anterior, donde se justifican las alternativas valoradas y los criterios de elección, aquí se describe cómo queda organizado el sistema completo y cómo interactúan sus distintos bloques durante el funcionamiento.
 
-La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, una plataforma \textit{cloud} intermedia basada en ThingSpeak y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema cubre el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, publicación de telemetría, almacenamiento histórico y visualización mediante \textit{dashboard} web.
+La arquitectura final se basa en estaciones de campo autónomas con Arduino UNO, sensores ambientales y de suelo, comunicación LTE mediante el módulo A7670E-LASA, ThingSpeak como plataforma \textit{cloud} y \textit{broker} de telemetría, y un sistema de supervisión implementado sobre Raspberry Pi 5. El sistema cubre el ciclo completo de monitorización y actuación local: adquisición de datos, decisión de riego en la estación, publicación de telemetría, almacenamiento histórico y visualización mediante \textit{dashboard} web.
 
 El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi no actúa como elemento central de decisión del riego. La decisión crítica se desplaza al \textit{firmware} de cada estación, que evalúa sus propias lecturas y aplica reglas locales de seguridad. La Raspberry conserva un papel importante, pero orientado a supervisión, histórico y visualización.
 
@@ -12,7 +12,7 @@ El cambio principal respecto a planteamientos anteriores es que la Raspberry Pi 
 
 La arquitectura final de TierraViva se organiza como un sistema IoT distribuido. Las medidas se obtienen en campo, la comunicación se realiza mediante red móvil, la información se publica en una plataforma \textit{cloud} y la supervisión se ejecuta desde una Raspberry Pi 5. La actuación sobre el riego, sin embargo, no depende de una decisión externa enviada desde la Raspberry, sino de reglas locales ejecutadas en cada estación.
 
-El sistema está formado por cuatro elementos principales: las estaciones autónomas de campo A y B, la plataforma ThingSpeak, la Raspberry Pi 5 y el \textit{dashboard} web. Las estaciones se encargan de medir, decidir y actuar localmente. ThingSpeak funciona como capa intermedia de telemetría y estado. La Raspberry Pi consulta los datos, mantiene un histórico local y expone una API. El \textit{dashboard} permite supervisar el estado del sistema desde una interfaz web.
+El sistema está formado por cuatro elementos principales: las estaciones autónomas de campo A y B, ThingSpeak como \textit{broker} de telemetría, la Raspberry Pi 5 y el \textit{dashboard} web. Las estaciones se encargan de medir, decidir y actuar localmente. ThingSpeak funciona como capa intermedia de telemetría y estado. La Raspberry Pi consulta los datos, mantiene un histórico local y expone una API. El \textit{dashboard} permite supervisar el estado del sistema desde una interfaz web.
 
 La Figura~\ref{fig:arquitectura_final_tierraviva} muestra la arquitectura final del sistema.
 
@@ -100,10 +100,10 @@ El flujo implementado en esta primera versión es ascendente: las estaciones pub
 
 La solución LTE/IP/TCP/HTTP no proporciona comunicación en tiempo real estricto, pero sí permite completar el flujo necesario para el prototipo: publicación remota de telemetría, consulta desde la Raspberry Pi, almacenamiento histórico y visualización web. El detalle de inicialización del módem, pruebas con comandos AT e integración en \textit{firmware} se desarrolla en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
-\section{ThingSpeak como capa intermedia}
+\section{ThingSpeak como \textit{broker} de telemetría}
 \label{sec:thingspeak_capa_intermedia}
 
-ThingSpeak actúa en TierraViva como capa intermedia entre las estaciones de campo y la Raspberry Pi. Su función dentro de la arquitectura final es desacoplar la publicación de datos en campo de la supervisión posterior: las estaciones publican telemetría y estado mediante LTE/HTTP, mientras que la Raspberry Pi lee esa información, mantiene un histórico local y la muestra en el \textit{dashboard}.
+ThingSpeak actúa en TierraViva como plataforma IoT y \textit{broker} de telemetría entre las estaciones de campo y la Raspberry Pi. Su función dentro de la arquitectura final es desacoplar la publicación de datos en campo de la supervisión posterior: las estaciones publican telemetría y estado mediante LTE/HTTP, y la Raspberry Pi consulta esa información, mantiene un histórico local y la muestra en el \textit{dashboard}.
 
 La estructura finalmente adoptada se apoya en dos canales diferenciados: \texttt{TierraViva\_A} y \texttt{TierraViva\_B}. Cada canal corresponde a una estación de campo y contiene tanto las variables medidas como la información de estado generada por el \textit{firmware}. En la arquitectura final no se utilizan canales de comandos, ya que la decisión de riego se realiza localmente en cada estación.
 

@@ -382,14 +382,14 @@ La decisión final no implica que LoRa/LoRaWAN sea tecnológicamente inferior. D
 \section{Elección de plataforma \textit{cloud}: ThingSpeak}
 \label{sec:eleccion_plataforma_cloud}
 
-La plataforma \textit{cloud} debía actuar como capa intermedia entre las estaciones remotas y la Raspberry Pi. Su función principal no es decidir el riego, sino permitir que las estaciones publiquen telemetría y que el sistema de supervisión pueda consultar esos datos sin conexión física con los nodos de campo.
+La plataforma \textit{cloud} debía actuar como elemento intermedio entre las estaciones remotas y la Raspberry Pi. En términos funcionales, se necesitaba un \textit{broker} de telemetría capaz de recibir los datos publicados por las estaciones y ponerlos a disposición del sistema de supervisión sin exigir una conexión física directa con los nodos de campo. En TierraViva, este papel se asigna a ThingSpeak.
 
-Se valoraron alternativas como \textit{brokers} MQTT accesibles desde Internet, Ubidots, Adafruit IO, Blynk, ThingsBoard o una plataforma propia. Sin embargo, para el alcance del TFG se buscaba una solución sencilla, verificable y compatible con dispositivos embebidos. ThingSpeak se seleccionó porque ofrece una estructura basada en canales y campos, permite escribir datos mediante una API documentada sobre HTTP y facilita una primera visualización de las medidas publicadas \cite{thingspeak_docs,thingspeak_write_data}.
+Se valoraron alternativas como \textit{brokers} MQTT accesibles desde Internet, Ubidots, Adafruit IO, Blynk, ThingsBoard o una plataforma propia. Sin embargo, para el alcance del TFG se buscaba una solución sencilla, verificable y compatible con dispositivos embebidos. ThingSpeak se seleccionó como plataforma IoT y \textit{broker} de telemetría porque ofrece una estructura basada en canales y campos, permite escribir datos mediante una API documentada sobre HTTP y facilita una primera visualización de las medidas publicadas \cite{thingspeak_docs,thingspeak_write_data}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.78\textwidth]{figs/figura_3_9_thingspeak_capa_intermedia.png}
-    \caption{Uso de ThingSpeak como capa intermedia entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi. Elaboración propia.}
+    \caption{Uso de ThingSpeak como \textit{broker} de telemetría entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi. Elaboración propia.}
     \label{fig:cap3_thingspeak_capa_intermedia}
 \end{figure}
 

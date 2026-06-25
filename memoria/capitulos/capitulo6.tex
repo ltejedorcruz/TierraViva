@@ -19,7 +19,7 @@ El código asociado al proyecto se conserva en el repositorio público TierraViv
 \section{Prototipo local previo con MQTT}
 \label{sec:prototipo_local_mqtt}
 
-Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna. Esta fase no pretendía resolver todavía el despliegue en campo, sino validar de forma controlada la cadena software básica del sistema: adquisición de telemetría, transporte de mensajes, almacenamiento local, API y visualización web.
+Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y ThingSpeak, se desarrolló un prototipo local sobre Raspberry Pi utilizando MQTT como mecanismo de comunicación interna. Esta fase se planteó como una validación controlada de la cadena software básica del sistema: adquisición de telemetría, transporte de mensajes, almacenamiento local, API y visualización web, antes de abordar el despliegue en campo.
 
 \begin{wrapfigure}{l}{0.32\textwidth}
     \vspace{-12pt}
@@ -30,9 +30,9 @@ Antes de cerrar la arquitectura final basada en estaciones remotas con LTE y Thi
     \vspace{-8pt}
 \end{wrapfigure}
 
-El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio \cite{tierraviva_github_mqtt}. Su valor dentro del TFG no reside en representar la solución definitiva, sino en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
+El prototipo se conserva en el directorio \texttt{prototipos/prototipo\_local\_mqtt/} del repositorio \cite{tierraviva_github_mqtt}. Su valor dentro del TFG reside en haber servido como fase previa de aprendizaje e integración. Permitió comprobar que una arquitectura desacoplada por capas facilitaba la depuración: recepción de datos, persistencia, API y \textit{dashboard} podían probarse de forma progresiva antes de incorporar la complejidad de la comunicación móvil.
 
-El enfoque MQTT no se mantuvo como arquitectura final porque dependía de un flujo más local y no resolvía de forma natural la publicación remota desde estaciones desplegadas fuera del entorno de laboratorio. La solución definitiva sustituye esa comunicación local por publicación LTE/HTTP en ThingSpeak, manteniendo la decisión de riego en el \textit{firmware} de cada estación y dejando la Raspberry Pi como nodo de supervisión, ingesta, almacenamiento, API y \textit{dashboard}.
+El enfoque MQTT se descartó como arquitectura final porque dependía de un flujo más local y ofrecía peor encaje con la publicación remota desde estaciones desplegadas fuera del entorno de laboratorio. La solución definitiva sustituye esa comunicación local por publicación LTE/HTTP en ThingSpeak, manteniendo la decisión de riego en el \textit{firmware} de cada estación y dejando la Raspberry Pi como nodo de supervisión, ingesta, almacenamiento, API y \textit{dashboard}.
 
 La evolución desde el prototipo MQTT hasta la arquitectura final se recoge como decisión técnica en el Anexo~\ref{anexo:seguimiento_decisiones}. El flujo definitivo de funcionamiento se resume en el Anexo~\ref{anexo:diagramas_flujo_funcionamiento}, mientras que la estructura de telemetría empleada en ThingSpeak se documenta en el Anexo~\ref{anexo:estructura_thingspeak_estados}.
 
@@ -48,9 +48,9 @@ La evolución desde el prototipo MQTT hasta la arquitectura final se recoge como
     \vspace{-8pt}
 \end{wrapfigure}
 
-Una vez descartado el prototipo local como arquitectura final, la Raspberry Pi se adapta al modelo definitivo de TierraViva: las estaciones no envían datos directamente a la Raspberry, sino que publican su telemetría y estado en ThingSpeak mediante LTE/HTTP. El primer bloque software de la Raspberry consiste, por tanto, en consultar periódicamente la plataforma, recuperar la última publicación disponible de cada estación y convertirla a una estructura interna común.
+Una vez descartado el prototipo local como arquitectura final, la Raspberry Pi se adapta al modelo definitivo de TierraViva: las estaciones publican su telemetría y estado en ThingSpeak mediante LTE/HTTP, y la Raspberry consulta posteriormente esa información. El primer bloque software de la Raspberry consiste, por tanto, en consultar periódicamente la plataforma, recuperar la última publicación disponible de cada estación y convertirla a una estructura interna común.
 
-Este bloque se implementa en el módulo principal de ingesta, asociado al fichero \texttt{main.py}, disponible en el repositorio público del proyecto \cite{tierraviva_github}. Su responsabilidad no es decidir el riego ni enviar órdenes a las estaciones, sino mantener actualizada la copia local de los datos publicados en la nube. De esta forma, la Raspberry Pi actúa como sistema de supervisión: lee, normaliza, registra y sirve información al \textit{dashboard}, mientras que la decisión de actuación permanece en el \textit{firmware} de cada estación.
+Este bloque se implementa en el módulo principal de ingesta, asociado al fichero \texttt{main.py}, disponible en el repositorio público del proyecto \cite{tierraviva_github}. Su responsabilidad consiste en mantener actualizada la copia local de los datos publicados en la nube. De esta forma, la Raspberry Pi lee, normaliza, registra y sirve información al \textit{dashboard}, dentro de su papel como sistema de supervisión.
 
 \begin{table}[H]
 \centering
@@ -87,7 +87,7 @@ La ingesta utiliza el identificador \texttt{entry\_id} de ThingSpeak para difere
 
 El tratamiento de errores se plantea de forma conservadora. Si falla la consulta HTTP, si ThingSpeak devuelve una respuesta no válida o si no se recibe un \texttt{entry\_id} interpretable, el módulo registra la incidencia y continúa con el siguiente ciclo. No se fuerza una inserción incompleta ni se detiene el sistema completo por un fallo puntual de lectura. Esta decisión es coherente con la arquitectura final: una pérdida temporal de supervisión desde Raspberry Pi no debe afectar al comportamiento local de las estaciones.
 
-En resumen, la lectura de ThingSpeak transforma la plataforma \textit{cloud} en una fuente de datos estructurada para el sistema local de supervisión. La Raspberry no depende de una conexión física con las estaciones ni participa en la decisión de riego; su función es recuperar información publicada por cada nodo, filtrar duplicados, tratar errores de lectura y preparar los datos para su almacenamiento y posterior visualización.
+En resumen, la lectura de ThingSpeak transforma la plataforma \textit{cloud} en una fuente de datos estructurada para el sistema local de supervisión. La Raspberry recupera la información publicada por cada nodo, filtra duplicados, trata errores de lectura y prepara los datos para su almacenamiento y posterior visualización.
 
 \section{Base de datos SQLite}
 \label{sec:base_datos_sqlite}
@@ -111,7 +111,7 @@ El acceso a la base de datos se encapsula mediante una función de conexión. Es
 
 El modelo local se organiza en tres tablas principales: \texttt{readings}, \texttt{valve\_events} y \texttt{system\_state}. Esta división separa los datos de telemetría, los eventos asociados a la actuación y el estado interno del sistema de supervisión. De esta forma se evita mezclar en una única tabla información de naturaleza distinta.
 
-La Figura~\ref{fig:er_tierraviva_sqlite} resume el modelo entidad--relación simplificado de la base de datos local. El objetivo del diagrama no es representar una base de datos industrial completa, sino mostrar con claridad cómo se separan las lecturas de telemetría, los eventos asociados a la actuación y el estado interno utilizado por la Raspberry Pi durante la supervisión.
+La Figura~\ref{fig:er_tierraviva_sqlite} resume el modelo entidad--relación simplificado de la base de datos local. El objetivo del diagrama es mostrar con claridad cómo se separan las lecturas de telemetría, los eventos asociados a la actuación y el estado interno utilizado por la Raspberry Pi durante la supervisión.
 
 \begin{figure}[H]
 \centering
@@ -219,7 +219,7 @@ La Figura~\ref{fig:er_tierraviva_sqlite} resume el modelo entidad--relación sim
 
 \end{tikzpicture}%
 }
-\caption{Modelo entidad--relación simplificado de la base de datos SQLite utilizada por TierraViva en la Raspberry Pi. Elaboración propia.}
+\caption{Modelo entidad--relación simplificado de la base de datos utilizada por TierraViva en el motor SQLite en la Raspberry Pi. Elaboración propia.}
 \label{fig:er_tierraviva_sqlite}
 \end{figure}
 
@@ -232,7 +232,7 @@ El módulo \texttt{database.py}, disponible en el repositorio del proyecto \cite
 \section{Interpretación de estados publicados por las estaciones}
 \label{sec:interpretacion_estados_estaciones}
 
-La Raspberry Pi no decide si una estación debe regar ni envía órdenes de actuación hacia Arduino. Su papel consiste en interpretar los datos que la estación ya ha publicado en ThingSpeak, almacenarlos de forma coherente y ofrecer una representación comprensible al \textit{dashboard}. Esta separación evita confundir supervisión con control: la decisión local de riego pertenece al \textit{firmware} de la estación, como se ha descrito en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
+La Raspberry Pi interpreta los datos que la estación ya ha publicado en ThingSpeak, los almacena de forma coherente y ofrece una representación comprensible al \textit{dashboard}. Esta separación organiza el sistema en dos planos diferenciados: el \textit{firmware} de estación genera los estados operativos y la Raspberry los transforma en información consultable para supervisión, como se ha descrito en el Capítulo~\ref{cap:implementacion_hardware_firmware}.
 
 Además de las variables ambientales, cada publicación incluye tres campos de estado: \texttt{relay\_state}, \texttt{system\_event} y \texttt{debug\_code}. Estos campos permiten conocer si la bomba estaba activada, qué evento principal se había producido y qué información auxiliar de diagnóstico acompañaba a la lectura. La Raspberry normaliza estos valores, los almacena en SQLite y los sirve mediante la API para que el \textit{dashboard} pueda mostrar estados comprensibles.
 
@@ -257,7 +257,7 @@ Además de las variables ambientales, cada publicación incluye tres campos de e
 \label{tab:campos_estado_raspberry}
 \end{table}
 
-La codificación completa de estados se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}. La API y el \textit{dashboard} interpretan estos valores junto con la antigüedad de la lectura: si un dato es antiguo, la interfaz debe mostrarlo como obsoleto u \textit{offline}, no asumir que representa el estado físico instantáneo de la estación.
+La codificación completa de estados se recoge en el Anexo~\ref{anexo:estructura_thingspeak_estados}. La API y el \textit{dashboard} interpretan estos valores junto con la antigüedad de la lectura: si un dato es antiguo, la interfaz debe mostrarlo como obsoleto u \textit{offline}, indicando claramente que corresponde a una lectura histórica.
 
 \section{API FastAPI}
 \label{sec:api_fastapi}
@@ -273,7 +273,7 @@ La API local de TierraViva se implementa con FastAPI y actúa como capa de servi
     \vspace{-8pt}
 \end{wrapfigure}
 
-La API se ejecuta localmente en la Raspberry Pi mediante Uvicorn, servidor ASGI utilizado para desplegar aplicaciones FastAPI \cite{uvicorn_docs}. No se comunica con los sensores, no accede al puerto serie de Arduino y no envía órdenes de riego a las estaciones. Trabaja únicamente sobre la información ya ingerida desde ThingSpeak y almacenada en SQLite. Esta separación mantiene la coherencia de la arquitectura final: las estaciones miden y actúan localmente, mientras que la Raspberry Pi supervisa, almacena y sirve información.
+La API se ejecuta localmente en la Raspberry Pi mediante Uvicorn, servidor ASGI utilizado para desplegar aplicaciones FastAPI \cite{uvicorn_docs}. Trabaja sobre la información ya ingerida desde ThingSpeak y almacenada en SQLite, proporcionando una capa de consulta estructurada para el \textit{dashboard} web y para posibles clientes futuros. Esta separación mantiene una organización clara entre almacenamiento, lógica de consulta y presentación de datos.
 
 La Figura~\ref{fig:fastapi_capa_servicio} representa el papel de FastAPI dentro del sistema software.
 
@@ -323,20 +323,20 @@ La API expone un conjunto reducido de \textit{endpoints} orientados a supervisi�
 \label{tab:cap6_resumen_api}
 \end{table}
 
-Uno de los aspectos más relevantes de la API es que no se limita a devolver registros crudos de la base de datos. Algunas respuestas incorporan información calculada que simplifica el trabajo del \textit{dashboard}. Por ejemplo, a partir de la última lectura puede calcularse la antigüedad del dato, una etiqueta de frescura y una clasificación básica de humedad del suelo. De este modo, la interfaz no necesita repetir lógica de interpretación en JavaScript.
+Uno de los aspectos más relevantes de la API es la incorporación de información calculada que simplifica el trabajo del \textit{dashboard}. Por ejemplo, a partir de la última lectura puede calcularse la antigüedad del dato, una etiqueta de frescura y una clasificación básica de humedad del suelo. De este modo, la interfaz no necesita repetir lógica de interpretación en JavaScript.
 
 La API también ayuda a separar responsabilidades en la visualización. El \textit{dashboard} solicita datos ya estructurados, mientras que la API concentra las reglas de consulta y preparación de respuesta. Así se reduce el acoplamiento entre \textit{frontend} y base de datos, y facilita la depuración: si una lectura aparece incorrecta en la interfaz, puede comprobarse primero la respuesta JSON de la API antes de revisar la capa visual.
 
 La referencia completa de \textit{endpoints}, parámetros, ejemplos de respuesta, validaciones y códigos HTTP se incluye en el Anexo~\ref{anexo:manual_api}. El uso de estos \textit{endpoints} desde el punto de vista del usuario final se describe en el Anexo~\ref{anexo:manual_usuario}.
 
-En resumen, FastAPI permite convertir la información almacenada localmente en una interfaz de consulta clara y reutilizable. Dentro de TierraViva no cumple una función de control físico, sino de supervisión: sirve datos al \textit{dashboard}, facilita la consulta del histórico y permite comprobar el estado básico del sistema software.
+En resumen, FastAPI permite convertir la información almacenada localmente en una interfaz de consulta clara y reutilizable. En TierraViva, sirve datos al \textit{dashboard}, facilita la consulta del histórico y permite comprobar el estado básico del sistema software.
 
 \section{\textit{Dashboard} web de supervisión}
 \label{sec:dashboard_web_supervision}
 
 El \textit{dashboard} web constituye la capa de presentación del sistema software de TierraViva. Su función es transformar los datos servidos por la API en una vista de supervisión accesible desde un navegador, sin que el usuario tenga que consultar directamente ThingSpeak, SQLite o los \textit{logs} de ejecución.
 
-Dentro de la arquitectura final, el \textit{dashboard} no toma decisiones de riego, no accede al puerto serie, no escribe en la base de datos y no envía órdenes a las estaciones. Su papel se limita a consultar la API local, representar el estado del sistema y actualizar la información mostrada conforme llegan nuevos datos.
+Dentro de la arquitectura final, el \textit{dashboard} actúa como interfaz de supervisión. Consulta la API local, representa el estado del sistema y actualiza la información mostrada conforme llegan nuevos datos.
 
 La implementación actual del \textit{frontend} se concentra en el fichero:
 
@@ -346,11 +346,11 @@ La implementación actual del \textit{frontend} se concentra en el fichero:
 
 Este fichero contiene la estructura HTML de la interfaz, los estilos CSS embebidos en una sección \texttt{<style>} y la lógica JavaScript embebida en una sección \texttt{<script>}. Los recursos gráficos utilizados por la interfaz se almacenan en el directorio \texttt{dashboard/images/}.
 
-Esta organización no implica que el \textit{dashboard} carezca de separación lógica entre presentación y comportamiento. La decisión de mantener el \textit{dashboard} en un único fichero HTML facilita el despliegue del prototipo y reduce el número de rutas que deben sincronizarse durante las pruebas.
+Aunque el \textit{dashboard} se concentra en un único fichero HTML, mantiene una separación lógica entre estructura, estilo y comportamiento mediante las secciones HTML, CSS y JavaScript. Esta decisión facilita el despliegue del prototipo y reduce el número de rutas que deben sincronizarse durante las pruebas.
 
 El \textit{dashboard} se sitúa al final del flujo software: las estaciones publican telemetría en ThingSpeak, la Raspberry Pi ingiere y almacena los datos en SQLite, FastAPI los expone mediante \textit{endpoints} HTTP y la interfaz los presenta visualmente. Esta organización evita que la interfaz dependa directamente de la plataforma \textit{cloud} o de la estructura interna de la base de datos.
 
-Desde el punto de vista del \textit{frontend}, el \textit{dashboard} consulta la configuración activa, la última lectura, el histórico reciente y las estadísticas agregadas. La estación activa se selecciona desde la propia interfaz, permitiendo reutilizar la misma página para estaciones distintas. La actualización se realiza mediante peticiones periódicas a la API, interpretando siempre la frescura del dato para no presentar lecturas antiguas como si fueran necesariamente actuales.
+Desde el punto de vista del \textit{frontend}, el \textit{dashboard} consulta la configuración activa, la última lectura, el histórico reciente y las estadísticas agregadas. La estación activa se selecciona desde la propia interfaz, permitiendo reutilizar la misma página para estaciones distintas. La actualización se realiza mediante peticiones periódicas a la API, interpretando siempre la frescura del dato para distinguir las lecturas recientes de las lecturas antiguas u obsoletas.
 
 \subsection{Estructura visual}
 
@@ -393,9 +393,9 @@ Tabla de lecturas & Facilita la revisión de registros recientes almacenados en 
 
 La descripción de uso, interpretación de estados, eventos, códigos de diagnóstico y situaciones habituales se mantiene en el Anexo~\ref{anexo:manual_usuario}.
 
-Una decisión relevante del diseño es que el \textit{dashboard} no cierra el bucle de control del riego. Aunque muestra estados operativos como relé activo, evento de sistema o código de diagnóstico, estos valores proceden de la estación y han sido publicados previamente en ThingSpeak. La interfaz no modifica umbrales en Arduino, no activa la bomba y no confirma órdenes de actuación.
+El \textit{dashboard} presenta estados operativos generados por las estaciones, como el estado del relé, el evento de sistema o el código de diagnóstico. Estos valores proceden del \textit{firmware} de cada estación y han sido publicados previamente en ThingSpeak, por lo que la interfaz permite supervisar el comportamiento del prototipo a partir de información ya generada por los nodos de campo.
 
-El \textit{dashboard} también debe representar situaciones incompletas o anómalas. Si la API no devuelve datos, si una lectura es antigua o si algún campo aparece vacío, la interfaz debe mostrar esa condición en lugar de ocultarla. El uso detallado de la interfaz, la interpretación de estados y las situaciones habituales se documentan en el Anexo~\ref{anexo:manual_usuario}.
+El \textit{dashboard} también debe representar situaciones incompletas o anómalas. Ante una respuesta vacía de la API, una lectura antigua o un campo sin valor, la interfaz muestra esa condición de forma explícita. El uso detallado de la interfaz, la interpretación de estados y las situaciones habituales se documentan en el Anexo~\ref{anexo:manual_usuario}.
 
 \section{Ejecución y gestión del sistema software}
 \label{sec:ejecucion_gestion_software}
@@ -429,7 +429,7 @@ El \textit{script} permite instalar dependencias, preparar el entorno virtual, p
 \label{cuadro:cap6_tierraviva_sh}
 \end{table}
 
-Además de arrancar los procesos, el \textit{script} carga el fichero \texttt{.env} cuando está disponible. Esto permite mantener fuera del código fuente las claves de ThingSpeak y los identificadores de canal. Durante el arranque, el \textit{script} comprueba que existen las variables necesarias para consultar las estaciones configuradas, como los identificadores de canal y las claves de lectura de ThingSpeak. Si faltan identificadores de canal o claves de lectura, el proceso de ingesta no continúa como si el sistema estuviera correctamente configurado, sino que deja el error reflejado en los \textit{logs}.
+Además de arrancar los procesos, el \textit{script} carga el fichero \texttt{.env} cuando está disponible. Esto permite mantener fuera del código fuente las claves de ThingSpeak y los identificadores de canal. Durante el arranque, el \textit{script} comprueba que existen las variables necesarias para consultar las estaciones configuradas, como los identificadores de canal y las claves de lectura de ThingSpeak. Si faltan identificadores de canal o claves de lectura, el proceso de ingesta registra el error en los \textit{logs} y evita arrancar con una configuración incompleta.
 
-Esta capa de gestión no modifica la arquitectura del sistema: la estación sigue siendo autónoma y la Raspberry mantiene un papel de supervisión. Su valor está en hacer que el \textit{backend} sea más reproducible, más fácil de ejecutar y más sencillo de depurar durante las pruebas.
+Esta capa de gestión conserva la arquitectura del sistema y aporta reproducibilidad al \textit{backend}. Su valor está en facilitar la ejecución, reducir errores de arranque y simplificar la depuración durante las pruebas.
 

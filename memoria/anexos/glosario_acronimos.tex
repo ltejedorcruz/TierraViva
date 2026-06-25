@@ -70,7 +70,7 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     Actuador hidráulico utilizado para mover agua desde un depósito hacia el cultivo o sustrato durante una prueba de riego.
 
     \item[Broker]
-    Intermediario utilizado en arquitecturas MQTT para recibir mensajes publicados por dispositivos y entregarlos a clientes suscritos a determinados temas.
+    Elemento funcional intermedio que desacopla productores y consumidores de información. Recibe datos o mensajes procedentes de unos componentes del sistema y los pone a disposición de otros mediante mecanismos de publicación, consulta o suscripción. Aunque el término se utiliza con frecuencia en arquitecturas MQTT, no se limita a este protocolo. En TierraViva, ThingSpeak actúa funcionalmente como \textit{broker} de telemetría entre las estaciones de campo y la Raspberry Pi.
 
     \item[Búfer]
     Zona de memoria utilizada para almacenar temporalmente datos o cadenas. En Arduino UNO debe dimensionarse con cuidado por la memoria SRAM limitada. 
@@ -265,7 +265,7 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     Herramienta del entorno Arduino utilizada para visualizar mensajes enviados por la placa durante la ejecución del \textit{firmware}. En TierraViva permite comprobar lecturas de sensores, respuestas del módem, registro LTE y publicación en ThingSpeak.
 
     \item[Mosquitto]
-    Broker MQTT utilizado en el prototipo local previo para validar la cadena de adquisición, transporte, almacenamiento y visualización antes de adoptar la arquitectura final basada en LTE y ThingSpeak.
+    \textit{Broker} MQTT utilizado en el prototipo local previo para validar la cadena de adquisición, transporte, almacenamiento y visualización antes de adoptar la arquitectura final basada en LTE y ThingSpeak. En ese prototipo, Mosquitto actuaba como intermediario de mensajes bajo el modelo publicación/suscripción propio de MQTT.
 
     \item[MQTT]
     Protocolo de mensajería publicación/suscripción habitual en IoT. Se estudia como alternativa, pero TierraViva utiliza HTTP en la versión actual.
@@ -382,8 +382,8 @@ El glosario no sustituye a los anexos técnicos específicos. La estructura de c
     Plataforma IoT de código abierto orientada a la gestión de dispositivos, telemetría, reglas y \textit{dashboards}. Se consideró como alternativa más completa, aunque se descartó para el alcance actual por requerir mayor configuración e infraestructura.
 
     \item[ThingSpeak]
-    Plataforma IoT utilizada como capa intermedia para recibir los datos publicados por las estaciones y permitir su consulta desde la Raspberry Pi.
-
+    Plataforma IoT de MathWorks utilizada en TierraViva como \textit{broker} de telemetría y estado. Recibe los datos publicados por las estaciones de campo y los pone a disposición de la Raspberry Pi para su consulta, almacenamiento local y visualización.
+    
     \item[Topic]
     Tema o canal lógico utilizado en MQTT para organizar mensajes publicados y suscripciones.
 

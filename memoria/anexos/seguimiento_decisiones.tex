@@ -39,7 +39,7 @@ D03 & Usar Raspberry Pi como nodo local de supervisión. & La Raspberry Pi aport
 \hline
 D04 & Emplear conectividad LTE mediante A7670E-LASA. & El sistema está pensado para parcelas o entornos donde no siempre existe red WiFi local disponible. & La estación puede publicar telemetría usando infraestructura móvil. \\
 \hline
-D05 & Utilizar ThingSpeak como capa intermedia de telemetría. & Permite recibir datos IoT y consultarlos posteriormente sin desarrollar una plataforma \textit{cloud} propia. & Reduce tiempo de desarrollo y centra el esfuerzo en integración, validación y visualización. \\
+Papel de ThingSpeak & Posible plataforma central de gestión. & Capa intermedia de telemetría y consulta. \\ & Reduce tiempo de desarrollo y centra el esfuerzo en integración, validación y visualización. \\
 \hline
 D06 & Mantener la decisión de riego en Arduino. & La actuación sobre agua debe poder ejecutarse de forma segura aunque falle temporalmente la comunicación o la supervisión. & La estación conserva autonomía local y no depende de órdenes remotas para actuar o mantenerse apagada. \\
 \hline
@@ -113,7 +113,7 @@ Algunas decisiones no se limitaron a elegir un componente, sino que modificaron 
 \hline
 Papel de la Raspberry Pi & Posible elemento central de decisión y supervisión. & Nodo local de ingesta, almacenamiento, API y \textit{dashboard}. \\
 \hline
-Papel de ThingSpeak & Posible plataforma central de gestión. & Capa intermedia de telemetría y consulta. \\
+Papel de ThingSpeak & Posible plataforma central de gestión. & \textit{Broker} de telemetría y consulta. \\
 \hline
 Papel de Arduino & Nodo de lectura de sensores. & Estación autónoma con lectura, decisión local y actuación segura. \\
 \hline
@@ -136,7 +136,7 @@ El seguimiento del proyecto ha permitido extraer varias lecciones técnicas:
     \item En un sistema IoT físico, la arquitectura debe diseñarse desde el principio pensando en fallos de alimentación, sensores y comunicación.
     \item La actuación sobre una bomba no debe depender exclusivamente de una orden remota ni de una conexión continua.
     \item Separar estación, telemetría, almacenamiento, API y \textit{dashboard} facilita la depuración del sistema.
-    \item ThingSpeak resulta útil como plataforma intermedia, pero debe tratarse como una dependencia externa y no como núcleo de control.
+    \item ThingSpeak resulta útil como \textit{broker} de telemetría, pero debe tratarse como una dependencia externa y no como núcleo de control.
     \item La conectividad LTE aporta valor en entornos sin WiFi local, pero exige cuidar alimentación, antena, SIM y configuración APN.
     \item La validación por bloques reduce errores acumulados y permite localizar mejor el origen de cada fallo.
 \end{itemize}

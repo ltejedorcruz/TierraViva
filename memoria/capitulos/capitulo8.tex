@@ -1,16 +1,16 @@
 \chapter{Resultados, discusión y proyección del sistema}
 \label{cap:resultados_discusion_conclusiones}
 
-Tras la implementación y validación de TierraViva, este capítulo sintetiza los resultados obtenidos y discute el alcance real del sistema desarrollado. La finalidad no es repetir la implementación descrita en los capítulos anteriores, sino valorar el prototipo como una solución completa: qué se ha conseguido, qué decisiones han sido más relevantes, cómo se ha comportado en pruebas reales y qué mejoras permitirían evolucionarlo hacia una versión más robusta.
+Tras la implementación y validación de TierraViva, este capítulo sintetiza los resultados obtenidos y discute el alcance real del sistema desarrollado. La finalidad es valorar el prototipo como una solución completa: qué se ha conseguido, qué decisiones han sido más relevantes, cómo se ha comportado en pruebas reales y qué mejoras permitirían evolucionarlo hacia una versión más robusta.
 
-TierraViva no se limita a una prueba aislada de sensores ni a una visualización de datos. El resultado final es un sistema IoT funcional formado por dos estaciones remotas, comunicación LTE, publicación en ThingSpeak, supervisión local en Raspberry Pi, almacenamiento en SQLite, API FastAPI, \textit{dashboard} web y actuación física sobre riego. Esta integración es el aspecto central del trabajo: el sistema mide, decide, actúa, publica, almacena y visualiza.
+El resultado final de TierraViva es un sistema IoT funcional formado por dos estaciones remotas, comunicación LTE, publicación en ThingSpeak, supervisión local en Raspberry Pi, almacenamiento en SQLite, API FastAPI, \textit{dashboard} web y actuación física sobre riego. Esta integración es el aspecto central del trabajo: el sistema mide, decide, actúa, publica, almacena y visualiza.
 
 \section{Resultados integrados del prototipo}
 \label{sec:resultados_integrados}
 
 El resultado principal del proyecto es la construcción y validación de un prototipo de riego inteligente basado en estaciones autónomas. Las estaciones A y B han sido montadas y probadas siguiendo una arquitectura equivalente, con sensórica ambiental y de suelo, módulo LTE A7670E-LASA, relé, bomba de agua y alimentación independiente.
 
-Cada estación ejecuta localmente el \textit{firmware} de adquisición, decisión y actuación. La Raspberry Pi no controla la bomba ni envía órdenes de riego, sino que actúa como nodo de supervisión: consulta ThingSpeak, almacena lecturas en SQLite, expone datos mediante API y sirve el \textit{dashboard}. Esta separación permite que la actuación crítica permanezca en la estación incluso si la supervisión o la comunicación fallan temporalmente.
+Cada estación ejecuta localmente el \textit{firmware} de adquisición, decisión y actuación. La Raspberry Pi actúa como nodo de supervisión: consulta ThingSpeak, almacena lecturas en SQLite, expone datos mediante API y sirve el \textit{dashboard}. Esta separación permite que la actuación crítica permanezca en la estación incluso si la supervisión o la comunicación fallan temporalmente.
 
 \begin{table}[H]
 \centering
@@ -70,7 +70,7 @@ Almacenamiento histórico & La Raspberry Pi conserva lecturas en SQLite evitando
 \hline
 Visualización & El \textit{dashboard} muestra lecturas, estado, histórico, gráficas y selección de estación. & RF-07, RNF-08; P09, P10, P16. & Cumplido \\
 \hline
-Decisión local de riego & El riego se decide en el \textit{firmware}, no desde la nube ni desde la Raspberry Pi. & RF-08, RF-11, RNF-06; P13--P15. & Cumplido \\
+Decisión local de riego & El riego se decide en el \textit{firmware} de cada estación, a partir de las lecturas y reglas locales configuradas. & RF-08, RF-11, RNF-06; P13--P15. & Cumplido \\
 \hline
 Actuación segura & La bomba se activa por relé durante un tiempo limitado y se apaga explícitamente. & RF-09, ET-05, ET-08; P11, P12, P17. & Cumplido \\
 \hline
@@ -86,13 +86,13 @@ Esta tabla permite cerrar el recorrido completo del proyecto: los requisitos no 
 \section{Discusión técnica de la arquitectura final}
 \label{sec:discusion_tecnica_arquitectura}
 
-La arquitectura final de TierraViva es el resultado de varias decisiones tomadas durante el desarrollo. La más importante ha sido mantener la actuación crítica en la estación. Ese reparto condiciona todo el sistema: la nube no ordena el riego, la Raspberry Pi no activa la bomba y el \textit{dashboard} no fuerza actuaciones. La estación mide y decide localmente, mientras que el resto de bloques supervisa, almacena y visualiza.
+La arquitectura final de TierraViva es el resultado de varias decisiones tomadas durante el desarrollo. La más importante ha sido mantener la actuación crítica en la estación. Ese reparto condiciona todo el sistema: la estación mide y decide localmente, mientras que ThingSpeak, la Raspberry Pi y el \textit{dashboard} se orientan a telemetría, almacenamiento, consulta y visualización.
 
 En un sistema que actúa sobre agua, esta separación es especialmente importante. Si la decisión dependiera de la nube o de una conexión continua, una caída de red, una latencia elevada o una orden incorrecta podrían provocar un comportamiento no deseado. En TierraViva, una pérdida temporal de ThingSpeak afecta a la publicación de datos, pero no deja la bomba sin control.
 
 El uso de LTE mediante A7670E-LASA también ha sido una decisión relevante. Frente a una solución basada únicamente en WiFi, LTE permite que la estación funcione en zonas donde no existe infraestructura local de red. A cambio, introduce más complejidad: comandos AT, alimentación más exigente, consumo superior, necesidad de SIM, cobertura y gestión de errores. El prototipo ha permitido comprobar que esta complejidad es asumible dentro del alcance del TFG, siempre que se valide de forma incremental.
 
-ThingSpeak ha funcionado como una capa intermedia útil para telemetría. Su valor principal ha sido desacoplar las estaciones de la Raspberry Pi: la estación publica desde campo y la Raspberry consulta posteriormente. Sin embargo, ThingSpeak no se interpreta como núcleo de control ni como sistema de tiempo real. Su papel en TierraViva es recibir datos, conservarlos temporalmente y permitir su consulta.
+ThingSpeak ha funcionado como una capa intermedia útil para telemetría. Su valor principal ha sido desacoplar las estaciones de la Raspberry Pi: la estación publica desde campo y la Raspberry consulta posteriormente. Su papel en TierraViva es recibir datos, conservarlos temporalmente y permitir su consulta como \textit{broker} de telemetría.
 
 La Raspberry Pi aporta la parte de supervisión local. Al almacenar en SQLite, exponer una API y servir un \textit{dashboard}, el sistema gana trazabilidad, consulta histórica y una interfaz más adaptada al proyecto. Esta capa convierte una publicación aislada de sensores en un sistema supervisable.
 
@@ -200,19 +200,19 @@ ODS 13 & Observación ambiental y adaptación futura. & El histórico de datos p
 \label{tab:alineacion_ods_tierraviva}
 \end{table}
 
-Desde el punto de vista social, la prueba en Agrolab Móstoles mostró que el sistema puede resultar comprensible y útil para usuarios no técnicos, especialmente por la posibilidad de supervisar el estado del riego, automatizar actuaciones durante ausencias y adaptar el montaje a distintas necesidades. Esta recepción refuerza que el valor del prototipo no reside solo en la integración tecnológica, sino también en su aplicabilidad en huertos urbanos y pequeñas zonas de cultivo.
+Desde el punto de vista social, la prueba en Agrolab Móstoles mostró que el sistema puede resultar comprensible y útil para usuarios no técnicos, especialmente por la posibilidad de supervisar el estado del riego, automatizar actuaciones durante ausencias y adaptar el montaje a distintas necesidades. Esta recepción refuerza el valor del prototipo tanto por su integración tecnológica como por su aplicabilidad en huertos urbanos y pequeñas zonas de cultivo.
 
 \section{Conclusiones finales}
 \label{sec:conclusiones_finales}
 
 El Trabajo de Fin de Grado ha permitido diseñar, implementar y validar TierraViva, un prototipo IoT de riego inteligente formado por dos estaciones remotas, comunicación LTE, telemetría en ThingSpeak, supervisión en Raspberry Pi, almacenamiento SQLite, API FastAPI, \textit{dashboard} web y actuación física mediante relé y bomba de agua.
 
-El sistema demuestra el ciclo completo de funcionamiento: mide variables del entorno y del suelo, interpreta la humedad mediante \textit{firmware}, decide localmente si debe regar, activa la bomba durante un tiempo limitado, publica su estado y permite supervisar los datos de forma local y remota. Esta integración confirma que el trabajo no se ha limitado a un módulo aislado, sino a una arquitectura funcional de extremo a extremo.
+El sistema demuestra el ciclo completo de funcionamiento: mide variables del entorno y del suelo, interpreta la humedad mediante \textit{firmware}, decide localmente si debe regar, activa la bomba durante un tiempo limitado, publica su estado y permite supervisar los datos de forma local y remota. Esta integración confirma el desarrollo de una arquitectura funcional de extremo a extremo.
 
-La decisión de mantener el control crítico en la estación ha sido esencial. Gracias a ella, la pérdida de comunicación con ThingSpeak, la caída del nodo de supervisión o la ausencia del \textit{dashboard} no generan una actuación insegura de la bomba. Esta separación entre actuación local y supervisión remota es una de las aportaciones técnicas más importantes del proyecto.
+La decisión de mantener el control crítico en la estación ha sido esencial. Gracias a ella, la pérdida de comunicación con ThingSpeak, la caída del nodo de supervisión o la ausencia del \textit{dashboard} conservan la actuación bajo la lógica local del \textit{firmware}. Esta separación entre actuación local y supervisión remota es una de las aportaciones técnicas más importantes del proyecto.
 
 La validación en Agrolab Móstoles aporta una dimensión adicional: el sistema no solo funcionó en entorno controlado, sino que fue probado en una zona real de cultivo y ante usuarios potenciales. La recepción cualitativa obtenida mostró interés por la utilidad del sistema, especialmente para ausencias, supervisión remota y adaptación modular.
 
 TierraViva mantiene limitaciones: calibración agronómica todavía inicial, dependencia de cobertura LTE, consumo del módulo celular, ausencia de encapsulado definitivo y falta de campañas prolongadas. Sin embargo, estas limitaciones están identificadas y conducen a líneas futuras claras: energía solar, configuración remota, riego manual seguro, IA predictiva, sensores adicionales, encapsulado, PCB y gestión multiestación avanzada.
 
-En conjunto, TierraViva cumple los objetivos del TFG y constituye una base técnica sólida, funcional, estable, modular y escalable. No se presenta como producto comercial terminado, sino como un prototipo académico avanzado que demuestra la viabilidad de integrar sensórica, comunicaciones móviles, supervisión software y actuación local segura para riego inteligente.
+En conjunto, TierraViva cumple los objetivos del TFG y constituye una base técnica sólida, funcional, estable, modular y escalable. El resultado es un prototipo académico avanzado que demuestra la viabilidad de integrar sensórica, comunicaciones móviles, supervisión software y actuación local segura para riego inteligente.
