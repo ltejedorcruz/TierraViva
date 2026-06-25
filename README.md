@@ -122,46 +122,30 @@ Esta separación es una de las decisiones más importantes del proyecto, porque 
 | **Visualización** | `dashboard/` | Consulta de estado, histórico y diagnóstico |
 
 <p align="center">
-  <img src="docs/assets/section_repo_structure.svg" alt="Estructura del repositorio" width="100%"/>
+  <img src="docs/assets/section_architecture_functional.svg" alt="Arquitectura funcional" width="100%"/>
 </p>
 
+
+TierraViva puede entenderse como una cadena funcional muy clara:
+
 ```text
-.
-├── api.py                          # API FastAPI y servicio del dashboard
-├── database.py                     # Persistencia y consultas SQLite
-├── main.py                         # Ingesta periódica desde ThingSpeak
-├── tierraviva.sh                   # Instalación, arranque y gestión del sistema
-├── requirements.txt                # Dependencias Python del proyecto
-├── README.md                       # Presentación general del repositorio
-│
-├── dashboard/                      # Dashboard web de supervisión
-│   ├── images/                     # Logo TierraViva, logo URJC y favicon
-│   └── index.html                  # Interfaz principal del dashboard
-│
-├── docs/                           # Documentación auxiliar y recursos del README
-│   ├── assets/                     # Assets gráficos del README
-│   ├── Circuit_Documentation_TierraViva.pdf
-│   └── logs_arduino_estacionA.txt
-│
-├── Estacion/                       # Firmware final de las estaciones remotas
-│   ├── Estacion_A_final_Plus/      # Código Arduino final de la estación A
-│   └── Estacion_B_final_Plus/      # Código Arduino final de la estación B
-│
-├── memoria/                        # Memoria del TFG en LaTeX
-│   ├── anexos/                     # Anexos técnicos, manuales y trazabilidad
-│   ├── capitulos/                  # Capítulos principales de la memoria
-│   ├── figs/                       # Figuras originales y recursos gráficos
-│   ├── figs_png/                   # Figuras exportadas y capturas utilizadas
-│   ├── portada/                    # Portada, resumen, prólogo e índices
-│   ├── bibliografia.bib            # Bibliografía del trabajo
-│   ├── estilo.tex                  # Configuración de estilo LaTeX
-│   ├── memoria.tex                 # Documento principal de la memoria
-│   └── memoria.pdf                 # Versión compilada de la memoria
-│
-└── prototipos/                     # Prototipos previos y pruebas de evolución
-    ├── estacion_pruebas/           # Ensayos iniciales con A7670E y sensores
-    └── prototipo_local_mqtt/       # Arquitectura previa basada en MQTT local
+[ Estación remota ]
+   ├─ Sensores: suelo, temperatura, humedad, luz y presión
+   ├─ Evaluación local de condiciones
+   ├─ Actuación mediante relé y bomba
+   └─ Publicación LTE → ThingSpeak
+
+[ Raspberry Pi ]
+   ├─ Consulta periódica a ThingSpeak
+   ├─ Normalización de datos
+   ├─ Almacenamiento en SQLite
+   ├─ API REST con FastAPI
+   └─ Servicio del dashboard web
+
+[ Usuario ]
+   └─ Consulta estado, histórico, eventos y diagnóstico desde navegador
 ```
+
 
 <p align="center">
   <img src="docs/assets/section_thingspeak_contract.svg" alt="Contrato de datos en ThingSpeak" width="100%"/>
@@ -286,22 +270,41 @@ curl "http://127.0.0.1:8000/api/latest?station=A"
 
 ```text
 .
-├── Estacion/                  # Firmware Arduino de las estaciones A y B
-├── dashboard/                 # Frontend web de supervisión
-├── docs/                      # Documentación auxiliar
-├── memoria/                   # Memoria del TFG en LaTeX
-│   ├── capitulos/
-│   ├── anexos/
-│   ├── figs/
-│   ├── figs_png/
-│   └── memoria.tex
-├── prototipos/                # Prototipos previos y pruebas
-├── api.py                     # API FastAPI y servicio del dashboard
-├── database.py                # Persistencia en SQLite
-├── main.py                    # Ingesta periódica desde ThingSpeak
-├── tierraviva.sh              # Instalación y gestión del sistema
-├── requirements.txt           # Dependencias Python
-└── .env.example               # Plantilla de configuración
+├── api.py                          # API FastAPI y servicio del dashboard
+├── database.py                     # Persistencia y consultas SQLite
+├── main.py                         # Ingesta periódica desde ThingSpeak
+├── tierraviva.sh                   # Instalación, arranque y gestión del sistema
+├── .env.example                    # Plantilla de configuración
+├── requirements.txt                # Dependencias Python del proyecto
+├── README.md                       # Presentación general del repositorio
+│
+├── dashboard/                      # Dashboard web de supervisión
+│   ├── images/                     # Logo TierraViva, logo URJC y favicon
+│   └── index.html                  # Interfaz principal del dashboard
+│
+├── docs/                           # Documentación auxiliar y recursos del README
+│   ├── assets/                     # Assets gráficos del README
+│   ├── Circuit_Documentation_TierraViva.pdf
+│   └── logs_arduino_estacionA.txt
+│
+├── Estacion/                       # Firmware final de las estaciones remotas
+│   ├── Estacion_A_final_Plus/      # Código Arduino de la estación A
+│   └── Estacion_B_final_Plus/      # Código Arduino de la estación B
+│
+├── memoria/                        # Memoria del TFG en LaTeX
+│   ├── anexos/                     # Anexos técnicos, manuales y trazabilidad
+│   ├── capitulos/                  # Capítulos principales de la memoria
+│   ├── figs/                       # Figuras originales y recursos gráficos
+│   ├── figs_png/                   # Figuras exportadas y capturas utilizadas
+│   ├── portada/                    # Portada, resumen, prólogo e índices
+│   ├── bibliografia.bib            # Bibliografía del trabajo
+│   ├── estilo.tex                  # Configuración de estilo LaTeX
+│   ├── memoria.tex                 # Documento principal de la memoria
+│   └── memoria.pdf                 # Versión compilada de la memoria
+│
+└── prototipos/                     # Prototipos previos y pruebas de evolución
+    ├── estacion_pruebas/           # Ensayos iniciales con A7670E y sensores
+    └── prototipo_local_mqtt/       # Arquitectura previa basada en MQTT local
 ```
 
 <p align="center">
@@ -324,20 +327,6 @@ La memoria incluye:
 * glosario;
 * trazabilidad requisitos-pruebas.
 
-
-<p align="center">
-  <img src="docs/assets/section_security.svg" alt="Seguridad y configuración" width="100%"/>
-</p>
-
-Este repositorio **no debe contener**:
-
-* claves reales de ThingSpeak;
-* ficheros `.env` con credenciales;
-* bases de datos de ejecución;
-* logs sensibles;
-* secretos de despliegue.
-
-Utiliza siempre `.env.example` como plantilla.
 
 <p align="center">
   <img src="docs/assets/footer.svg" alt="TierraViva footer" width="100%"/>
