@@ -96,7 +96,7 @@ ThingSpeak ha funcionado como una capa intermedia útil para telemetría. Su val
 
 La Raspberry Pi aporta la parte de supervisión local. Al almacenar en SQLite, exponer una API y servir un \textit{dashboard}, el sistema gana trazabilidad, consulta histórica y una interfaz más adaptada al proyecto. Esta capa convierte una publicación aislada de sensores en un sistema supervisable.
 
-La existencia de dos estaciones montadas y probadas refuerza la validez de la arquitectura. Aunque TierraViva no se presenta como red agrícola de gran escala, sí demuestra que el modelo no queda restringido a un único nodo. La separación por identificadores y canales permite escalar conceptualmente a más estaciones, manteniendo una lógica común de supervisión.
+La existencia de dos estaciones montadas y probadas refuerza la validez de la arquitectura. El modelo demuestra capacidad multiestación mediante identificadores y canales diferenciados, lo que permite escalar conceptualmente a más nodos manteniendo una lógica común de supervisión.
 
 \section{Validación en Agrolab Móstoles y recepción cualitativa}
 \label{sec:validacion_recepcion_agrolab}
@@ -105,7 +105,7 @@ La prueba funcional en Agrolab Móstoles tiene un valor especial dentro del proy
 
 Durante la prueba final se desplegó la estación B en una zona de cultivo y se verificó el funcionamiento integrado del sistema: lectura de sensores, decisión local de riego, actuación temporizada de la bomba, publicación de telemetría en ThingSpeak, consulta desde Raspberry Pi y visualización en el \textit{dashboard}. La prueba no constituye una campaña agronómica prolongada, pero sí una validación funcional relevante en un contexto de uso real.
 
-Además de la comprobación técnica, la prueba permitió recoger impresiones cualitativas de personas usuarias del espacio. Estas observaciones no se presentan como encuesta formal ni como estudio estadístico, sino como una primera recepción práctica del prototipo por parte de personas familiarizadas con el riego y el cuidado de cultivos.
+Además de la comprobación técnica, la prueba permitió recoger impresiones cualitativas de personas usuarias del espacio. Estas observaciones se incorporan como una primera recepción práctica del prototipo por parte de personas familiarizadas con el riego y el cuidado de cultivos.
 
 \begin{table}[H]
 \centering
@@ -136,7 +136,7 @@ Se sugirió que el sistema tenía potencial suficiente como para protegerse o de
 
 Para conservar el carácter real de la prueba sin introducir un tono coloquial excesivo en la memoria, los comentarios se han incorporado de forma anonimizada y resumida. El elemento común en la recepción recibida fue claro: el interés no se centró solo en la tecnología, sino en la utilidad práctica. Los usuarios valoraron especialmente que el sistema pudiera regar cuando la persona no está presente, que se pudiera consultar su estado y que fuera adaptable a depósitos, alimentación o necesidades distintas.
 
-Esta recepción cualitativa refuerza una conclusión importante: TierraViva no solo resuelve un problema técnico de integración IoT, sino que conecta con una necesidad comprensible para usuarios reales de huertos urbanos y pequeñas zonas de cultivo. Esa conexión entre implementación técnica y utilidad percibida es uno de los resultados más relevantes de la prueba en Agrolab.
+Esta recepción cualitativa refuerza una conclusión importante: TierraViva conecta la integración técnica IoT con una necesidad comprensible para usuarios reales de huertos urbanos y pequeñas zonas de cultivo. Esa relación entre implementación técnica y utilidad percibida es uno de los resultados más relevantes de la prueba en Agrolab.
 
 \section{Limitaciones detectadas}
 \label{sec:limitaciones_detectadas}
@@ -149,7 +149,7 @@ La segunda limitación es la dependencia de cobertura LTE y alimentación establ
 
 Otra limitación es la robustez física. El montaje actual permite validar la arquitectura y el funcionamiento, pero una versión de campo prolongada requeriría encapsulado, conectores adecuados, protección frente a humedad, organización del cableado y mayor resistencia mecánica.
 
-Por último, la prueba en Agrolab Móstoles es una validación funcional en entorno real, no una certificación agronómica. No permite afirmar ahorros hídricos cuantificados, mejoras de rendimiento del cultivo ni comportamiento estacional. Estas conclusiones requerirían campañas de larga duración y mediciones comparativas.
+Por último, la prueba en Agrolab Móstoles constituye una validación funcional en entorno real. Su alcance permite comprobar el comportamiento integrado del prototipo en una zona de cultivo, mientras que la cuantificación de ahorro hídrico, la mejora del rendimiento del cultivo y el comportamiento estacional requerirían campañas de larga duración y mediciones comparativas.
 
 \section{Líneas futuras}
 \label{sec:lineas_futuras}
@@ -160,11 +160,11 @@ Una primera evolución sería mejorar la calibración agronómica del sensor de 
 
 La segunda línea futura es la autonomía energética. La integración de panel solar, batería dimensionada y regulador de carga permitiría desplegar estaciones durante periodos más largos. Existen además iniciativas abiertas que exploran soluciones de riego alimentadas por energía solar en contextos comunitarios, como OSPIT \cite{apc2024,ospit2024}, por lo que esta línea encaja de forma natural con la evolución de TierraViva. Esta mejora fue especialmente coherente con los comentarios recibidos en Agrolab, donde se valoró la posibilidad de adaptar batería, alimentación y depósito a cada caso.
 
-Una tercera línea es incorporar configuración remota desde el \textit{dashboard}. Esta mejora permitiría modificar umbrales de humedad, duración de riego, frecuencia de envío o parámetros de \textit{cooldown} sin reprogramar el Arduino. No obstante, no debe plantearse como un simple botón añadido a la interfaz: implicaría diseñar un canal descendente seguro, validación de órdenes, persistencia de configuración y límites que impidan actuaciones peligrosas.
+Una tercera línea es incorporar configuración remota desde el \textit{dashboard}. Esta mejora permitiría modificar umbrales de humedad, duración de riego, frecuencia de envío o parámetros de \textit{cooldown} sin reprogramar el Arduino. Su incorporación implicaría diseñar un canal descendente seguro, validación de órdenes, persistencia de configuración y límites que impidan actuaciones peligrosas.
 
 También podría añadirse un modo de riego manual supervisado desde el \textit{dashboard}. Esta función permitiría activar un riego puntual bajo control del usuario, pero debería incorporar restricciones de seguridad: tiempo máximo, confirmación explícita, bloqueo por \textit{cooldown}, comprobación de estado de estación y registro del evento.
 
-Otra línea relevante es la incorporación de inteligencia artificial o modelos predictivos. En una versión futura, con suficiente histórico de humedad, meteorología, riegos y respuesta del suelo, podrían entrenarse modelos para anticipar necesidades de riego o ajustar umbrales dinámicamente. En el prototipo actual no se implementa IA porque no existe todavía un volumen de datos suficiente ni una campaña prolongada que permita validar predicciones de forma rigurosa.
+Otra línea relevante es la incorporación de inteligencia artificial o modelos predictivos. En una versión futura, con suficiente histórico de humedad, meteorología, riegos y respuesta del suelo, podrían entrenarse modelos para anticipar necesidades de riego o ajustar umbrales dinámicamente. Esta línea requiere un volumen de datos mayor y una campaña prolongada que permita validar predicciones de forma rigurosa.
 
 También se podrían integrar sensores adicionales: caudalímetro para estimar volumen aplicado, sensor de nivel de depósito para evitar activar la bomba sin agua, pH, conductividad eléctrica o sensores meteorológicos complementarios. Estas variables permitirían pasar de un sistema de riego basado principalmente en humedad de suelo a una supervisión agronómica más completa.
 
@@ -175,7 +175,7 @@ Finalmente, el sistema podría evolucionar hacia una gestión multiestación má
 \section{Alineación ambiental y social}
 \label{sec:alineacion_ambiental_social}
 
-La alineación de TierraViva con los Objetivos de Desarrollo Sostenible se entiende como una contribución potencial dentro del alcance de un prototipo académico. El sistema no cuantifica todavía ahorro hídrico ni demuestra una mejora agronómica prolongada, pero sí materializa una arquitectura orientada a medir condiciones reales del entorno, evitar actuaciones de riego puramente fijas, supervisar el estado del sistema y facilitar futuras optimizaciones basadas en datos.
+La alineación de TierraViva con los Objetivos de Desarrollo Sostenible se entiende como una contribución potencial dentro del alcance de un prototipo académico. El sistema materializa una arquitectura orientada a medir condiciones reales del entorno, evitar actuaciones de riego puramente fijas, supervisar el estado del sistema y facilitar futuras optimizaciones basadas en datos. La cuantificación de ahorro hídrico y la demostración de mejoras agronómicas prolongadas quedan reservadas para fases posteriores de validación.
 
 \begin{table}[H]
 \centering
