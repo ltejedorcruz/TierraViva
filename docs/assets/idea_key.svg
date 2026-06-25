@@ -1,0 +1,8 @@
+<svg width="1400" height="180" viewBox="0 0 1400 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1400" y2="180"><stop offset="0" stop-color="#174F1E"/><stop offset="1" stop-color="#66BB6A"/></linearGradient></defs>
+  <rect x="20" y="18" width="1360" height="144" rx="30" fill="url(#g)"/>
+  <circle cx="1260" cy="58" r="70" fill="#FFFFFF" fill-opacity="0.10"/>
+  <circle cx="1180" cy="120" r="36" fill="#FFFFFF" fill-opacity="0.10"/>
+  <text x="72" y="76" font-family="Inter, Segoe UI, Arial" font-size="40" font-weight="800" fill="#FFFFFF">La decisión de riego se toma en la estación, no en la nube</text>
+  <text x="74" y="116" font-family="Inter, Segoe UI, Arial" font-size="24" font-weight="600" fill="#F1F8E9">La estación mide, decide y actúa; la Raspberry Pi supervisa, almacena y visualiza.</text>
+</svg>

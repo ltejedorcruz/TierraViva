@@ -1,0 +1,42 @@
+<svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBFFFB"/><stop offset="1" stop-color="#E8F5E9"/></linearGradient>
+    <linearGradient id="cardDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B5E20"/><stop offset="1" stop-color="#43A047"/></linearGradient>
+  </defs>
+  <rect x="18" y="18" width="1564" height="484" rx="34" fill="#FFFFFF" stroke="#C8E6C9" stroke-width="2"/>
+  <text x="800" y="68" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="34" font-weight="800" fill="#1B5E20">Vista general del sistema</text>
+  <text x="800" y="102" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="20" font-weight="600" fill="#33663A">Del campo al dashboard: un flujo IoT completo y trazable</text>
+  <rect x="70" y="150" width="265" height="215" rx="28" fill="url(#card)" stroke="#A5D6A7" stroke-width="2"/>
+  <text x="202.5" y="196" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="30" font-weight="800" fill="#1B5E20">Estación IoT</text>
+  <text x="202.5" y="238" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="22" font-weight="700" fill="#2E7D32">mide · decide · actúa</text>
+  <text x="202.5" y="280" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">Arduino UNO + sensores</text>
+  <text x="202.5" y="310" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">A7670E-LASA + relé + bomba</text>
+  <rect x="382" y="150" width="240" height="215" rx="28" fill="url(#card)" stroke="#A5D6A7" stroke-width="2"/>
+  <text x="502" y="196" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="30" font-weight="800" fill="#1B5E20">ThingSpeak</text>
+  <text x="502" y="238" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="22" font-weight="700" fill="#2E7D32">telemetría</text>
+  <text x="502" y="280" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">field1 · field2 · field3</text>
+  <text x="502" y="310" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">field4 · field5 · field6</text>
+  <text x="502" y="340" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">field7 · field8</text>
+  <rect x="670" y="150" width="285" height="215" rx="28" fill="url(#card)" stroke="#A5D6A7" stroke-width="2"/>
+  <text x="812.5" y="196" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="30" font-weight="800" fill="#1B5E20">Raspberry Pi</text>
+  <text x="812.5" y="238" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="22" font-weight="700" fill="#2E7D32">supervisa · almacena</text>
+  <text x="812.5" y="280" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">main.py + database.py</text>
+  <text x="812.5" y="310" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">SQLite + lógica de consulta</text>
+  <rect x="1002" y="150" width="190" height="215" rx="28" fill="url(#card)" stroke="#A5D6A7" stroke-width="2"/>
+  <text x="1097" y="196" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="30" font-weight="800" fill="#1B5E20">FastAPI</text>
+  <text x="1097" y="238" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="22" font-weight="700" fill="#2E7D32">API REST</text>
+  <text x="1097" y="280" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">api.py</text>
+  <text x="1097" y="310" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#335B38">/api/latest</text>
+  <rect x="1239" y="150" width="270" height="215" rx="28" fill="url(#cardDark)" stroke="#2E7D32" stroke-width="2"/>
+  <text x="1374" y="196" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="30" font-weight="800" fill="#FFFFFF">Dashboard</text>
+  <text x="1374" y="238" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="22" font-weight="700" fill="#E8F5E9">visualiza y resume</text>
+  <text x="1374" y="280" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#F1F8E9">estado · histórico</text>
+  <text x="1374" y="310" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="18" fill="#F1F8E9">eventos · diagnóstico</text>
+  <g stroke="#2E7D32" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M342 258H372"/><path d="M368 244L388 258L368 272"/>
+    <path d="M628 258H658"/><path d="M654 244L674 258L654 272"/>
+    <path d="M962 258H992"/><path d="M988 244L1008 258L988 272"/>
+    <path d="M1198 258H1228"/><path d="M1224 244L1244 258L1224 272"/>
+  </g>
+  <text x="800" y="438" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="26" font-weight="800" fill="#1B5E20">La actuación crítica no depende de la nube: la estación decide localmente y la Raspberry Pi supervisa.</text>
+</svg>

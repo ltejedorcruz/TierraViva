@@ -1,0 +1,16 @@
+<svg width="1600" height="235" viewBox="0 0 1600 235" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="1600" y2="235">
+      <stop offset="0" stop-color="#CBE8CF"/>
+      <stop offset="0.45" stop-color="#A9D8B0"/>
+      <stop offset="1" stop-color="#86CA91"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="235" rx="32" fill="url(#f)"/>
+  <path d="M0 160C163 125 319 159 491 140C688 118 808 64 989 70C1160 76 1336 150 1600 120V235H0V160Z" fill="#2E7D32" fill-opacity="0.18"/>
+  <path d="M0 188C173 158 336 191 542 171C737 152 873 108 1045 110C1222 112 1370 173 1600 158V235H0V188Z" fill="#1B5E20" fill-opacity="0.12"/>
+  <text x="800" y="72" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="43" font-weight="800" fill="#103A1B">TierraViva</text>
+  <text x="800" y="112" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="22" font-weight="700" fill="#184823">Una arquitectura IoT distribuida para observar, comprender y apoyar el riego en cultivos desatendidos.</text>
+  <text x="800" y="150" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="21" font-weight="700" fill="#24552D">Lucía Tejedor de la Cruz</text>
+  <text x="800" y="184" text-anchor="middle" font-family="Inter, Segoe UI, Arial" font-size="19" font-weight="600" fill="#2C5C33">Trabajo Fin de Grado · Ingeniería en Tecnologías de la Telecomunicación · Universidad Rey Juan Carlos</text>
+</svg>

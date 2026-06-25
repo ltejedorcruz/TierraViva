@@ -1,0 +1,13 @@
+<svg width="1600" height="180" viewBox="0 0 1600 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1600" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#174F1E"/>
+      <stop offset="1" stop-color="#66BB6A"/>
+    </linearGradient>
+  </defs>
+  <rect x="20" y="16" width="1560" height="148" rx="30" fill="url(#g)"/>
+  <circle cx="1460" cy="58" r="70" fill="#FFFFFF" fill-opacity="0.10"/>
+  <circle cx="1380" cy="120" r="38" fill="#FFFFFF" fill-opacity="0.08"/>
+  <text x="72" y="78" font-family="Inter, Segoe UI, Arial" font-size="42" font-weight="800" fill="#FFFFFF">API principal</text>
+  <text x="74" y="120" font-family="Inter, Segoe UI, Arial" font-size="24" font-weight="600" fill="#F1F8E9">Endpoints disponibles para consulta y supervisión</text>
+</svg>

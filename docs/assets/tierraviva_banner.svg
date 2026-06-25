@@ -1,0 +1,25 @@
+<svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E3B20"/><stop offset="0.35" stop-color="#1B5E20"/><stop offset="0.68" stop-color="#2E7D32"/><stop offset="1" stop-color="#A5D6A7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1230 95) rotate(130) scale(550 340)">
+      <stop stop-color="#E8F5E9" stop-opacity="0.82"/><stop offset="1" stop-color="#E8F5E9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="520" rx="36" fill="url(#bg)"/>
+  <rect width="1600" height="520" rx="36" fill="url(#glow)"/>
+  <path d="M0 410C145 364 287 393 461 361C655 325 740 228 928 225C1095 223 1236 296 1600 253V520H0V410Z" fill="#F1F8E9" fill-opacity="0.14"/>
+  <path d="M0 452C181 399 336 438 548 401C787 359 864 272 1065 276C1239 279 1351 350 1600 328V520H0V452Z" fill="#FFFFFF" fill-opacity="0.13"/>
+  <text x="96" y="168" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="98" font-weight="800" fill="#FFFFFF" letter-spacing="-2">TierraViva</text>
+  <text x="100" y="230" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="700" fill="#E8F5E9">Monitorización ambiental y riego inteligente</text>
+  <text x="100" y="278" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="26" font-weight="600" fill="#F1F8E9">Prototipo IoT distribuido para cultivos y huertos desatendidos</text>
+  <text x="100" y="328" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="23" font-weight="500" fill="#F8FFF8">Estaciones autónomas · Decisión local · LTE · ThingSpeak · Raspberry Pi · SQLite · FastAPI · Dashboard</text>
+  <g transform="translate(1210 246)">
+    <path d="M105 147C105 87 157 45 215 45C272 45 321 88 321 147C321 208 271 250 215 250C160 250 105 208 105 147Z" fill="#E8F5E9" fill-opacity="0.25"/>
+    <path d="M214 249C214 174 219 126 274 70" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+    <path d="M214 189C175 146 137 140 95 149" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+    <path d="M218 150C260 120 296 121 329 134" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+    <path d="M215 249C190 284 157 302 115 309" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+  </g>
+</svg>
