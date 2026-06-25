@@ -334,23 +334,19 @@ En resumen, FastAPI permite convertir la información almacenada localmente en u
 \section{\textit{Dashboard} web de supervisión}
 \label{sec:dashboard_web_supervision}
 
-El \textit{dashboard} web constituye la capa de presentación del sistema software de TierraViva. Su función es transformar los datos servidos por la API en una vista de supervisión accesible desde un navegador, sin que el usuario tenga que consultar directamente ThingSpeak, SQLite o los \textit{logs} de ejecución.
+El \textit{dashboard} web es la página de supervisión de TierraViva. Está alojado en la Raspberry Pi y se sirve desde la propia aplicación FastAPI ejecutada mediante Uvicorn, de forma que puede consultarse desde un navegador conectado al sistema. Su función es transformar los datos almacenados y expuestos por la API en una vista visual del estado del prototipo.
 
-Dentro de la arquitectura final, el \textit{dashboard} actúa como interfaz de supervisión. Consulta la API local, representa el estado del sistema y actualiza la información mostrada conforme llegan nuevos datos.
-
-La implementación actual del \textit{frontend} se concentra en el fichero:
+En la implementación actual, el fichero fuente de la interfaz se encuentra en:
 
 \begin{center}
 \texttt{dashboard/index.html}
 \end{center}
 
-Este fichero contiene la estructura HTML de la interfaz, los estilos CSS embebidos en una sección \texttt{<style>} y la lógica JavaScript embebida en una sección \texttt{<script>}. Los recursos gráficos utilizados por la interfaz se almacenan en el directorio \texttt{dashboard/images/}.
+Durante el despliegue, el \textit{script} \texttt{tierraviva.sh} copia los recursos del directorio \texttt{dashboard/} al directorio \texttt{frontend/}. Desde ahí, FastAPI sirve la página principal en la ruta \texttt{/} y los recursos gráficos en la ruta \texttt{/images}. De este modo, la Raspberry Pi actúa también como servidor web del panel de supervisión.
 
-Aunque el \textit{dashboard} se concentra en un único fichero HTML, mantiene una separación lógica entre estructura, estilo y comportamiento mediante las secciones HTML, CSS y JavaScript. Esta decisión facilita el despliegue del prototipo y reduce el número de rutas que deben sincronizarse durante las pruebas.
+El fichero \texttt{index.html} contiene la estructura HTML de la interfaz, los estilos CSS embebidos en una sección \texttt{<style>} y la lógica JavaScript embebida en una sección \texttt{<script>}. Esta organización mantiene una separación lógica entre estructura, estilo y comportamiento, al mismo tiempo que facilita el despliegue del prototipo y reduce el número de ficheros que deben sincronizarse durante las pruebas.
 
-El \textit{dashboard} se sitúa al final del flujo software: las estaciones publican telemetría en ThingSpeak, la Raspberry Pi ingiere y almacena los datos en SQLite, FastAPI los expone mediante \textit{endpoints} HTTP y la interfaz los presenta visualmente. Esta organización evita que la interfaz dependa directamente de la plataforma \textit{cloud} o de la estructura interna de la base de datos.
-
-Desde el punto de vista del \textit{frontend}, el \textit{dashboard} consulta la configuración activa, la última lectura, el histórico reciente y las estadísticas agregadas. La estación activa se selecciona desde la propia interfaz, permitiendo reutilizar la misma página para estaciones distintas. La actualización se realiza mediante peticiones periódicas a la API, interpretando siempre la frescura del dato para distinguir las lecturas recientes de las lecturas antiguas u obsoletas.
+Desde el navegador, el \textit{dashboard} consulta periódicamente los \textit{endpoints} locales de la API para obtener la configuración activa, la última lectura, el histórico reciente, las estadísticas agregadas y el estado básico del servicio. La estación activa se selecciona desde la propia interfaz, permitiendo reutilizar la misma página para consultar estaciones distintas. La actualización se realiza interpretando siempre la frescura del dato para distinguir lecturas recientes de lecturas antiguas u obsoletas.
 
 \subsection{Estructura visual}
 

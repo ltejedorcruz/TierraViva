@@ -406,7 +406,7 @@ La Raspberry Pi se ha seleccionado como sistema de supervisión software de Tier
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs/figura_3_10_arquitectura_software_raspberry.png}
+    \includegraphics[width=\textwidth]{figs_png/figura_3_10_arquitectura_software_raspberry.png}
     \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el \textit{dashboard} web. Elaboración propia.}
     \label{fig:cap3_arquitectura_software_raspberry}
 \end{figure}
@@ -415,7 +415,7 @@ La arquitectura software de supervisión se apoya en tres bloques principales: a
 
 FastAPI se selecciona como \textit{framework} para construir la API de supervisión en Python \cite{fastapi_docs}. Su papel dentro de TierraViva es actuar como capa intermedia entre la base de datos y la interfaz web, evitando que el \textit{dashboard} acceda directamente a SQLite o a los detalles internos de almacenamiento. La API permite consultar datos mediante peticiones HTTP y deja preparada la arquitectura para que otros clientes puedan reutilizar la misma información en futuras ampliaciones.
 
-El \textit{dashboard} web constituye la capa de presentación del sistema. En TierraViva, este término se utiliza para referirse al panel web de supervisión que integra, en una misma interfaz, lecturas recientes, estado del sistema, históricos y eventos relevantes del prototipo. Su objetivo es mostrar de forma comprensible las últimas lecturas, el estado de las estaciones y la información operativa publicada por cada nodo. De esta manera, la Raspberry Pi no se limita a almacenar datos, sino que los transforma en información útil para supervisar el comportamiento del prototipo.
+El \textit{dashboard} web constituye la página web de supervisión del sistema. En TierraViva, este término se utiliza para referirse a una interfaz web alojada en la Raspberry Pi y servida por la aplicación FastAPI, accesible desde un navegador. Esta página integra lecturas recientes, estado del sistema, históricos y eventos relevantes del prototipo, y obtiene la información mediante peticiones HTTP a la API local. Su objetivo es mostrar de forma comprensible las últimas lecturas, el estado de las estaciones y la información operativa publicada por cada nodo.
 
 La implementación concreta de estos bloques, incluyendo la estructura de los \textit{scripts}, los \textit{endpoints} expuestos, el modelo de datos y la evolución desde el prototipo local previo, se desarrolla en el Capítulo~\ref{cap:implementacion_software_raspberry_nube}.
 
@@ -438,7 +438,7 @@ SQLite & Almacenamiento local de lecturas, estados e incidencias. & Base de dato
 \hline
 FastAPI & Exposición de datos mediante \textit{endpoints} HTTP. & Facilita crear una API sencilla entre la base de datos y el \textit{dashboard}. \\
 \hline
-\textit{Dashboard} web & Visualización de medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo sin acceder a la consola ni realizar consultas SQL (\textit{Structured Query Language}). \\
+\textit{Dashboard} web & Página web de supervisión servida desde la Raspberry Pi para visualizar medidas, histórico, estado del relé y estado de las estaciones. & Permite supervisar el prototipo desde un navegador sin acceder a la consola ni realizar consultas SQL (\textit{Structured Query Language}). \\
 \hline
 \end{tabular}
 \caption{Bloques principales de la arquitectura software de supervisión en Raspberry Pi}
