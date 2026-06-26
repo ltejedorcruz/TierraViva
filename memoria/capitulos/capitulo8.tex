@@ -50,16 +50,39 @@ El sistema validado cubre el flujo extremo a extremo planteado para el TFG: capt
 
 El grado de cumplimiento del proyecto debe valorarse comparando los resultados con los objetivos y requisitos definidos durante el diseño. Por ello, en esta sección no se evalúa únicamente si el prototipo “funciona”, sino si cubre las funciones, restricciones y criterios operativos establecidos en el Capítulo~\ref{cap:capitulo3} y trazados posteriormente en el Anexo~\ref{anexo:trazabilidad_requisitos_pruebas}.
 
-\begin{table}[H]
-\centering
+\begingroup
 \scriptsize
 \renewcommand{\arraystretch}{1.18}
 \rowcolors{2}{TableRowSoft}{white}
-\begin{tabular}{|p{0.19\textwidth}|p{0.32\textwidth}|p{0.26\textwidth}|p{0.13\textwidth}|}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.19\textwidth}|
+>{\raggedright\arraybackslash}p{0.32\textwidth}|
+>{\raggedright\arraybackslash}p{0.26\textwidth}|
+>{\raggedright\arraybackslash}p{0.13\textwidth}|}
+
+\caption{Cumplimiento de objetivos y requisitos a partir de las pruebas realizadas.}
+\label{tab:cumplimiento_objetivos_requisitos}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Elemento evaluado} & \TVHead{Resultado observado} & \TVHead{Relación con requisitos/pruebas} & \TVHead{Estado} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Elemento evaluado} & \TVHead{Resultado observado} & \TVHead{Relación con requisitos/pruebas} & \TVHead{Estado} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{4}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Medición de variables & La estación mide humedad de suelo, temperatura, humedad relativa, presión y luminosidad. & RF-01, RF-02, RF-03; P02--P04, P16. & Cumplido \\
 \hline
 Comunicación remota & La estación publica telemetría mediante LTE/HTTP en ThingSpeak. & RF-04, RF-10; P05, P06, P16. & Cumplido \\
@@ -76,10 +99,11 @@ Actuación segura & La bomba se activa por relé durante un tiempo limitado y se
 \hline
 Validación en entorno real & El prototipo se prueba en Agrolab Móstoles con la estación B, en un entorno real de cultivo y diferentes condiciones de humedad. & P17; validación funcional en entorno real. & Cumplido \\
 \hline
-\end{tabular}
-\caption{Cumplimiento de objetivos y requisitos a partir de las pruebas realizadas.}
-\label{tab:cumplimiento_objetivos_requisitos}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 Esta tabla permite cerrar el recorrido completo del proyecto: los requisitos no quedan como una lista teórica de diseño, sino vinculados a bloques implementados y pruebas realizadas.
 

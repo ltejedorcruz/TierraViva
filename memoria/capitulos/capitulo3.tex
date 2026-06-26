@@ -55,7 +55,7 @@ Para facilitar la trazabilidad del sistema, los requisitos funcionales se identi
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_3_1_requisitos_funcionales.png}
-    \caption{Relación entre los requisitos funcionales y el ciclo completo de funcionamiento del sistema. TierraViva debe medir, publicar telemetría, registrar histórico, visualizar el estado, decidir localmente y actuar sobre el riego de forma segura. Elaboración propia.}
+    \caption{Relación entre los requisitos funcionales y el ciclo completo de funcionamiento del sistema. TierraViva debe medir, publicar telemetría, registrar histórico, visualizar el estado, decidir localmente y actuar sobre el riego de forma segura. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_requisitos_funcionales}
 \end{figure}
 
@@ -130,21 +130,42 @@ El sistema debe mantener un equilibrio entre ambición técnica y viabilidad. Po
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{figs/figura_3_2_requisitos_no_funcionales.png}
-    \caption{Requisitos no funcionales considerados en el diseño del prototipo. Estos criterios permiten evaluar la calidad técnica del sistema más allá de las funciones implementadas. Elaboración propia.}
+    \caption{Requisitos no funcionales considerados en el diseño del prototipo. Estos criterios permiten evaluar la calidad técnica del sistema más allá de las funciones implementadas. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_requisitos_no_funcionales}
 \end{figure}
 
-\begin{table}[H]
-\begin{center}
+\begingroup
 \small
 \renewcommand{\arraystretch}{1.15}
 \rowcolors{2}{TableRowSoft}{white}
 
-\begin{tabular}{|p{0.13\textwidth}|p{0.25\textwidth}|p{0.50\textwidth}|}
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.13\textwidth}|
+>{\raggedright\arraybackslash}p{0.25\textwidth}|
+>{\raggedright\arraybackslash}p{0.50\textwidth}|}
+
+\caption{Requisitos no funcionales del sistema TierraViva}
+\label{cuadro:requisitos_no_funcionales}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Requisito} & \TVHead{Descripción} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Requisito} & \TVHead{Descripción} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 RNF-01 & Modularidad & El sistema debe organizarse en bloques diferenciados: estación de campo autónoma, comunicación, almacenamiento, supervisión, visualización y actuación local. \\
 \hline
 RNF-02 & Bajo coste & Los componentes seleccionados deben ser asumibles para un prototipo académico, evitando soluciones industriales de coste elevado cuando no sean necesarias. \\
@@ -163,11 +184,11 @@ RNF-08 & Claridad de visualización & La interfaz debe presentar la información
 \hline
 RNF-09 & Adecuación académica & El alcance debe ser realizable dentro del tiempo y medios disponibles para el TFG, priorizando funciones verificables frente a desarrollos excesivamente complejos. \\
 \hline
-\end{tabular}
-\caption{Requisitos no funcionales del sistema TierraViva}
-\label{cuadro:requisitos_no_funcionales}
-\end{center}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 Estos requisitos no funcionales condicionan la arquitectura del proyecto. La modularidad, la reproducibilidad y la facilidad de depuración justifican la separación entre estación de campo, plataforma intermedia, sistema de supervisión, API e interfaz web. Esta división permite probar cada bloque de forma independiente y reduce el riesgo de que un fallo en una capa impida validar el conjunto.
 
@@ -185,29 +206,46 @@ Las especificaciones temporales (ET) no se plantean como valores rígidos e inmo
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figs/figura_3_3_especificaciones_temporales.png}
-    \caption{Especificaciones temporales y operativas iniciales del sistema. Elaboración propia.}
+    \caption{Especificaciones temporales y operativas iniciales del sistema. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_especificaciones_temporales}
 \end{figure}
 
 En la Tabla~\ref{cuadro:especificaciones_temporales} se recogen las principales especificaciones temporales y operativas consideradas para TierraViva.
 
-\begin{table}[H]
-\centering
+\begingroup
 \footnotesize
 \renewcommand{\arraystretch}{1.15}
 \rowcolors{2}{TableRowSoft}{white}
+\setlength{\LTleft}{-0.7cm}
+\setlength{\LTright}{0cm}
 
-\makebox[\textwidth][c]{%
-\hspace*{-0.7cm}%
-\begin{tabular}{|
+\begin{longtable}{|
 >{\raggedright\arraybackslash}p{0.09\textwidth}|
 >{\raggedright\arraybackslash}p{0.28\textwidth}|
 >{\raggedright\arraybackslash}p{0.17\textwidth}|
 >{\raggedright\arraybackslash}p{0.38\textwidth}|}
+\caption{Especificaciones temporales y operativas iniciales del sistema}
+\label{cuadro:especificaciones_temporales}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Parámetro} & \TVHead{Valor inicial} & \TVHead{Criterio operativo} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Código} & \TVHead{Parámetro} & \TVHead{Valor inicial} & \TVHead{Criterio operativo} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{4}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 ET-01 & Periodo de lectura de sensores & Configurable & Las estaciones toman medidas periódicas del entorno. Durante pruebas pueden utilizarse intervalos reducidos para acelerar la validación. \\
 \hline
 ET-02 & Frecuencia de envío de telemetría & Configurable & Cada estación envía sus datos de forma periódica, evitando tráfico innecesario en funcionamiento normal. \\
@@ -228,12 +266,11 @@ ET-09 & Comportamiento ante dato inválido & Ignorar y registrar & Las lecturas 
 \hline
 ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actuación & La pérdida de comunicación no debe dejar la bomba activa. \\
 \hline
-\end{tabular}%
-}
 
-\caption{Especificaciones temporales y operativas iniciales del sistema}
-\label{cuadro:especificaciones_temporales}
-\end{table}
+\end{longtable}
+
+\normalsize
+\endgroup
 
 Los parámetros temporales se definen como valores configurables del \textit{firmware}. Durante las pruebas pueden emplearse intervalos reducidos para acelerar la validación, mientras que en un funcionamiento más estable conviene utilizar periodos más conservadores. En particular, el tiempo máximo de bomba activa no debe interpretarse como una recomendación agronómica general, sino como un límite de seguridad del prototipo. Su valor debe ser deliberadamente conservador durante la validación y ajustarse posteriormente a partir de pruebas de caudal, tipo de cultivo, volumen de agua aplicado y evolución real de la humedad del suelo. Lo importante desde el punto de vista de diseño no es fijar un único valor definitivo, sino garantizar ciclos controlados, detección de datos antiguos en supervisión y actuación de la bomba siempre limitada temporalmente.
 
@@ -249,7 +286,7 @@ En TierraViva se combinan variables del suelo y variables ambientales. La humeda
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_6_variables_sensores.png}
-    \caption{Variables seleccionadas para la monitorización de TierraViva. La humedad del suelo se utiliza como variable principal para la decisión local de riego, mientras que temperatura, humedad relativa, presión y luminosidad aportan contexto ambiental. Elaboración propia.}
+    \caption{Variables seleccionadas para la monitorización de TierraViva. La humedad del suelo se utiliza como variable principal para la decisión local de riego, mientras que temperatura, humedad relativa, presión y luminosidad aportan contexto ambiental. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_variables_sensores}
 \end{figure}
 
@@ -294,7 +331,7 @@ La arquitectura de TierraViva separa claramente dos niveles funcionales. Por un 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs/figura_3_7_plataformas_control_supervision.png}
-    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5. Elaboración propia.}
+    \caption{Separación de responsabilidades entre Arduino UNO y Raspberry Pi 5. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_plataformas_control_supervision}
 \end{figure}
 
@@ -389,7 +426,7 @@ Se valoraron alternativas como \textit{brokers} MQTT accesibles desde Internet, 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.78\textwidth]{figs/figura_3_9_thingspeak_capa_intermedia.png}
-    \caption{Uso de ThingSpeak como \textit{broker} de telemetría entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi. Elaboración propia.}
+    \caption{Uso de ThingSpeak como \textit{broker} de telemetría entre estaciones remotas y sistema de supervisión. La plataforma organiza la telemetría y los estados por canales y campos, permitiendo su consulta posterior desde Raspberry Pi. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_thingspeak_capa_intermedia}
 \end{figure}
 
@@ -407,7 +444,7 @@ La Raspberry Pi se ha seleccionado como sistema de supervisión software de Tier
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/figura_3_10_arquitectura_software_raspberry.png}
-    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el \textit{dashboard} web. Elaboración propia.}
+    \caption{Arquitectura software de supervisión en Raspberry Pi. La información publicada en la nube se consulta, valida, almacena en SQLite, expone mediante FastAPI y se presenta en el \textit{dashboard} web. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
     \label{fig:cap3_arquitectura_software_raspberry}
 \end{figure}
 
@@ -470,7 +507,7 @@ La Figura~\ref{fig:arquitectura_general_tierraviva} muestra una visión general 
 
 \begin{figure}[H]
   \hspace{-0.5cm}\centerline{\resizebox{1.2\textwidth}{!}{\includegraphics{figs/arquitecturaTierraViva.png}}}
-  \caption{Arquitectura general planteada para TierraViva. Elaboración propia.}
+  \caption{Arquitectura general planteada para TierraViva. Elaboración propia, véase Anexo~\ref{sec:uso_ia_generativa_tfg}.}
 \label{fig:arquitectura_general_tierraviva}
 \end{figure}
 
