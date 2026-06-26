@@ -122,16 +122,38 @@ De forma general, una arquitectura de red IoT se organiza alrededor de varios el
 
 La Tabla~\ref{tab:arquitectura_red_iot_elementos} resume estos elementos desde un punto de vista funcional. Entre las tecnologías que pueden formar parte de una red de acceso se encuentran WiFi, LoRa, LoRaWAN (\textit{Long Range Wide Area Network}), LTE (\textit{Long Term Evolution}), NB-IoT (\textit{Narrowband Internet of Things}) o Ethernet, entre otras. Las diferencias entre estas opciones se desarrollan posteriormente en el apartado dedicado a conectividad en entornos rurales.
 
-\begin{table}[H]
-\begin{center}
+\begingroup
 \small
 \renewcommand{\arraystretch}{1.15}
 \rowcolors{2}{TableRowSoft}{white}
-\begin{tabular}{|p{0.24\textwidth}|p{0.42\textwidth}|p{0.24\textwidth}|}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.24\textwidth}|
+>{\raggedright\arraybackslash}p{0.42\textwidth}|
+>{\raggedright\arraybackslash}p{0.24\textwidth}|}
+
+\caption{Elementos funcionales habituales en una arquitectura de red IoT.}
+\label{tab:arquitectura_red_iot_elementos}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Elemento funcional} & \TVHead{Responsabilidad dentro de la arquitectura} & \TVHead{Ejemplos de implementación} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Elemento funcional} & \TVHead{Responsabilidad dentro de la arquitectura} & \TVHead{Ejemplos de implementación} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Nodo terminal o nodo de campo & Mide variables físicas, genera telemetría y, si incorpora actuadores, puede ejecutar acciones locales. & Arduino, ESP32, STM32, módulos embebidos específicos. \\
 \hline
 Red de acceso & Proporciona conectividad entre los nodos de campo y el resto del sistema. & WiFi, LoRa/LoRaWAN, LTE, NB-IoT, Ethernet. \\
@@ -144,11 +166,11 @@ Backend o sistema de supervisión & Valida, transforma, almacena y expone los da
 \hline
 Aplicación de usuario & Permite consultar el estado del sistema, revisar históricos, visualizar alertas o analizar tendencias. & Dashboard web, aplicación móvil, panel cloud. \\
 \hline
-\end{tabular}
-\caption{Elementos funcionales habituales en una arquitectura de red IoT.}
-\label{tab:arquitectura_red_iot_elementos}
-\end{center}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 Esta distinción permite analizar posteriormente qué plataforma resulta más adecuada para cada función. La arquitectura define primero qué elementos son necesarios y cómo se relacionan entre sí; después se decide con qué tecnología se implementa cada elemento. En sistemas agrícolas, esta separación es especialmente importante porque los nodos de campo suelen estar condicionados por consumo, conectividad, protección ambiental y autonomía, mientras que los sistemas de supervisión pueden requerir más capacidad de almacenamiento, servicios software e interfaces de consulta.
 
@@ -171,16 +193,38 @@ La diferencia entre ambas familias no debe interpretarse como una equivalencia d
 
 En la comparativa se emplean además varias siglas habituales en plataformas embebidas: GPIO (\textit{General Purpose Input/Output}) para pines de entrada y salida digital, ADC (\textit{Analog-to-Digital Converter}) para conversión analógico-digital, PWM (\textit{Pulse Width Modulation}) para modulación por ancho de pulso, UART (\textit{Universal Asynchronous Receiver-Transmitter}) para comunicación serie y USB (\textit{Universal Serial Bus}) para conexión de periféricos o programación.
 
-\begin{table}[H]
-\begin{center}
+\begingroup
 \small
 \renewcommand{\arraystretch}{1.15}
 \rowcolors{2}{TableRowSoft}{white}
-\begin{tabular}{|p{0.24\textwidth}|p{0.32\textwidth}|p{0.32\textwidth}|}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.24\textwidth}|
+>{\raggedright\arraybackslash}p{0.32\textwidth}|
+>{\raggedright\arraybackslash}p{0.32\textwidth}|}
+
+\caption{Comparación general entre microcontroladores y computadores de placa única como plataformas de implementación en IoT}
+\label{cuadro:microcontroladores_sbc}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Aspecto} & \TVHead{Microcontroladores} & \TVHead{Computadores de placa única o SBC} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Aspecto} & \TVHead{Microcontroladores} & \TVHead{Computadores de placa única o SBC} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Naturaleza & Circuitos integrados o placas basadas en microcontrolador, orientadas a tareas embebidas concretas. & Placas completas capaces de ejecutar un sistema operativo y varios procesos software. \\
 \hline
 Uso habitual en IoT & Implementación de nodos terminales, lectura de sensores, control de salidas y lógica local sencilla. & Implementación de pasarelas, servidores locales, sistemas de supervisión, almacenamiento o visualización. \\
@@ -193,11 +237,11 @@ Interfaces típicas & GPIO, ADC, PWM, UART, I2C, SPI y entradas/salidas cercanas
 \hline
 Limitaciones & Memoria reducida, menor capacidad de procesamiento y dificultad para ejecutar servicios complejos. & Mayor consumo, arranque más lento y dependencia de sistema operativo. \\
 \hline
-\end{tabular}
-\caption{Comparación general entre microcontroladores y computadores de placa única como plataformas de implementación en IoT}
-\label{cuadro:microcontroladores_sbc}
-\end{center}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 La Tabla~\ref{cuadro:microcontroladores_sbc} resume las diferencias entre ambas plataformas como opciones de implementación. En un sistema IoT agrícola, una arquitectura híbrida puede combinar nodos terminales implementados con microcontroladores y sistemas de supervisión implementados con computadores de placa única. Lo importante no es asociar rígidamente una tecnología a un elemento arquitectónico, sino asignar cada función al dispositivo que mejor responda a sus restricciones de consumo, interfaces, robustez y capacidad software \cite{hanes2017iot,soussi2024smart}.
 
