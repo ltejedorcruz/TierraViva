@@ -20,7 +20,7 @@ Este manual cubre las operaciones de uso habituales:
     \item comprobaciones básicas ante fallos.
 \end{itemize}
 
-No se incluyen en este manual las tareas de montaje eléctrico, instalación en Raspberry Pi o configuración de ThingSpeak, ya que dichas tareas se documentan en el Anexo \ref{anexo:manual_instalacion_sistema}. Tampoco se documentan en detalle los endpoints de la API, que se recogen en el Anexo \ref{anexo:manual_api}.
+Las tareas de montaje eléctrico, instalación en Raspberry Pi y configuración de ThingSpeak se documentan en el Anexo \ref{anexo:manual_instalacion_sistema}. La referencia detallada de los \textit{endpoints} de la API se recoge en el Anexo \ref{anexo:manual_api}.
 
 \section{Perfil de usuario}
 
@@ -36,7 +36,7 @@ El \textit{dashboard} de TierraViva puede ser utilizado por dos tipos principale
 \rowcolor{URJCRed}
 \TVHead{Perfil} & \TVHead{Uso principal del sistema} \\
 \hline
-Usuario no técnico & Consultar el estado de la parcela, comprobar si el suelo está seco o húmedo y revisar si la estación está actualizando datos. \\
+Usuario general técnico & Consultar el estado de la parcela, comprobar si el suelo está seco o húmedo y revisar si la estación está actualizando datos. \\
 \hline
 Usuario técnico & Verificar lecturas, revisar estado de conexión, comprobar eventos de sistema, analizar histórico y detectar posibles problemas de sensores, comunicación o \textit{backend}. \\
 \hline
@@ -71,7 +71,7 @@ El \textit{dashboard} está organizado en bloques visuales para que el estado de
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figs/dashboard_final_vista_general.jpg}
+    \includegraphics[width=0.9\textwidth]{figs/dashboard_final_vista_general.jpg}
     \caption{Vista general del \textit{dashboard} web de TierraViva. Captura propia.}
     \label{fig:manual_dashboard_vista_general}
 \end{figure}
@@ -151,7 +151,7 @@ Presión & hPa & Presión atmosférica medida por el sensor BME280. \\
 \label{tab:lecturas_actuales_dashboard}
 \end{table}
 
-Si una variable aparece como ``---'', significa que no existe dato disponible para esa lectura, que el sensor no ha enviado valor o que todavía no se ha almacenado ninguna lectura válida.
+Si una variable aparece como ``---'', indica ausencia de dato disponible para esa lectura. Esta situación puede deberse a una lectura pendiente, a un valor no recibido desde el sensor o a la falta de registros válidos almacenados para la estación seleccionada.
 
 \section{Estado de humedad del suelo}
 
@@ -172,7 +172,7 @@ Normal & Humedad entre umbral bajo y alto & El suelo se encuentra en una zona in
 \hline
 Húmedo & Humedad superior al umbral alto & El suelo dispone de humedad suficiente. \\
 \hline
-Sin dato & No hay lectura válida & No se debe interpretar el estado hídrico hasta recibir una lectura correcta. \\
+Sin dato & Ausencia de lectura válida & Interpretación hídrica pendiente hasta recibir una lectura correcta. \\
 \hline
 \end{tabular}
 \caption{Interpretación del estado de humedad del suelo.}
@@ -183,7 +183,7 @@ En la configuración por defecto, los umbrales utilizados por el \textit{dashboa
 
 \section{Estado de conexión y frescura de datos}
 
-El \textit{dashboard} no solo muestra la última lectura, sino también su antigüedad. Esto permite saber si la estación está actualizando datos de forma reciente o si se ha perdido continuidad en la telemetría.
+El \textit{dashboard} muestra la última lectura junto con su antigüedad. Esta información permite saber si la estación está actualizando datos de forma reciente o si se ha perdido continuidad en la telemetría.
 
 \begin{table}[H]
 \centering
@@ -200,7 +200,7 @@ Datos recientes & Lectura algo antigua, pero dentro del margen permitido & El si
 \hline
 Sin actualización & Lectura antigua & Puede existir un problema de comunicación, publicación, ingesta o alimentación. \\
 \hline
-Sin datos & No existe ninguna lectura almacenada & La estación no ha publicado todavía o la Raspberry Pi no ha podido recuperar datos. \\
+Sin datos & Ausencia de lecturas almacenadas & Publicación pendiente de la estación o recuperación de datos pendiente desde la Raspberry Pi. \\
 \hline
 \end{tabular}
 \caption{Estados de conexión y frescura de datos.}
@@ -222,11 +222,11 @@ El \textit{dashboard} muestra el estado del relé recibido desde la estación. E
 \rowcolor{URJCRed}
 \TVHead{Valor} & \TVHead{Estado mostrado} & \TVHead{Interpretación} \\
 \hline
-0 & OFF & El relé está apagado y la bomba no debería estar activa. \\
+0 & OFF & El relé está apagado y la bomba permanece desalimentada en el momento de la lectura publicada. \\
 \hline
 1 & Activo & El relé está activo y el sistema de riego puede estar funcionando. \\
 \hline
-Sin dato & Sin dato & No se ha recibido información válida del relé. \\
+Sin dato & Sin dato & Ausencia de información válida del relé. \\
 \hline
 \end{tabular}
 \caption{Interpretación del estado del relé.}
@@ -248,7 +248,7 @@ El campo de evento permite interpretar el estado interno de la estación. La Tab
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Evento} & \TVHead{Interpretación} \\
 \hline
-100 & \texttt{idle} & Estación en reposo, sin riego activo. \\
+100 & \texttt{idle} & Estación en reposo, con riego inactivo. \\
 \hline
 206 & \texttt{safe mode} & La estación trabaja en modo seguro. \\
 \hline
@@ -282,7 +282,7 @@ El campo de diagnóstico aporta información auxiliar sobre el estado del ciclo 
 \hline
 200 & OK & Funcionamiento correcto. \\
 \hline
-204 & no riego & No se ha activado el riego en el ciclo actual. \\
+204 & no riego & Ciclo finalizado con riego inactivo. \\
 \hline
 206 & modo seguro & La estación se encuentra en modo seguro. \\
 \hline
@@ -308,7 +308,7 @@ El \textit{dashboard} incluye gráficas de evolución reciente para las variable
     \item repetición de eventos de error o \textit{cooldown}.
 \end{itemize}
 
-Las gráficas se construyen a partir de las últimas lecturas almacenadas en SQLite. Si no existen datos suficientes, la gráfica mostrará un mensaje indicando que todavía no hay información disponible.
+Las gráficas se construyen a partir de las últimas lecturas almacenadas en SQLite. Ante un histórico insuficiente, la gráfica mostrará un mensaje indicando que la información disponible todavía es limitada.
 
 \begin{figure}[H]
     \centering
@@ -404,7 +404,7 @@ Una vez instalado el sistema, el uso habitual puede resumirse en los siguientes 
 \rowcolor{URJCRed}
 \TVHead{Situación observada} & \TVHead{Interpretación probable} & \TVHead{Actuación recomendada} \\
 \hline
-El \textit{dashboard} muestra ``Sin datos'' & No hay lecturas almacenadas para la estación seleccionada. & Comprobar que la estación publica en ThingSpeak y que \texttt{main.py} está ejecutándose. \\
+El \textit{dashboard} muestra ``Sin datos'' & Ausencia de lecturas almacenadas para la estación seleccionada. & Comprobar que la estación publica en ThingSpeak y que \texttt{main.py} está ejecutándose. \\
 \hline
 El estado aparece como ``Sin actualización'' & La última lectura es demasiado antigua. & Revisar alimentación de la estación, cobertura LTE, canal ThingSpeak y \textit{logs} de Raspberry Pi. \\
 \hline
@@ -416,9 +416,9 @@ Aparece código 400 & Se ha detectado un error o lectura no válida. & Revisar s
 \hline
 El relé aparece activo & La última telemetría indica relé encendido. & Comprobar físicamente si la bomba está funcionando y verificar que se apaga al finalizar el tiempo programado. \\
 \hline
-Las gráficas no muestran datos & No hay histórico suficiente o la API no devuelve lecturas. & Esperar nuevas lecturas y comprobar \texttt{/api/readings}. \\
+Las gráficas muestran información vacía & Histórico insuficiente o respuesta de la API sin lecturas disponibles. & Esperar nuevas lecturas y comprobar \texttt{/api/readings}. \\
 \hline
-Los valores no cambian durante mucho tiempo & Puede no haber nuevas publicaciones o el ingestor está ignorando duplicados. & Revisar entry\_id en ThingSpeak, \textit{logs} de \texttt{main.py} y estado de la estación. \\
+Los valores permanecen constantes durante mucho tiempo & Posible ausencia de nuevas publicaciones o procesamiento de entradas duplicadas por parte del ingestor. & Revisar \texttt{entry\_id} en ThingSpeak, \textit{logs} de \texttt{main.py} y estado de la estación. \\
 \hline
 \end{tabular}
 \caption{Situaciones habituales durante el uso de TierraViva.}
@@ -431,11 +431,11 @@ Para utilizar TierraViva de forma segura y fiable se recomienda:
 
 \begin{itemize}
     \item verificar que la estación arranca con el relé apagado;
-    \item no dejar la bomba conectada durante pruebas iniciales sin supervisión;
+    \item realizar las pruebas iniciales de bomba con supervisión directa;
     \item revisar periódicamente el estado de conexión del \textit{dashboard};
     \item comprobar que la humedad del suelo cambia de forma coherente;
-    \item no modificar umbrales sin registrar el cambio;
-    \item no compartir capturas que contengan claves API;
+    \item registrar cualquier modificación de umbrales;
+    \item compartir únicamente capturas libres de claves API;
     \item mantener la electrónica protegida frente a agua y salpicaduras;
     \item revisar \textit{logs} si aparecen estados de error o datos obsoletos;
     \item contrastar el \textit{dashboard} con una observación física durante pruebas de riego.
@@ -443,6 +443,6 @@ Para utilizar TierraViva de forma segura y fiable se recomienda:
 
 \section{Conclusión}
 
-El \textit{dashboard} de TierraViva permite supervisar de forma sencilla el estado de una o varias estaciones de riego inteligente. La interfaz resume las variables principales, clasifica el estado de humedad, muestra la frescura de los datos, representa gráficas recientes y permite revisar histórico almacenado en la Raspberry Pi.
+El \textit{dashboard} de TierraViva permite supervisar de forma sencilla el estado de una o varias estaciones de riego inteligente desde una página web servida por la Raspberry Pi. La interfaz resume las variables principales, clasifica el estado de humedad, muestra la frescura de los datos, representa gráficas recientes y permite revisar el histórico almacenado localmente.
 
 El usuario debe interpretar el sistema como una herramienta de monitorización y apoyo a la validación del prototipo. La actuación sobre el riego se realiza en la estación Arduino mediante lógica local, mientras que el \textit{dashboard} permite comprobar si las lecturas, eventos y estados publicados son coherentes con el funcionamiento esperado.

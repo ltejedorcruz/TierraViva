@@ -1,7 +1,7 @@
 \chapter{Matriz de trazabilidad entre requisitos y pruebas}
 \label{anexo:trazabilidad_requisitos_pruebas}
 
-Este anexo recoge la trazabilidad entre los requisitos definidos para TierraViva y las pruebas empleadas para validar el prototipo. Su finalidad es demostrar que los requisitos funcionales, no funcionales y operativos no quedan únicamente descritos en el diseño, sino relacionados con bloques concretos del sistema y con evidencias de comprobación.
+Este anexo recoge la trazabilidad entre los requisitos definidos para TierraViva y las pruebas empleadas para validar el prototipo. Su finalidad es demostrar que los requisitos funcionales, no funcionales y operativos quedan vinculados con bloques concretos del sistema y con evidencias de comprobación.
 
 La matriz de trazabilidad conecta tres niveles del proyecto: los requisitos definidos en el Capítulo~\ref{cap:capitulo3}, los bloques técnicos implementados en los Capítulos~\ref{cap:capitulo4}, \ref{cap:implementacion_hardware_firmware} y \ref{cap:implementacion_software_raspberry_nube}, y las pruebas resumidas en el Capítulo~\ref{cap:validacion_pruebas}. El detalle procedimental de cada prueba se recoge en el Anexo~\ref{anexo:plan_pruebas}.
 
@@ -18,7 +18,7 @@ Para cada requisito se indican los siguientes elementos:
     \item \textbf{Estado}: grado de cobertura alcanzado en el prototipo.
 \end{itemize}
 
-El estado \textit{Validado} se utiliza cuando el requisito se ha comprobado mediante pruebas del prototipo. El estado \textit{Cubierto por diseño y documentación} se utiliza para requisitos no funcionales que no dependen de una única prueba, sino de la arquitectura, los manuales, los anexos técnicos y la reproducibilidad del montaje. El estado \textit{Validado con limitación} se reserva para requisitos cumplidos dentro del alcance del TFG, pero que podrían requerir ensayos más prolongados o mediciones adicionales en una versión industrial.
+El estado \textit{Validado} se utiliza cuando el requisito se ha comprobado mediante pruebas del prototipo. El estado \textit{Cubierto por diseño y documentación} se utiliza para requisitos no funcionales cuya cobertura procede de la arquitectura, los manuales, los anexos técnicos y la reproducibilidad del montaje. El estado \textit{Validado con limitación} se reserva para requisitos cumplidos dentro del alcance del TFG, pero que podrían requerir ensayos más prolongados o mediciones adicionales en una versión industrial.
 
 \section{Trazabilidad de requisitos funcionales}
 
@@ -71,7 +71,7 @@ RF-11 & Seguridad de funcionamiento & \textit{Firmware}, relé apagado por defec
 
 \section{Trazabilidad de requisitos no funcionales}
 
-Los requisitos no funcionales no siempre se validan mediante una única prueba. En muchos casos se comprueban mediante la arquitectura adoptada, la documentación generada, la separación de bloques, la facilidad de repetición del montaje o las pruebas de integración.
+Los requisitos no funcionales se validan mediante una combinación de arquitectura adoptada, documentación generada, separación de bloques, facilidad de repetición del montaje y pruebas de integración.
 
 \begin{table}[H]
 \centering
@@ -97,7 +97,7 @@ RNF-03 & Reproducibilidad & El montaje, instalación, configuración, librerías
 \hline
 RNF-04 & Facilidad de depuración & El sistema permite probar por separado sensores, LTE, ThingSpeak, Raspberry, API, \textit{dashboard} y actuación. & P01--P10, P16 & Validado \\
 \hline
-RNF-05 & Consumo razonable & Se evita actuación indefinida y se emplean ciclos configurables; no se realiza optimización energética completa. & ET-01, ET-02, ET-05, trabajos futuros & Validado con limitación \\
+RNF-05 & Consumo razonable & El sistema emplea ciclos configurables y actuación temporizada; la optimización energética completa queda planteada como línea futura. & ET-01, ET-02, ET-05, trabajos futuros & Validado con limitación \\
 \hline
 RNF-06 & Tolerancia a fallos & Ante fallos de lectura, comunicación o actuación se mantiene un comportamiento seguro. & P13, P14, P15, riesgos & Validado \\
 \hline
@@ -105,7 +105,7 @@ RNF-07 & Escalabilidad & La arquitectura admite estaciones diferenciadas mediant
 \hline
 RNF-08 & Claridad de visualización & El \textit{dashboard} diferencia lecturas, estados, frescura del dato, gráficas e histórico. & P10, manual de usuario & Validado \\
 \hline
-RNF-09 & Adecuación académica & El alcance prioriza funciones verificables y evita presentar como cerradas funcionalidades industriales futuras. & Plan de pruebas, conclusiones, trabajos futuros & Cubierto por diseño \\
+RNF-09 & Adecuación académica & El alcance prioriza funciones verificables y diferencia con claridad la versión implementada de las funcionalidades planteadas como trabajo futuro. & Plan de pruebas, conclusiones, trabajos futuros & Cubierto por diseño y documentación \\
 \hline
 \end{tabular}%
 }
@@ -149,9 +149,9 @@ ET-07 & Tiempo máximo sin dato reciente en supervisión & Configurable & P10, P
 \hline
 ET-08 & Estado seguro por defecto & Bomba apagada & P11, P14, P15, P17 & Relé apagado al arrancar o ante condición no verificable. \\
 \hline
-ET-09 & Comportamiento ante dato inválido & Ignorar y registrar & P14 & No activación de bomba y publicación de código de error. \\
+ET-09 & Comportamiento ante dato inválido & Ignorar y registrar & P14 & Bomba apagada y publicación de código de error. \\
 \hline
-ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actuación & P15, P17 & La pérdida de comunicación no genera actuación insegura. \\
+ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o actuación bloqueada & P15, P17 & La estación conserva un comportamiento seguro ante pérdida de comunicación. \\
 \hline
 \end{tabular}%
 }
@@ -161,7 +161,7 @@ ET-10 & Comportamiento ante pérdida de comunicación & Bomba apagada o no actua
 
 \section{Cobertura de pruebas sobre requisitos}
 
-La Tabla~\ref{tab:cobertura_pruebas_requisitos} muestra la relación inversa: qué requisitos cubre cada prueba principal. Esta vista permite comprobar que las pruebas no se han definido de forma aislada, sino como respuesta a requisitos concretos.
+La Tabla~\ref{tab:cobertura_pruebas_requisitos} muestra la relación inversa: qué requisitos cubre cada prueba principal. Esta vista permite comprobar que las pruebas responden a requisitos concretos y mantienen una relación directa con la validación del prototipo.
 
 \begin{table}[H]
 \centering
@@ -214,7 +214,7 @@ P17 & Prueba funcional en entorno real en Agrolab Móstoles. & RF-04, RF-07, RF-
 
 \section{Requisitos críticos}
 
-No todos los requisitos tienen el mismo impacto sobre la validez del prototipo. Se consideran críticos aquellos que afectan directamente a la medición principal, comunicación remota, almacenamiento, actuación física o seguridad del riego.
+Los requisitos con mayor impacto sobre la validez del prototipo son aquellos que afectan directamente a la medición principal, la comunicación remota, el almacenamiento, la actuación física o la seguridad del riego.
 
 \begin{table}[H]
 \centering
@@ -228,9 +228,9 @@ No todos los requisitos tienen el mismo impacto sobre la validez del prototipo. 
 \hline
 RF-01 & La humedad del suelo condiciona la decisión local de riego. & Lectura variable y publicación de humedad de suelo. \\
 \hline
-RF-04 & Sin telemetría remota no existe supervisión del sistema. & Publicación visible en ThingSpeak mediante LTE/HTTP. \\
+RF-04 & La telemetría remota permite supervisar el sistema desde la capa software. & Publicación visible en ThingSpeak mediante LTE/HTTP. \\
 \hline
-RF-06 & Sin histórico local no puede analizarse la evolución del prototipo. & Inserción comprobada en SQLite. \\
+RF-06 & El histórico local permite analizar la evolución del prototipo. & Inserción comprobada en SQLite. \\
 \hline
 RF-08 & La decisión local define cuándo se actúa sobre el riego. & Prueba de umbral, confirmación, \textit{cooldown} y dato inválido. \\
 \hline
@@ -251,7 +251,7 @@ ET-08 & Define el estado seguro por defecto. & Relé apagado al arrancar y ante 
 
 \section{Limitaciones de cobertura}
 
-La matriz anterior muestra que los requisitos principales están cubiertos por pruebas del prototipo. No obstante, algunos aspectos quedan validados dentro del alcance académico del TFG, pero no equivalen a una certificación industrial ni a una campaña prolongada en campo.
+La matriz anterior muestra que los requisitos principales están cubiertos por pruebas del prototipo. Algunos aspectos quedan validados dentro del alcance académico del TFG y delimitan líneas futuras de ampliación, especialmente en certificación industrial, caracterización energética y campañas prolongadas en campo.
 
 \begin{table}[H]
 \centering
@@ -263,15 +263,15 @@ La matriz anterior muestra que los requisitos principales están cubiertos por p
 \rowcolor{URJCRed}
 \TVHead{Aspecto} & \TVHead{Cobertura alcanzada} & \TVHead{Limitación reconocida} \\
 \hline
-Consumo energético & El sistema funciona con alimentación de 12 V y regulación a 5 V. & No se realiza una caracterización energética completa ni dimensionamiento solar definitivo. \\
+Consumo energético & El sistema funciona con alimentación de 12 V y regulación a 5 V. & La caracterización energética completa y el dimensionamiento solar definitivo quedan como líneas futuras. \\
 \hline
 Humedad del suelo & El sensor responde y permite una decisión local básica. & La calibración agronómica completa con diferentes sustratos queda como mejora futura. \\
 \hline
 Conectividad LTE & El módulo publica datos mediante red móvil. & El funcionamiento depende de cobertura, SIM y alimentación estable del módem. \\
 \hline
-ThingSpeak & La plataforma permite publicar, consultar y visualizar telemetría. & No se considera un sistema de tiempo real estricto. \\
+ThingSpeak & La plataforma permite publicar, consultar y visualizar telemetría. & Su uso se orienta a telemetría y supervisión periódica, con latencias compatibles con el alcance del prototipo. \\
 \hline
-Ensayo en Agrolab Móstoles & El prototipo se valida funcionalmente en un entorno real de cultivo mediante fotografía, capturas y vídeo de funcionamiento. & La prueba no equivale a una campaña agronómica prolongada ni permite evaluar comportamiento estacional, degradación ambiental o autonomía energética completa. \\
+Ensayo en Agrolab Móstoles & El prototipo se valida funcionalmente en un entorno real de cultivo mediante fotografía, capturas y vídeo de funcionamiento. & La prueba permite comprobar funcionamiento integrado en entorno real; el comportamiento estacional, la degradación ambiental y la autonomía energética completa quedan reservados para campañas prolongadas futuras. \\
 \hline
 \end{tabular}
 \caption{Limitaciones de cobertura reconocidas tras la validación.}
@@ -284,4 +284,4 @@ La matriz de trazabilidad muestra que los requisitos definidos para TierraViva e
 
 Los requisitos funcionales quedan cubiertos mediante pruebas de sensórica, comunicación LTE, ThingSpeak, Raspberry Pi, SQLite, API, \textit{dashboard} y actuación local. Los requisitos no funcionales se justifican mediante la arquitectura modular, la documentación de montaje, la estrategia de pruebas y el comportamiento seguro ante fallos. Las especificaciones temporales y operativas quedan relacionadas con pruebas de ciclos, publicación, \textit{dashboard}, \textit{cooldown}, actuación temporizada y estado seguro.
 
-En conjunto, la trazabilidad confirma que TierraViva no se valida únicamente por descripción, sino mediante una relación explícita entre requisitos, implementación, pruebas y evidencias.
+En conjunto, la trazabilidad confirma que TierraViva se valida mediante una relación explícita entre requisitos, implementación, pruebas y evidencias.

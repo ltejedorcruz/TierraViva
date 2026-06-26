@@ -9,15 +9,38 @@ Al tratarse de un prototipo que combina hardware, software y servicios externos,
 
 La validación de TierraViva se plantea como un proceso incremental. En primer lugar se prueban los componentes de forma aislada; después se comprueba la comunicación entre bloques; finalmente se valida el funcionamiento integrado del prototipo.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|c|p{0.30\textwidth}|p{0.43\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\centering\arraybackslash}p{0.10\textwidth}|
+>{\raggedright\arraybackslash}p{0.30\textwidth}|
+>{\raggedright\arraybackslash}p{0.48\textwidth}|}
+
+\caption{Estrategia general de pruebas del proyecto TierraViva.}
+\label{tab:estrategia_pruebas}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Fase} & \TVHead{Tipo de prueba} & \TVHead{Objetivo principal} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Fase} & \TVHead{Tipo de prueba} & \TVHead{Objetivo principal} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 F1 & Pruebas eléctricas básicas & Verificar alimentación, masas comunes, tensiones y conexiones antes de cargar el sistema completo. \\
 \hline
 F2 & Pruebas de sensores & Comprobar que los sensores entregan lecturas coherentes y estables. \\
@@ -30,30 +53,55 @@ F5 & Pruebas de Raspberry Pi & Verificar consulta de datos, almacenamiento SQLit
 \hline
 F6 & Pruebas de actuación sin carga real & Validar la lógica de riego usando relé o indicador, sin bomba conectada. \\
 \hline
+F7 & Pruebas de actuación, sin bomba conectada & Comprobar activación temporizada y apagado seguro del sistema de riego. \\
+\hline
 F7 & Pruebas de actuación con bomba & Comprobar activación temporizada y apagado seguro del sistema de riego. \\
 \hline
 F8 & Pruebas de integración completa & Validar el flujo completo estación--ThingSpeak--Raspberry--dashboard--riego. \\
 \hline
 F9 & Prueba funcional en entorno real & Evaluar el comportamiento del prototipo en Agrolab Móstoles, comprobando el funcionamiento de la estación, la publicación de datos, la supervisión y la actuación controlada del riego. \\
 \hline
-\end{tabular}
-\caption{Estrategia general de pruebas del proyecto TierraViva.}
-\label{tab:estrategia_pruebas}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Entorno de pruebas}
 
 El entorno de pruebas se compone de una estación remota, una Raspberry Pi como nodo de supervisión, una cuenta de ThingSpeak y un sistema de riego controlado mediante relé.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|p{0.28\textwidth}|p{0.58\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.30\textwidth}|
+>{\raggedright\arraybackslash}p{0.62\textwidth}|}
+
+\caption{Elementos empleados en el entorno de pruebas.}
+\label{tab:entorno_pruebas}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Elemento} & \TVHead{Uso durante las pruebas} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Elemento} & \TVHead{Uso durante las pruebas} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Arduino UNO & Ejecución del \textit{firmware} de estación, lectura de sensores y control del relé. \\
 \hline
 A7670E-LASA & Comunicación LTE/4G mediante comandos AT y envío de telemetría. \\
@@ -78,27 +126,50 @@ SQLite & Registro histórico de lecturas, estados y eventos de riego. \\
 \hline
 Agrolab Móstoles & Entorno real de agricultura urbana/periurbana utilizado para la prueba funcional final del prototipo. \\
 \hline
-\end{tabular}
-\caption{Elementos empleados en el entorno de pruebas.}
-\label{tab:entorno_pruebas}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Criterios de aceptación}
 
 Para considerar válida una prueba, se definen criterios de aceptación claros. Estos criterios permiten evitar una validación subjetiva basada únicamente en que el sistema ``parece funcionar''.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|p{0.30\textwidth}|p{0.56\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.30\textwidth}|
+>{\raggedright\arraybackslash}p{0.62\textwidth}|}
+
+\caption{Criterios generales de aceptación de pruebas.}
+\label{tab:criterios_aceptacion}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Área} & \TVHead{Criterio de aceptación} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Área} & \TVHead{Criterio de aceptación} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Alimentación & Las tensiones medidas se mantienen dentro de valores seguros antes y durante la prueba. \\
 \hline
-Sensores & Las lecturas son coherentes con el entorno y no presentan valores imposibles o fuera de rango. \\
+Sensores & Las lecturas son coherentes con el entorno y se mantienen dentro de rangos físicamente plausibles. \\
 \hline
 Comunicación LTE & El módulo responde a comandos AT, registra red y permite enviar datos. \\
 \hline
@@ -116,24 +187,49 @@ Bomba & La bomba se activa durante el tiempo previsto y se apaga al finalizar. \
 \hline
 Seguridad & El sistema evita riegos repetidos, excesivos o provocados por datos no válidos. \\
 \hline
-\end{tabular}
-\caption{Criterios generales de aceptación de pruebas.}
-\label{tab:criterios_aceptacion}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Casos de prueba}
 
 La Tabla \ref{tab:casos_prueba} recoge los casos de prueba principales. Se han seleccionado pruebas representativas de cada bloque del sistema, priorizando aquellas que validan la funcionalidad esencial del prototipo.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.22}
+\begingroup
 \scriptsize
-\begin{tabular}{|c|p{0.20\textwidth}|p{0.30\textwidth}|p{0.28\textwidth}|}
+\renewcommand{\arraystretch}{1.15}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\centering\arraybackslash}p{0.07\textwidth}|
+>{\raggedright\arraybackslash}p{0.20\textwidth}|
+>{\raggedright\arraybackslash}p{0.31\textwidth}|
+>{\raggedright\arraybackslash}p{0.32\textwidth}|}
+
+\caption{Casos de prueba principales definidos para TierraViva.}
+\label{tab:casos_prueba}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{ID} & \TVHead{Prueba} & \TVHead{Procedimiento} & \TVHead{Resultado esperado} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{ID} & \TVHead{Prueba} & \TVHead{Procedimiento} & \TVHead{Resultado esperado} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{4}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 P01 & Verificación de alimentación & Medir la salida del LM2596 y comprobar masa común antes de conectar todos los módulos. & Tensiones correctas y ausencia de calentamiento o reinicios. \\
 \hline
 P02 & Lectura de BME280 & Ejecutar el \textit{firmware} con el sensor conectado al bus I2C. & Temperatura, humedad y presión con valores coherentes. \\
@@ -150,7 +246,7 @@ P07 & Consulta desde Raspberry Pi & Ejecutar el \textit{script} de lectura de Th
 \hline
 P08 & Almacenamiento en SQLite & Insertar lecturas obtenidas desde ThingSpeak en la base de datos local. & Las lecturas quedan registradas con estación, fecha y valores. \\
 \hline
-P09 & API local & Consultar endpoints como \texttt{/api/latest}, \texttt{/api/readings} y \texttt{/api/health}. & La API responde sin error y devuelve datos coherentes. \\
+P09 & API local & Consultar endpoints como \texttt{/api/latest}, \texttt{/api/readings} y \texttt{/api/health}. & La API responde correctamente y devuelve datos coherentes. \\
 \hline
 P10 & \textit{Dashboard} web & Abrir la interfaz desde navegador y comprobar actualización de datos. & El \textit{dashboard} muestra lecturas, estado y frescura de datos. \\
 \hline
@@ -160,7 +256,7 @@ P12 & Bomba con activación temporizada & Conectar bomba o carga real y ejecutar
 \hline
 P13 & \textit{Cooldown} entre riegos & Forzar decisiones de riego consecutivas en ciclos próximos. & El monitor serie registra \texttt{Cooldown activo: SI} y \texttt{Decision local: COOLDOWN}, bloqueando la nueva actuación. \\
 \hline
-P14 & Lectura inválida de humedad & Simular valor fuera de rango o desconexión del sensor. & El sistema no activa el riego y registra estado de error. \\
+P14 & Lectura inválida de humedad & Simular valor fuera de rango o desconexión del sensor. & El sistema mantiene la bomba apagada y registra estado de error. \\
 \hline
 P15 & Pérdida temporal de comunicación & Interrumpir temporalmente la publicación o consulta de datos. & El sistema registra el fallo y mantiene estado seguro. \\
 \hline
@@ -168,10 +264,11 @@ P16 & Integración completa & Ejecutar estación, ThingSpeak, Raspberry, API, \t
 \hline
 P17 & Prueba funcional en Agrolab Móstoles & Instalar el prototipo en Agrolab, ejecutar la estación, comprobar telemetría, \textit{dashboard} y actuación controlada, y registrar foto/vídeo como evidencia. & El sistema funciona en entorno real de cultivo y mantiene actuación segura. \\
 \hline
-\end{tabular}
-\caption{Casos de prueba principales definidos para TierraViva.}
-\label{tab:casos_prueba}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \subsection{P17. Prueba funcional en entorno real en Agrolab Móstoles}
 \label{subsec:p17_agrolab_mostoles}
@@ -217,7 +314,7 @@ La Figura~\ref{fig:anexo_monitor_serie_inicio_lte} muestra la fase de arranque e
     \label{fig:anexo_monitor_serie_inicio_lte}
 \end{figure}
 
-La Figura~\ref{fig:anexo_monitor_serie_decision_riego} recoge varios ciclos consecutivos de funcionamiento. En esta captura se observa que la estación no activa siempre el riego, sino que alterna entre \texttt{NO RIEGO}, \texttt{RIEGO} y estados bloqueados por \textit{cooldown} según la humedad medida y las condiciones internas del \textit{firmware}.
+La Figura~\ref{fig:anexo_monitor_serie_decision_riego} recoge varios ciclos consecutivos de funcionamiento. En esta captura se observa que la estación adapta su comportamiento a la humedad medida y a las condiciones internas del \textit{firmware}, alternando entre \texttt{NO RIEGO}, \texttt{RIEGO} y estados bloqueados por \textit{cooldown}.
 
 \begin{figure}[H]
     \centering
@@ -317,21 +414,44 @@ ThingSpeak OK
 
 Estos fragmentos muestran tres comportamientos relevantes para la validación: actuación de riego cuando se cumplen las condiciones de sequedad, bloqueo de una nueva actuación durante el periodo de \textit{cooldown} y ausencia de riego cuando la humedad medida no requiere actuación. También se observa que la publicación en ThingSpeak se valida mediante la respuesta \texttt{+HTTPACTION: 0,200,3}.
 
-En ejecuciones prolongadas se observaron fallos temporales de publicación HTTP, como errores en \texttt{HTTPINIT} o respuestas no interpretables del módem. Estos fallos no provocaron una actuación insegura de la bomba, ya que la decisión crítica de riego permanece en el \textit{firmware} local de la estación. La consecuencia de estos fallos se limita a la pérdida temporal de publicación en la plataforma, aspecto contemplado en las pruebas de tolerancia a fallos y en el análisis de riesgos.
+En ejecuciones prolongadas se observaron fallos temporales de publicación HTTP, como errores en \texttt{HTTPINIT} o respuestas no interpretables del módem. Ante estas situaciones, la estación mantuvo la decisión crítica de riego dentro del \textit{firmware} local y conservó un comportamiento seguro de actuación. La consecuencia principal fue la pérdida temporal de publicación en la plataforma, aspecto contemplado en las pruebas de tolerancia a fallos y en el análisis de riesgos.
 
 \section{Secuencia de validación}
 
-Para reducir riesgos durante las pruebas, la validación se realiza de forma gradual. No se conecta la bomba real hasta haber comprobado previamente la lógica de control y el comportamiento del relé.
+Para reducir riesgos durante las pruebas, la validación se realiza de forma gradual. La bomba real se conecta únicamente después de comprobar la lógica de control y el comportamiento del relé.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|c|p{0.37\textwidth}|p{0.39\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\centering\arraybackslash}p{0.08\textwidth}|
+>{\raggedright\arraybackslash}p{0.40\textwidth}|
+>{\raggedright\arraybackslash}p{0.44\textwidth}|}
+
+\caption{Secuencia de validación del prototipo.}
+\label{tab:secuencia_validacion}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Paso} & \TVHead{Acción} & \TVHead{Motivo} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Paso} & \TVHead{Acción} & \TVHead{Motivo} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 1 & Probar sensores y alimentación por separado. & Evitar que un error de cableado afecte al sistema completo. \\
 \hline
 2 & Probar el módulo LTE con comandos AT básicos. & Confirmar que la comunicación funciona antes de integrarla en el \textit{firmware}. \\
@@ -350,29 +470,53 @@ Para reducir riesgos durante las pruebas, la validación se realiza de forma gra
 \hline
 9 & Realizar la prueba funcional en Agrolab Móstoles. & Comprobar el comportamiento del prototipo en un entorno real de cultivo y registrar evidencias fotográficas y audiovisuales. \\
 \hline
-\end{tabular}
-\caption{Secuencia de validación del prototipo.}
-\label{tab:secuencia_validacion}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Pruebas de seguridad funcional}
 
-La seguridad funcional en TierraViva se centra en evitar actuaciones no deseadas sobre el sistema de riego. No se trata de seguridad industrial certificada, sino de medidas básicas necesarias para un prototipo que acciona una bomba.
+La seguridad funcional en TierraViva se centra en mantener una actuación segura sobre el sistema de riego. En el alcance de este prototipo, se aplican medidas básicas necesarias para controlar una bomba: arranque con relé apagado, temporización de la actuación, bloqueo por \textit{cooldown} y respuesta conservadora ante lecturas inválidas o errores.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|p{0.35\textwidth}|p{0.45\textwidth}|p{0.12\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.36\textwidth}|
+>{\raggedright\arraybackslash}p{0.44\textwidth}|
+>{\centering\arraybackslash}p{0.12\textwidth}|}
+
+\caption{Pruebas de seguridad funcional del sistema de riego.}
+\label{tab:pruebas_seguridad_funcional}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Condición comprobada} & \TVHead{Comportamiento esperado} & \TVHead{Prioridad} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Condición comprobada} & \TVHead{Comportamiento esperado} & \TVHead{Prioridad} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 Arranque o reinicio de la estación & El relé debe comenzar apagado. & Alta \\
 \hline
 Orden o decisión de riego con duración excesiva & La duración debe limitarse al máximo permitido. & Alta \\
 \hline
-Lectura de humedad inválida & El sistema no debe activar la bomba. & Alta \\
+Lectura de humedad inválida & El sistema debe mantener la bomba apagada. & Alta \\
 \hline
 Riegos consecutivos en poco tiempo & El sistema debe aplicar periodo de seguridad. & Alta \\
 \hline
@@ -380,26 +524,50 @@ Error durante la ejecución & El relé debe apagarse de forma explícita. & Alta
 \hline
 Pérdida temporal de comunicación & La estación debe mantener un estado seguro. & Media \\
 \hline
-Duplicidad de orden o evento & La estación no debe repetir una actuación ya ejecutada. & Media \\
+Duplicidad de evento o ciclo de actuación & La estación debe bloquear la repetición de una actuación ya ejecutada. & Media \\
 \hline
-\end{tabular}
-\caption{Pruebas de seguridad funcional del sistema de riego.}
-\label{tab:pruebas_seguridad_funcional}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Relación entre riesgos y pruebas}
 
 El plan de pruebas se ha definido teniendo en cuenta los riesgos principales del proyecto. La Tabla \ref{tab:trazabilidad_riesgos_pruebas} muestra la relación entre algunos riesgos identificados y las pruebas previstas.
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|c|p{0.42\textwidth}|p{0.34\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\centering\arraybackslash}p{0.10\textwidth}|
+>{\raggedright\arraybackslash}p{0.50\textwidth}|
+>{\raggedright\arraybackslash}p{0.32\textwidth}|}
+
+\caption{Trazabilidad entre riesgos y pruebas.}
+\label{tab:trazabilidad_riesgos_pruebas}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Riesgo} & \TVHead{Descripción} & \TVHead{Pruebas asociadas} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Riesgo} & \TVHead{Descripción} & \TVHead{Pruebas asociadas} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 R01 & Alimentación insuficiente o inestable del módulo LTE. & P01, P05, P06 \\
 \hline
 R02 & Lecturas incorrectas del sensor de humedad del suelo. & P04, P13, P14 \\
@@ -418,24 +586,47 @@ R08 & Exposición accidental de claves o credenciales. & Revisión de repositori
 \hline
 R09 & Inconsistencias entre \textit{firmware}, \textit{backend}, API y \textit{dashboard}. & P07, P08, P09, P10, P16 \\
 \hline
-\end{tabular}
-\caption{Trazabilidad entre riesgos y pruebas.}
-\label{tab:trazabilidad_riesgos_pruebas}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Estados de una prueba}
 
 Para homogeneizar el registro de resultados se utilizarán los siguientes estados:
 
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{1.25}
+\begingroup
 \small
-\begin{tabular}{|p{0.22\textwidth}|p{0.64\textwidth}|}
+\renewcommand{\arraystretch}{1.20}
+\rowcolors{2}{TableRowSoft}{white}
+
+\begin{longtable}{|
+>{\raggedright\arraybackslash}p{0.24\textwidth}|
+>{\raggedright\arraybackslash}p{0.68\textwidth}|}
+
+\caption{Estados definidos para el seguimiento de pruebas.}
+\label{tab:estados_prueba}\\
+
 \hline
 \rowcolor{URJCRed}
 \TVHead{Estado} & \TVHead{Significado} \\
 \hline
+\endfirsthead
+
+\hline
+\rowcolor{URJCRed}
+\TVHead{Estado} & \TVHead{Significado} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{r}{\small Continúa en la página siguiente} \\
+\endfoot
+
+\hline
+\endlastfoot
+
 No ejecutada & La prueba está definida pero aún no se ha realizado. \\
 \hline
 Superada & La prueba cumple todos los criterios de aceptación. \\
@@ -446,13 +637,14 @@ Fallida & La prueba no cumple el resultado esperado y requiere corrección. \\
 \hline
 Bloqueada & La prueba no puede ejecutarse por falta de componente, entorno, configuración o dependencia previa. \\
 \hline
-\end{tabular}
-\caption{Estados definidos para el seguimiento de pruebas.}
-\label{tab:estados_prueba}
-\end{table}
+
+\end{longtable}
+
+\normalsize
+\endgroup
 
 \section{Conclusión}
 
-El plan de pruebas de TierraViva permite validar el sistema de forma progresiva y controlada. La estrategia planteada evita conectar directamente todos los componentes sin haber comprobado antes alimentación, sensores, comunicación, almacenamiento, API, \textit{dashboard} y actuación.
+El plan de pruebas de TierraViva permite validar el sistema de forma progresiva y controlada. La estrategia planteada comprueba por separado alimentación, sensores, comunicación, almacenamiento, API, \textit{dashboard} y actuación antes de ejecutar la integración completa.
 
-Además, la relación entre riesgos y pruebas refuerza la calidad del proyecto, ya que cada punto crítico identificado dispone de una comprobación asociada. De este modo, la validación del prototipo no se limita a demostrar que funciona en condiciones ideales, sino que también contempla errores previsibles, situaciones de fallo y medidas de seguridad funcional.
+Además, la relación entre riesgos y pruebas refuerza la calidad del proyecto, ya que cada punto crítico identificado dispone de una comprobación asociada. De este modo, la validación del prototipo contempla tanto el funcionamiento en condiciones normales como errores previsibles, situaciones de fallo y medidas de seguridad funcional.

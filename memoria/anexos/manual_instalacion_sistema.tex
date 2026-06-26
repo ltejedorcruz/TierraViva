@@ -34,7 +34,7 @@ Antes de comenzar la instalación deben estar disponibles los siguientes element
     \item estación montada según el esquema eléctrico del Anexo~\ref{anexo:esquemas_electricos}.
 \end{itemize}
 
-Las claves reales no deben incluirse en la memoria ni subirse al repositorio. En la documentación se utilizarán siempre marcadores como \texttt{<READ\_KEY\_A>} o \texttt{<WRITE\_KEY\_A>}.
+Las claves reales deben mantenerse fuera de la memoria y del repositorio. En la documentación se utilizarán siempre marcadores como \texttt{<READ\_KEY\_A>} o \texttt{<WRITE\_KEY\_A>}.
 
 \section{Preparación de ThingSpeak}
 
@@ -93,7 +93,7 @@ Antes de cargarlo en Arduino UNO deben revisarse, como mínimo, los siguientes p
 \subsection{Librerías empleadas por el \textit{firmware}}
 \label{subsec:librerias_firmware_estacion}
 
-El \textit{firmware} de la estación remota utiliza varias librerías de Arduino y de C/C++ para gestionar la comunicación con sensores, el módem LTE y el tratamiento de cadenas. Estas dependencias no añaden funcionalidad aislada, sino que permiten implementar de forma ordenada los bloques principales del sketch: lectura I2C, comunicación serie con el A7670E-LASA, adquisición de medidas ambientales y construcción de peticiones HTTP.
+El \textit{firmware} de la estación remota utiliza varias librerías de Arduino y de C/C++ para gestionar la comunicación con sensores, el módem LTE y el tratamiento de cadenas. Estas dependencias permiten implementar de forma ordenada los bloques principales del \textit{sketch}: lectura I2C, comunicación serie con el A7670E-LASA, adquisición de medidas ambientales y construcción de peticiones HTTP.
 
 \begin{table}[H]
 \centering
@@ -200,24 +200,17 @@ nano .env
 Un ejemplo de configuración es:
 
 \begin{bashcode}
+STATIONS=A,B
+STATION_ID=A
+
 THINGSPEAK_CHANNEL_A=<CHANNEL_ID_A>
 THINGSPEAK_READ_KEY_A=<READ_KEY_A>
 
 THINGSPEAK_CHANNEL_B=<CHANNEL_ID_B>
 THINGSPEAK_READ_KEY_B=<READ_KEY_B>
 
-POLL_INTERVAL_SECONDS=30
+POLL_INTERVAL_SECONDS=10
 REQUEST_TIMEOUT_SECONDS=12
-
-SOIL_DRY_THRESHOLD=558
-SOIL_WET_THRESHOLD=211
-IRRIGATION_DURATION_SECONDS=10
-MAX_IRRIGATION_SECONDS=30
-COOLDOWN_SECONDS=60
-COMMAND_TIMEOUT_SECONDS=600
-
-WEB_REFRESH_SECONDS=5
-DATA_STALE_SECONDS=1200
 
 TIERRAVIVA_LOG_LEVEL=INFO
 \end{bashcode}
@@ -266,7 +259,7 @@ frontend/index.html
 frontend/images/
 \end{terminaloutput}
 
-No se requiere la existencia de carpetas \texttt{frontend/css/} ni \texttt{frontend/js/}, ya que los estilos y la lógica JavaScript están integrados en el propio fichero \texttt{index.html}. Esta organización simplifica el despliegue del prototipo y reduce el riesgo de rutas estáticas inconsistentes durante las pruebas.
+La estructura actual concentra los estilos y la lógica JavaScript en el propio fichero \texttt{index.html}. Esta organización simplifica el despliegue del prototipo, reduce el número de rutas estáticas que deben sincronizarse durante las pruebas y facilita que FastAPI sirva la interfaz desde el directorio \texttt{frontend/}.
 
 \section{Instalación mediante \textit{script}}
 
@@ -388,7 +381,7 @@ La instalación se considera preparada cuando se completa la siguiente secuencia
 \rowcolor{URJCRed}
 \TVHead{Comprobación} & \TVHead{Resultado esperado} \\
 \hline
-Estación encendida & Arduino, sensores y módem arrancan sin reinicios.\\
+Estación encendida & Arduino, sensores y módem arrancan de forma estable.\\
 \hline
 Lectura de sensores & Valores coherentes en el monitor serie.\\
 \hline
@@ -404,7 +397,7 @@ API operativa & \texttt{/api/health} responde correctamente.\\
 \hline
 \textit{Dashboard} visible & La interfaz muestra datos de la estación.\\
 \hline
-Relé sin bomba & El relé conmuta y vuelve a apagado.\\
+Prueba de relé aislada & El relé conmuta correctamente y vuelve a estado apagado.\\
 \hline
 Bomba temporizada & La bomba se activa y se apaga tras el tiempo configurado.\\
 \hline
@@ -426,21 +419,21 @@ Bomba temporizada & La bomba se activa y se apaga tras el tiempo configurado.\\
 \rowcolor{URJCRed}
 \TVHead{Problema} & \TVHead{Causa probable} & \TVHead{Acción recomendada} \\
 \hline
-No aparecen datos en ThingSpeak & Clave de escritura incorrecta, APN incorrecto o fallo LTE. & Revisar \textit{firmware}, SIM, antena, APN y monitor serie. \\
+Ausencia de datos en ThingSpeak & Clave de escritura incorrecta, APN incorrecto o fallo LTE. & Revisar \textit{firmware}, SIM, antena, APN y monitor serie. \\
 \hline
-La Raspberry no recupera datos & Canal o clave de lectura incorrectos. & Revisar \texttt{THINGSPEAK\_CHANNEL\_A/B} y \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
+Fallo de recuperación de datos en Raspberry Pi & Canal o clave de lectura incorrectos. & Revisar \texttt{THINGSPEAK\_CHANNEL\_A/B} y \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
 \hline
-La API no arranca & Entorno virtual o dependencias no preparados. & Ejecutar \texttt{./tierraviva.sh install}. \\
+Fallo de arranque de la API & Entorno virtual o dependencias pendientes de preparar. & Ejecutar \texttt{./tierraviva.sh install}. \\
 \hline
-El \textit{dashboard} no carga & No existe \texttt{frontend/index.html} o no se ha sincronizado el contenido de \texttt{dashboard/}. & Ejecutar \texttt{./tierraviva.sh install} o, de forma manual, \texttt{cp -r dashboard/* frontend/}. Comprobar que existen \texttt{frontend/index.html} y \texttt{frontend/images/}. \\
+Fallo de carga del \textit{dashboard} & Ausencia de \texttt{frontend/index.html} o sincronización pendiente del contenido de \texttt{dashboard/}. & Ejecutar \texttt{./tierraviva.sh install} o, de forma manual, \texttt{cp -r dashboard/* frontend/}. Comprobar que existen \texttt{frontend/index.html} y \texttt{frontend/images/}. \\
 \hline
-El \textit{dashboard} carga sin logotipos o imágenes & No se ha copiado correctamente el directorio \texttt{images/}. & Repetir \texttt{cp -r dashboard/* frontend/} y revisar que existen los ficheros gráficos en \texttt{frontend/images/}. \\
+El \textit{dashboard} carga con recursos gráficos ausentes & Sincronización incompleta del directorio \texttt{images/}. & Repetir \texttt{cp -r dashboard/* frontend/} y revisar que existen los ficheros gráficos en \texttt{frontend/images/}. \\
 \hline
-No hay registros en SQLite & La estación no ha publicado o el ingestor no está activo. & Revisar ThingSpeak y \textit{logs} de \texttt{main.py}. \\
+Ausencia de registros en SQLite & Publicación pendiente de la estación o ingestor inactivo. & Revisar ThingSpeak y \textit{logs} de \texttt{main.py}. \\
 \hline
 El relé se activa al arrancar & Lógica invertida o inicialización incorrecta. & Comprobar configuración del \textit{firmware} y probar sin bomba. \\
 \hline
-La bomba no se apaga & Error de cableado o uso del contacto incorrecto del relé. & Usar contacto normalmente abierto y validar apagado por \textit{firmware}. \\
+Bomba activa fuera del intervalo previsto & Error de cableado o uso del contacto incorrecto del relé. & Usar contacto normalmente abierto y validar apagado por \textit{firmware}. \\
 \hline
 El módulo LTE se reinicia & Alimentación insuficiente durante transmisión. & Revisar fuente, LM2596, corriente disponible y masa común. \\
 \hline
@@ -451,4 +444,4 @@ El módulo LTE se reinicia & Alimentación insuficiente durante transmisión. & 
 
 \section{Conclusión}
 
-La puesta en marcha de TierraViva debe realizarse por bloques: primero estación y sensores, después publicación en ThingSpeak, más tarde ingesta en Raspberry Pi, base de datos, API, \textit{dashboard} y finalmente actuación sobre relé o bomba. Esta secuencia permite aislar errores y evita que un fallo de montaje, configuración o comunicación quede oculto dentro de una prueba completa.
+La puesta en marcha de TierraViva debe realizarse por bloques: primero estación y sensores, después publicación en ThingSpeak, más tarde ingesta en Raspberry Pi, base de datos, API, \textit{dashboard} y finalmente actuación sobre relé o bomba. Esta secuencia permite aislar errores, localizar con mayor precisión fallos de montaje, configuración o comunicación, y comprobar cada capa antes de ejecutar una prueba completa.

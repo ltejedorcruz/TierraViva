@@ -5,9 +5,9 @@ Este anexo documenta el contrato de datos utilizado por TierraViva en ThingSpeak
 
 \section{Papel de ThingSpeak}
 
-ThingSpeak cumple una función concreta dentro de TierraViva: actuar como \textit{broker} de telemetría entre las estaciones de campo y la Raspberry Pi, recibiendo los datos publicados por las estaciones y permitiendo su consulta posterior desde el sistema de supervisión. Esta decisión simplifica la comunicación entre la estación de campo y el nodo local de supervisión, ya que la estación solo necesita publicar datos y no mantener una conexión directa con la Raspberry Pi.
+ThingSpeak cumple una función concreta dentro de TierraViva: actuar como \textit{broker} de telemetría entre las estaciones de campo y la Raspberry Pi, recibiendo los datos publicados por las estaciones y permitiendo su consulta posterior desde el sistema de supervisión. Esta decisión simplifica la comunicación entre la estación de campo y el nodo local de supervisión, ya que la estación publica datos en una plataforma intermedia y la Raspberry Pi los consulta posteriormente.
 
-El riego se decide en el \textit{firmware} de la estación. Por tanto, ThingSpeak no controla la bomba, no modifica umbrales y no envía comandos a Arduino.
+En la versión actual, ThingSpeak se centra en telemetría y estado. La decisión de riego, la gestión de umbrales y la actuación sobre la bomba permanecen en el \textit{firmware} de cada estación.
 
 \section{Separación por estaciones}
 
@@ -32,7 +32,7 @@ Para evitar mezclar datos de distintas ubicaciones, cada estación debe utilizar
 \label{tab:canales_thingspeak_estaciones}
 \end{table}
 
-La Raspberry Pi recorre las estaciones configuradas en \texttt{STATIONS} y consulta el canal correspondiente a cada una. Si una estación no tiene canal definido, se ignora durante la ingesta.
+La Raspberry Pi recorre las estaciones configuradas en \texttt{STATIONS} y consulta el canal correspondiente a cada una. Durante la ingesta se procesan únicamente las estaciones que tienen un canal ThingSpeak definido.
 
 \section{Estructura de campos}
 
@@ -102,11 +102,11 @@ El campo \texttt{field6} indica el estado del relé en el momento de la publicac
 \rowcolor{URJCRed}
 \TVHead{Valor} & \TVHead{Estado} & \TVHead{Interpretación} \\
 \hline
-\texttt{0} & Relé apagado & La bomba no debería estar alimentada en el momento de la lectura publicada. \\
+\texttt{0} & Relé apagado & La bomba permanece desalimentada en el momento de la lectura publicada. \\
 \hline
 \texttt{1} & Relé activo & La estación informa de que el relé está activo y la bomba puede estar funcionando. \\
 \hline
-Sin dato & Desconocido & No se ha recibido un valor válido para el estado del relé. \\
+Sin dato & Desconocido & Ausencia de un valor válido para el estado del relé. \\
 \hline
 \end{tabular}
 \caption{Interpretación del campo \texttt{relay\_state}.}
@@ -128,7 +128,7 @@ El campo \texttt{field7} contiene el evento principal de la estación durante el
 \rowcolor{URJCRed}
 \TVHead{Código} & \TVHead{Etiqueta} & \TVHead{Significado} \\
 \hline
-\texttt{100} & \texttt{idle} & Estación en reposo. No hay riego activo en el ciclo actual. \\
+\texttt{100} & \texttt{idle} & Estación en reposo, con riego inactivo en el ciclo actual. \\
 \hline
 \texttt{206} & \texttt{safe mode} & La estación se encuentra en modo seguro. Se aplican condiciones más conservadoras antes de actuar. \\
 \hline
@@ -138,7 +138,7 @@ El campo \texttt{field7} contiene el evento principal de la estación durante el
 \hline
 \texttt{400} & \texttt{error} & Se ha detectado un error relevante, normalmente asociado a sensores o lecturas no válidas. \\
 \hline
-\texttt{429} & \texttt{cooldown} & La estación ha bloqueado una activación porque no ha finalizado el tiempo mínimo entre riegos. \\
+\texttt{429} & \texttt{cooldown} & La estación ha bloqueado una activación porque el tiempo mínimo entre riegos sigue activo. \\
 \hline
 \end{tabular}
 \caption{Codificación del campo \texttt{system\_event}.}
@@ -162,7 +162,7 @@ El campo \texttt{field8} contiene un código auxiliar de diagnóstico. Este valo
 \hline
 \texttt{200} & \texttt{OK} & Funcionamiento correcto en el ciclo actual. \\
 \hline
-\texttt{204} & \texttt{no riego} & No se ha activado el riego porque no se cumplen las condiciones necesarias. \\
+\texttt{204} & \texttt{no riego} & El ciclo finaliza con riego inactivo al no cumplirse las condiciones necesarias. \\
 \hline
 \texttt{206} & \texttt{modo seguro} & La estación está operando en modo seguro. \\
 \hline
@@ -190,7 +190,7 @@ La interpretación más útil se obtiene combinando \texttt{relay\_state}, \text
 \rowcolor{URJCRed}
 \TVHead{\texttt{relay\_state}} & \TVHead{\texttt{system\_event}} & \TVHead{\texttt{debug\_code}} & \TVHead{Interpretación} \\
 \hline
-\texttt{0} & \texttt{100} & \texttt{204} & Estación en reposo. No se activa el riego porque no se cumplen las condiciones necesarias. \\
+\texttt{0} & \texttt{100} & \texttt{204} & Estación en reposo, con riego inactivo al no cumplirse las condiciones necesarias. \\
 \hline
 \texttt{0} & \texttt{206} & \texttt{206} & Estación en modo seguro. El sistema aplica criterios más conservadores. \\
 \hline
@@ -198,7 +198,7 @@ La interpretación más útil se obtiene combinando \texttt{relay\_state}, \text
 \hline
 \texttt{0} & \texttt{211} & \texttt{200} & Riego finalizado. El relé ha vuelto a estado apagado. \\
 \hline
-\texttt{0} & \texttt{400} & \texttt{400} & Error de sensores o lectura no válida. La respuesta segura es no activar el riego. \\
+\texttt{0} & \texttt{400} & \texttt{400} & Error de sensores o lectura no válida. La respuesta segura es mantener la bomba apagada. \\
 \hline
 \texttt{0} & \texttt{429} & \texttt{429} & Riego bloqueado por \textit{cooldown}. La estación evita una activación demasiado cercana a la anterior. \\
 \hline
@@ -266,11 +266,11 @@ Esta doble estrategia resulta útil durante la depuración y la evolución del p
 \rowcolor{URJCRed}
 \TVHead{Error} & \TVHead{Efecto observable} & \TVHead{Corrección recomendada} \\
 \hline
-Clave de escritura incorrecta & El canal no recibe nuevas entradas. & Revisar \texttt{THINGSPEAK\_API\_KEY} en el \textit{firmware}. \\
+Clave de escritura incorrecta & Ausencia de nuevas entradas en el canal. & Revisar \texttt{THINGSPEAK\_API\_KEY} en el \textit{firmware}. \\
 \hline
 Canal incorrecto en Raspberry Pi & Se consulta un canal que no corresponde a la estación. & Revisar \texttt{THINGSPEAK\_CHANNEL\_A/B}. \\
 \hline
-Clave de lectura incorrecta & La Raspberry Pi no puede recuperar datos si el canal es privado. & Revisar \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
+Clave de lectura incorrecta & Fallo de recuperación de datos desde la Raspberry Pi si el canal es privado. & Revisar \texttt{THINGSPEAK\_READ\_KEY\_A/B}. \\
 \hline
 Campos desordenados & El \textit{dashboard} o la API interpretan valores incorrectos. & Mantener fija la correspondencia \texttt{field1}--\texttt{field8}. \\
 \hline
@@ -285,17 +285,17 @@ Publicación demasiado frecuente & ThingSpeak puede no aceptar todas las actuali
 
 \section{Limitaciones de la versión actual}
 
-En la versión actual, ThingSpeak se utiliza únicamente para telemetría ascendente:
+ThingSpeak se utiliza para telemetría ascendente y supervisión posterior. El flujo implementado queda definido de la siguiente forma:
 
 \begin{itemize}
     \item la estación publica datos hacia ThingSpeak;
     \item la Raspberry Pi consulta datos desde ThingSpeak;
     \item la decisión de riego se ejecuta localmente en Arduino;
-    \item no se envían órdenes de riego desde el \textit{dashboard};
-    \item no existe canal descendente de comandos hacia la estación.
+    \item el \textit{dashboard} presenta el estado publicado por las estaciones;
+    \item la arquitectura mantiene el control físico de la bomba dentro del \textit{firmware} de estación.
 \end{itemize}
 
-Esta limitación es deliberada. La actuación sobre una bomba implica riesgos eléctricos e hidráulicos, por lo que la versión actual prioriza una lógica local con apagado explícito, \textit{cooldown} y comportamiento seguro ante lecturas no válidas.
+Esta decisión es deliberada. La actuación sobre una bomba implica riesgos eléctricos e hidráulicos, por lo que la versión actual prioriza una lógica local con apagado explícito, \textit{cooldown} y comportamiento seguro ante lecturas no válidas.
 
 \section{Conclusión}
 

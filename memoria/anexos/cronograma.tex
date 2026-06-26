@@ -1,7 +1,7 @@
 \chapter{Cronograma del proyecto}
 \label{anexo:cronograma}
 
-Este anexo recoge la planificación temporal seguida durante el desarrollo de TierraViva, desde el inicio del Trabajo de Fin de Grado a finales de agosto de 2025 hasta la entrega y defensa previstas en julio de 2026. El cronograma no se plantea como una secuencia rígida y lineal, sino como la reconstrucción ordenada del trabajo real realizado: definición inicial, revisión tecnológica, primeros prototipos, reajuste de arquitectura, implementación \textit{hardware} y \textit{software}, validación funcional, prueba en Agrolab Móstoles y redacción progresiva de la memoria.
+Este anexo recoge la planificación temporal seguida durante el desarrollo de TierraViva, desde el inicio del Trabajo de Fin de Grado a finales de agosto de 2025 hasta la entrega y defensa previstas en julio de 2026. El cronograma se plantea como la reconstrucción ordenada del trabajo real realizado: definición inicial, revisión tecnológica, primeros prototipos, reajuste de arquitectura, implementación \textit{hardware} y \textit{software}, validación funcional, prueba en Agrolab Móstoles y redacción progresiva de la memoria.
 
 TierraViva ha requerido integrar electrónica, \textit{firmware}, comunicaciones móviles, plataforma \textit{cloud}, base de datos, API, \textit{dashboard}, actuación física sobre bomba de agua y documentación técnica. Por ello, varias tareas se han desarrollado en paralelo y otras han requerido iteraciones, correcciones y cambios de enfoque.
 
@@ -206,7 +206,7 @@ Revisión final, formato, entrega y defensa &  &  &  &  &  &  &  &  &  &  & X & 
 
 \section{Hitos principales}
 
-La Tabla~\ref{cuadro:hitos_cronograma} identifica los hitos más relevantes del proyecto. Estos hitos permiten entender la evolución técnica de TierraViva y muestran que el resultado final no fue una implementación directa desde una solución cerrada, sino una construcción progresiva con reajustes.
+La Tabla~\ref{cuadro:hitos_cronograma} identifica los hitos más relevantes del proyecto. Estos hitos permiten entender la evolución técnica de TierraViva como una construcción progresiva, con reajustes derivados de las pruebas, la integración de componentes y la evolución de la arquitectura.
 
 \small
 \renewcommand{\arraystretch}{1.16}
@@ -259,7 +259,7 @@ H13 & Junio--julio 2026 & Cierre de memoria, anexos, resultados, discusión, con
 
 \section{Iteraciones, reajustes y problemas corregidos}
 
-El desarrollo incluyó varios reajustes relevantes. Estos cambios no se consideran desviaciones negativas, sino decisiones técnicas necesarias para alcanzar una solución más coherente con el objetivo final del TFG.
+El desarrollo incluyó varios reajustes relevantes. Estos cambios se recogen como decisiones técnicas necesarias para alcanzar una solución más coherente con el objetivo final del TFG.
 
 \small
 \renewcommand{\arraystretch}{1.12}
@@ -288,11 +288,11 @@ Problema de detección del Arduino compatible & La placa no aparecía inicialmen
 \hline
 Estabilización de comunicación con A7670E-LASA & El módem requería pruebas de baudios, comandos AT, APN, registro LTE y publicación HTTP. & Se estabilizó la comunicación serie a \texttt{9600} baudios y se validó la publicación en ThingSpeak. \\
 \hline
-Separación entre publicación y control & ThingSpeak podía fallar temporalmente o no responder de forma inmediata. & La pérdida de publicación no bloquea la lógica local de riego ni genera una actuación insegura. \\
+Separación entre publicación y control & ThingSpeak podía fallar temporalmente o no responder de forma inmediata. & La lógica local de riego permanece en la estación y mantiene un comportamiento seguro ante pérdidas temporales de publicación. \\
 \hline
 Evolución del \textit{dashboard} & La primera versión era suficiente para una demo, pero no para la supervisión final del sistema. & Se desarrolló una versión más completa con visualización, histórico, selección de estación y recursos gráficos. \\
 \hline
-Incorporación de estación B & Se quería demostrar que la arquitectura no dependía de una única estación física. & Se montó y probó una segunda estación, con configuración diferenciada y validación en Agrolab. \\
+Incorporación de estación B & Se quería demostrar la capacidad multiestación de la arquitectura. & Se montó y probó una segunda estación, con configuración diferenciada y validación en Agrolab. \\
 \hline
 Ajustes en bloque de bomba y alimentación & La bomba introduce perturbaciones y exige una alimentación más robusta que la sensórica. & Se reforzó la documentación eléctrica y se incorporó un condensador de \(2200~\mu\mathrm{F}\) en la rama de la bomba. \\
 \hline
@@ -317,16 +317,16 @@ El desarrollo de TierraViva presentó dependencias claras entre bloques. Estas d
     \item La redacción final de resultados y conclusiones dependía de cerrar antes la validación funcional, los anexos técnicos y la trazabilidad entre requisitos y pruebas.
 \end{itemize}
 
-Estas dependencias muestran que el proyecto no se desarrolló como una suma de tareas independientes, sino como una integración progresiva. Cada bloque condicionó al siguiente y obligó a revisar decisiones a medida que el prototipo pasaba de una idea inicial a un sistema físico funcional.
+Estas dependencias muestran que el proyecto se desarrolló como una integración progresiva. Cada bloque condicionó al siguiente y obligó a revisar decisiones a medida que el prototipo pasaba de una idea inicial a un sistema físico funcional.
 
 \section{Redacción de la memoria}
 
 La memoria se desarrolló en paralelo al avance técnico del proyecto, aunque la redacción intensiva comenzó en mayo de 2026. Primero se trabajaron los capítulos de introducción, estado del arte, requisitos y arquitectura; después los capítulos de implementación \textit{hardware}, \textit{firmware} y software; posteriormente se elaboraron los anexos técnicos, manuales, plan de pruebas, gestión de riesgos y trazabilidad; y finalmente se cerraron los capítulos de validación, resultados, discusión y conclusiones.
 
-Esta forma de trabajo permitió que la documentación no se limitara a una descripción final del sistema, sino que recogiera también la evolución real del proyecto: decisiones descartadas, problemas encontrados, reajustes de arquitectura, validación por bloques, evidencias de funcionamiento y limitaciones detectadas.
+Esta forma de trabajo permitió que la documentación recogiera la evolución real del proyecto: decisiones descartadas, problemas encontrados, reajustes de arquitectura, validación por bloques, evidencias de funcionamiento y limitaciones detectadas.
 
 \section{Conclusión del cronograma}
 
 El cronograma refleja un desarrollo progresivo e iterativo desde finales de agosto de 2025 hasta julio de 2026. La primera parte del proyecto se centró en definir el problema, revisar tecnologías y plantear la arquitectura. La parte intermedia concentró el mayor trabajo técnico: sensores, Arduino, LTE, ThingSpeak, Raspberry Pi, SQLite, API, \textit{dashboard} y decisión local de riego. La fase final integró las estaciones, validó el sistema, generó evidencias, realizó la prueba en Agrolab Móstoles y cerró la memoria.
 
-La planificación seguida muestra que TierraViva no fue un montaje directo ni una implementación lineal. El proyecto evolucionó mediante pruebas, correcciones y decisiones técnicas justificadas, hasta alcanzar un prototipo funcional de extremo a extremo.
+La planificación seguida muestra que TierraViva evolucionó mediante pruebas, correcciones y decisiones técnicas justificadas, hasta alcanzar un prototipo funcional de extremo a extremo.

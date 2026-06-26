@@ -3,7 +3,7 @@
 
 Este anexo recoge los esquemas eléctricos de referencia utilizados durante el diseño y montaje del prototipo TierraViva.
 
-Los esquemas incluidos tienen carácter técnico y documental. No sustituyen a las tablas de conexión detalladas del manual de instalación, sino que sirven como apoyo visual para comprender la arquitectura física del montaje.
+Los esquemas incluidos tienen carácter técnico y documental. Sirven como apoyo visual para comprender la arquitectura física del montaje y se complementan con las tablas de conexión detalladas recogidas en el manual de instalación.
 
 \section{Esquema general de una estación}
 
@@ -12,7 +12,7 @@ La Figura~\ref{fig:esquema_estacion_tierraviva} muestra el esquema general de un
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figs_png/esquema_estacion_TierraViva.png}
-    \caption{Esquema eléctrico general de una estación TierraViva elaborado en Cirkit Designer. Elaboración propia}
+    \caption{Esquema eléctrico general de una estación TierraViva elaborado en Cirkit Designer. Elaboración propia.}
     \label{fig:esquema_estacion_tierraviva}
 \end{figure}
 
@@ -80,14 +80,14 @@ Actuación & Relé y bomba 12 V & Activar físicamente el riego cuando se cumple
 
 \section{Notas de interpretación}
 
-El esquema debe interpretarse como una representación del prototipo de estación, no como un diseño industrial definitivo. Durante el montaje real deben comprobarse siempre los siguientes puntos:
+El esquema debe interpretarse como una representación del prototipo de estación desarrollado en TierraViva. Durante el montaje real deben comprobarse siempre los siguientes puntos:
 
 \begin{itemize}
     \item la salida del LM2596 debe estar ajustada a 5.0 V antes de alimentar el Arduino;
     \item todas las masas deben estar conectadas en común;
     \item el módulo A7670E-LASA debe alimentarse con una tensión compatible con su placa;
     \item la señal desde Arduino hacia el RX del módulo LTE debe adaptarse mediante divisor de tensión;
-    \item la bomba de 12 V no debe alimentarse desde el Arduino;
+    \item la bomba de 12 V debe alimentarse desde la línea de potencia correspondiente y conmutarse mediante el relé;
     \item el relé debe utilizar el contacto normalmente abierto para que el sistema arranque con el riego desactivado;
     \item la electrónica debe protegerse frente a humedad, polvo y salpicaduras en pruebas exteriores.
 \end{itemize}

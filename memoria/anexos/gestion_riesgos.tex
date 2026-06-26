@@ -3,7 +3,7 @@
 
 Este anexo recoge los principales riesgos identificados durante el desarrollo de TierraViva y las medidas previstas para reducir su probabilidad o limitar su impacto. Al tratarse de un prototipo que combina electrónica, comunicaciones móviles, sensores, servicios en la nube, software de supervisión y actuación física sobre el riego, resulta necesario documentar los puntos más sensibles del sistema.
 
-El objetivo no es presentar una lista exhaustiva de fallos posibles, sino dejar constancia de los riesgos más relevantes para el desarrollo, las pruebas y una posible evolución futura del prototipo.
+El objetivo es dejar constancia de los riesgos más relevantes para el desarrollo, las pruebas y una posible evolución futura del prototipo, centrando el análisis en aquellos aspectos con mayor impacto sobre el funcionamiento, la seguridad y la validación del sistema.
 
 \section{Criterio de valoración}
 
@@ -128,7 +128,7 @@ El módulo A7670E-LASA puede presentar picos de consumo durante el registro en r
 
 \subsection{R02. Fiabilidad de la humedad del suelo}
 
-La humedad del suelo es la variable principal para decidir el riego. Una lectura incorrecta puede provocar que el sistema riegue sin necesidad o que no actúe cuando el suelo está seco.
+La humedad del suelo es la variable principal para decidir el riego. Una lectura incorrecta puede provocar una actuación innecesaria o impedir el riego cuando el suelo está seco.
 
 \textbf{Medidas adoptadas:}
 
@@ -170,7 +170,7 @@ La conexión de sensores, módulo LTE, relé, bomba y alimentación requiere esp
 
 \subsection{R07. Exposición ambiental del montaje}
 
-Las pruebas en exterior pueden exponer la electrónica a humedad, polvo, salpicaduras o tirones de cable. Aunque TierraViva es un prototipo académico y no un producto industrial, estas condiciones deben tenerse en cuenta.
+Las pruebas en exterior pueden exponer la electrónica a humedad, polvo, salpicaduras o tirones de cable. Al tratarse de un prototipo académico funcional, estas condiciones deben controlarse durante los ensayos y considerarse en la evolución hacia versiones más robustas.
 
 \textbf{Medidas adoptadas:}
 
@@ -184,7 +184,7 @@ Las pruebas en exterior pueden exponer la electrónica a humedad, polvo, salpica
 
 \section{Relación entre riesgos y pruebas}
 
-La gestión de riesgos se conecta directamente con el plan de pruebas. Cada riesgo relevante debe tener una comprobación asociada que permita verificar que las medidas adoptadas funcionan correctamente.
+La gestión de riesgos se conecta directamente con el plan de pruebas. Cada riesgo relevante se asocia a una comprobación que permite verificar la eficacia de las medidas adoptadas durante la validación.
 
 \begin{table}[H]
 \centering
@@ -222,7 +222,7 @@ R10 & Planificación de prueba en entorno real o controlado. & Evidencia de ejec
 
 \section{Riesgo residual}
 
-Tras aplicar las medidas anteriores, algunos riesgos siguen existiendo de forma residual. Esto es normal en un prototipo físico conectado a servicios externos y probado en un entorno no completamente controlado.
+Tras aplicar las medidas anteriores, permanecen algunos riesgos residuales propios de un prototipo físico conectado a servicios externos y probado en un entorno parcialmente controlado.
 
 En la versión actual se consideran aceptables los siguientes riesgos residuales:
 
@@ -234,10 +234,10 @@ En la versión actual se consideran aceptables los siguientes riesgos residuales
     \item dependencia de credenciales y configuración externa para la comunicación con ThingSpeak.
 \end{itemize}
 
-Estos riesgos no invalidan el proyecto, ya que TierraViva se plantea como un prototipo funcional de Trabajo de Fin de Grado y no como un producto industrial final. Sin embargo, sí delimitan correctamente su alcance y orientan posibles mejoras futuras.
+Estos riesgos delimitan correctamente el alcance de TierraViva como prototipo funcional de Trabajo de Fin de Grado y orientan posibles mejoras futuras, especialmente en robustez física, autonomía, protección ambiental, seguridad de credenciales y tolerancia a fallos.
 
 \section{Conclusión}
 
 La gestión de riesgos permite identificar los puntos más sensibles de TierraViva: alimentación del módulo LTE, fiabilidad de la humedad del suelo, actuación sobre la bomba, integración eléctrica y protección del montaje durante pruebas exteriores.
 
-Las medidas adoptadas reducen estos riesgos y hacen que el prototipo sea más seguro, trazable y defendible. Además, este análisis permite conectar directamente los riesgos con el plan de pruebas, evitando que la validación del sistema se limite a comprobar únicamente el funcionamiento en condiciones ideales.
+Las medidas adoptadas reducen estos riesgos y hacen que el prototipo sea más seguro, trazable y defendible. Además, este análisis conecta directamente los riesgos con el plan de pruebas y permite validar el sistema también ante condiciones representativas de fallo, degradación de comunicación, lecturas anómalas o exposición controlada en entorno exterior.

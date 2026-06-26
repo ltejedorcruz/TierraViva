@@ -3,7 +3,7 @@
 
 Este anexo documenta la API local de TierraViva implementada sobre FastAPI. Su finalidad es servir como referencia técnica para consultar los \textit{endpoints} disponibles, sus parámetros, las respuestas esperadas y los errores más habituales.
 
-La API se ejecuta en la Raspberry Pi y trabaja sobre los datos almacenados previamente en SQLite. No consulta directamente los sensores ni se comunica por puerto serie con las estaciones. Las lecturas son publicadas por las estaciones en ThingSpeak, recuperadas por el ingestor \texttt{main.py}, almacenadas mediante \texttt{database.py} y expuestas posteriormente por \texttt{api.py}.
+La API se ejecuta en la Raspberry Pi y trabaja sobre los datos almacenados previamente en SQLite. Las lecturas siguen un flujo definido en SQLite. Las lecturas siguen un flujo definido: las estaciones las publican en ThingSpeak, el ingestor \texttt{main.py} las recupera, \texttt{database.py} las almacena y \texttt{api.py} las expone posteriormente mediante \textit{endpoints} HTTP.
 
 \section{Alcance}
 
@@ -40,10 +40,10 @@ En las respuestas JSON se utiliza habitualmente el campo \texttt{ok}:
 
 \begin{itemize}
     \item \texttt{ok: true}: la petición se ha procesado correctamente;
-    \item \texttt{ok: false}: la petición es válida, pero no existen datos para devolver.
+    \item \texttt{ok: false}: la petición es válida y la API devuelve una respuesta sin registros disponibles.
 \end{itemize}
 
-El parámetro de estación se denomina \texttt{station}. Si se omite, la API utiliza la estación configurada por defecto mediante la variable \texttt{STATION\_ID}.
+El parámetro \texttt{station} se normaliza a mayúsculas. Si se omite, la API utiliza la estación configurada por defecto mediante \texttt{STATION\_ID}. Si la estación consultada carece de registros almacenados, la API devuelve una respuesta equivalente a una consulta sin datos disponibles.
 
 \section{Variables de configuración utilizadas}
 
@@ -78,7 +78,7 @@ La Tabla~\ref{tab:variables_api_resumidas} recoge las variables de entorno que a
 \label{tab:variables_api_resumidas}
 \end{table}
 
-Las variables de ThingSpeak no se utilizan directamente en \texttt{api.py}; se emplean en el proceso de ingesta \texttt{main.py}.
+Las variables de ThingSpeak pertenecen al proceso de ingesta \texttt{main.py}, encargado de recuperar las lecturas desde la plataforma antes de que la API las consulte en SQLite.
 
 \section{Resumen de \textit{endpoints}}
 
@@ -124,7 +124,7 @@ Si el fichero \texttt{frontend/index.html} existe, el navegador muestra el \text
 
 \subsection*{Error posible}
 
-Si el fichero no existe, la API devuelve un error HTTP 404:
+Ante la ausencia del fichero, la API devuelve un error HTTP 404:
 
 \begin{jsoncode}
 {
@@ -509,7 +509,7 @@ FastAPI valida automáticamente algunos parámetros numéricos. Si se solicita u
 \label{tab:validacion_parametros_api_resumida}
 \end{table}
 
-En la versión actual, el parámetro \texttt{station} se normaliza a mayúsculas. La API no rechaza automáticamente una estación que no esté en la lista \texttt{STATIONS}; si no existen datos para esa estación, la respuesta será equivalente a una consulta sin registros.
+El parámetro \texttt{station} se normaliza a mayúsculas. Si la estación consultada carece de registros almacenados, la API devuelve una respuesta equivalente a una consulta sin datos disponibles.
 
 \section{Códigos HTTP habituales}
 
@@ -524,11 +524,11 @@ En la versión actual, el parámetro \texttt{station} se normaliza a mayúsculas
 \hline
 200 & Petición correcta & La API ha procesado la petición. El campo \texttt{ok} indica si existen datos. \\
 \hline
-404 & \textit{Dashboard} no encontrado & Falta el fichero \texttt{frontend/index.html}. \\
+404 & Fichero de \textit{dashboard} ausente & Falta el fichero \texttt{frontend/index.html}. \\
 \hline
-422 & Parámetro inválido & Un parámetro no cumple las restricciones, por ejemplo \texttt{limit=0}. \\
+422 & Parámetro inválido & Un parámetro queda fuera de las restricciones definidas, por ejemplo \texttt{limit=0}. \\
 \hline
-500 & Error interno & Fallo no controlado durante la ejecución. Deben revisarse los \textit{logs}. \\
+500 & Error interno & Fallo inesperado durante la ejecución. Deben revisarse los \textit{logs}. \\
 \hline
 \end{tabular}
 \caption{Códigos HTTP habituales en la API.}
@@ -565,4 +565,4 @@ El \textit{dashboard} consume los \textit{endpoints} de la API para actualizar l
 
 \section{Conclusión}
 
-La API de TierraViva proporciona una capa local de consulta sobre los datos almacenados en la Raspberry Pi. Sus \textit{endpoints} permiten obtener configuración, última lectura, histórico, estadísticas y estado básico del servicio. 
+La API de TierraViva proporciona una capa local de consulta sobre los datos almacenados en la Raspberry Pi. Sus \textit{endpoints} permiten obtener configuración, última lectura, histórico, estadísticas y estado básico del servicio, y sirven como punto de acceso para el \textit{dashboard} web de supervisión alojado en la propia Raspberry Pi. 

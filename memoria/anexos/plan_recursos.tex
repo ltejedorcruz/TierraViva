@@ -19,7 +19,7 @@ Esta clasificación permite analizar el proyecto desde una perspectiva de gesti�
 
 \section{Recursos humanos}
 
-El desarrollo de TierraViva ha sido realizado principalmente por la autora del TFG. La ejecución técnica, el montaje, la programación, la integración, las pruebas y la redacción de la memoria recaen sobre ella. Los tutores han participado como apoyo académico, técnico y experimental, sin asumir tareas de implementación directa del prototipo.
+El desarrollo de TierraViva ha sido realizado principalmente por la autora del TFG. La ejecución técnica, el montaje, la programación, la integración, las pruebas y la redacción de la memoria recaen sobre ella. Los tutores han participado como apoyo académico, técnico y experimental, orientando las decisiones de diseño, la integración del sistema y la validación del planteamiento.
 
 \begin{table}[H]
 \centering
@@ -79,11 +79,11 @@ Redacción y revisión de la memoria & Autora & Javier Simó / Ana Zazo \\
 \label{tab:responsabilidades_recursos}
 \end{table}
 
-Esta tabla no representa una distribución porcentual de autoría, sino la organización del trabajo y los apoyos disponibles durante el desarrollo.
+Esta tabla representa la organización del trabajo y los apoyos disponibles durante el desarrollo, diferenciando entre responsabilidad principal y supervisión o acompañamiento académico.
 
 \section{Recursos hardware}
 
-Los recursos hardware se agrupan por función dentro del sistema. No se detallan aquí referencias comerciales ni precios, ya que esa información se encuentra en el Anexo \ref{anexo:materiales}.
+Los recursos hardware se agrupan por función dentro del sistema. El detalle de referencias comerciales y precios se recoge en el Anexo \ref{anexo:materiales}.
 
 \begin{table}[H]
 \centering
@@ -111,7 +111,7 @@ Montaje y protección & Protoboard, cableado, resistencias, condensadores, aisla
 \label{tab:recursos_hardware_agrupados}
 \end{table}
 
-La separación por bloques permite distinguir entre recursos propios de cada estación y recursos compartidos. La Raspberry Pi, por ejemplo, actúa como nodo de supervisión y no tendría que duplicarse necesariamente por cada estación adicional.
+La separación por bloques permite distinguir entre recursos propios de cada estación y recursos compartidos. La Raspberry Pi, por ejemplo, actúa como nodo de supervisión común y puede reutilizarse para varias estaciones siempre que el volumen de datos y la carga de consulta se mantengan dentro que el volumen de datos y la carga de consulta se mantengan dentro de un rango asumible.
 
 \section{Recursos software}
 
@@ -164,7 +164,7 @@ TierraViva utiliza servicios externos solo cuando aportan una función clara den
 \hline
 ThingSpeak & Plataforma IoT & Recepción de telemetría publicada por las estaciones y consulta posterior desde la Raspberry Pi. \\
 \hline
-Red móvil LTE/4G & Infraestructura de comunicación & Conectividad de las estaciones remotas en ubicaciones sin dependencia directa de una red WiFi local. \\
+Red móvil LTE/4G & Infraestructura de comunicación & Conectividad de las estaciones remotas en ubicaciones donde se prioriza cobertura móvil frente a una red WiFi local. \\
 \hline
 GitHub & Repositorio remoto & Almacenamiento del código fuente, seguimiento de cambios y acceso al proyecto. \\
 \hline
@@ -235,7 +235,7 @@ Notas de pruebas, capturas y \textit{logs} & Evidencias de funcionamiento, depur
 
 \section{Asignación de recursos por fase}
 
-La Tabla \ref{tab:recursos_por_fase_resumidos} relaciona los recursos anteriores con las fases generales del proyecto. No se reproduce aquí el cronograma completo, sino una visión de qué recursos resultan críticos en cada bloque de trabajo.
+La Tabla \ref{tab:recursos_por_fase_resumidos} relaciona los recursos anteriores con las fases generales del proyecto y ofrece una visión resumida de qué recursos resultan críticos en cada bloque de trabajo. El cronograma completo se recoge en el Anexo \ref{anexo:cronograma}.
 
 \begin{table}[H]
 \centering
@@ -267,7 +267,7 @@ Documentación final & LaTeX, plantilla oficial, bibliografía, anexos y resulta
 
 \section{Recursos compartidos y escalabilidad}
 
-No todos los recursos crecen de la misma forma si el sistema se amplía. Algunos deben duplicarse por estación, mientras que otros pueden compartirse.
+Los recursos del sistema presentan comportamientos distintos ante una posible ampliación. Algunos deben duplicarse por estación, mientras que otros pueden compartirse entre varios nodos.
 
 \begin{table}[H]
 \centering
@@ -280,7 +280,7 @@ No todos los recursos crecen de la misma forma si el sistema se amplía. Algunos
 \hline
 Sensores, Arduino, módem LTE, relé y alimentación de estación & Por estación & Deben añadirse para cada nuevo nodo físico. \\
 \hline
-Canal ThingSpeak y claves asociadas & Por estación & Se recomienda un canal independiente para no mezclar datos. \\
+Canal ThingSpeak y claves asociadas & Por estación & Se recomienda un canal independiente para mantener la separación de datos entre estaciones. \\
 \hline
 Raspberry Pi & Compartido & Puede supervisar varias estaciones si el volumen de datos es moderado. \\
 \hline
@@ -295,8 +295,8 @@ Entorno de pruebas & Compartido o variable & Depende de la disponibilidad de par
 \label{tab:recursos_escalabilidad}
 \end{table}
 
-Esta distinción resulta relevante porque el coste incremental de añadir estaciones no es igual al coste total del prototipo inicial. Parte de la infraestructura, como la Raspberry Pi, la API, la base de datos y el \textit{dashboard}, puede reutilizarse.
+Esta distinción resulta relevante porque el coste incremental de añadir estaciones difiere del coste total del prototipo inicial. Parte de la infraestructura, como la Raspberry Pi, la API, la base de datos y el \textit{dashboard}, puede reutilizarse.
 
 \section{Conclusión}
 
-El desarrollo de TierraViva ha requerido recursos de naturaleza diversa: personas, componentes electrónicos, herramientas de programación, servicios de comunicación, entorno experimental y documentación técnica. La organización de estos recursos permite entender el proyecto como un sistema integrado, no como una simple suma de componentes.
+El desarrollo de TierraViva ha requerido recursos de naturaleza diversa: personas, componentes electrónicos, herramientas de programación, servicios de comunicación, entorno experimental y documentación técnica. La organización de estos recursos permite entender el proyecto como un sistema integrado, en el que cada bloque cumple una función concreta dentro de la arquitectura completa.

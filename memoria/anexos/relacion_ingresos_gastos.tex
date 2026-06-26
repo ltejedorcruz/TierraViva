@@ -1,7 +1,7 @@
 \chapter{Relación ingresos-gastos y viabilidad económica}
 \label{anexo:relacion_ingresos_gastos}
 
-Este anexo recoge la relación entre los recursos económicos disponibles, los gastos asociados al prototipo TierraViva y una estimación del coste total del proyecto. El objetivo no es presentar TierraViva como un producto comercial cerrado, sino analizar la viabilidad económica de un prototipo académico que podría evolucionar hacia una solución más completa de riego inteligente.
+Este anexo recoge la relación entre los recursos económicos disponibles, los gastos asociados al prototipo TierraViva y una estimación del coste total del proyecto. El objetivo es analizar la viabilidad económica de un prototipo académico funcional, valorando tanto el gasto material necesario para reproducirlo como el esfuerzo técnico asociado a su desarrollo y su posible evolución hacia una solución más completa de riego inteligente.
 
 Los costes materiales detallados de cada componente se recogen en el Anexo \ref{anexo:materiales}. En este apartado se ofrece una visión agregada, diferenciando entre gasto directo del prototipo, recursos disponibles, coste estimado de desarrollo y viabilidad de reproducción.
 
@@ -15,7 +15,7 @@ Para analizar el proyecto de forma realista se distinguen tres conceptos:
     \item \textbf{Coste valorado}: estimación económica del tiempo dedicado al análisis, diseño, montaje, programación, pruebas y documentación.
 \end{itemize}
 
-Esta separación evita mezclar el coste real de construir el prototipo con el valor económico completo del trabajo realizado. 
+Esta separación permite distinguir el coste material de construcción del prototipo y el valor económico completo del trabajo realizado.
 
 \section{Resumen económico del prototipo}
 
@@ -42,7 +42,7 @@ Reserva para imprevistos & 10\% del coste material & 42.05 \euro{} \\
 \label{tab:resumen_economico_directo}
 \end{table}
 
-La reserva de imprevistos no representa necesariamente un gasto realizado, sino un margen razonable para cubrir sustitución de componentes, cables adicionales, conectores, material de aislamiento o pequeñas compras no previstas durante el montaje.
+La reserva de imprevistos representa un margen razonable para cubrir sustitución de componentes, cables adicionales, conectores, material de aislamiento o pequeñas compras surgidas durante el montaje.
 
 \section{Distribución de gastos por bloques}
 
@@ -75,7 +75,7 @@ Montaje y material auxiliar & Protoboard, cableado, resistencias, condensadores 
 \label{tab:gastos_por_bloques}
 \end{table}
 
-Como se observa en la Tabla \ref{tab:gastos_por_bloques}, el mayor peso económico corresponde al bloque de procesamiento y supervisión, principalmente por la Raspberry Pi 5. Este coste debe interpretarse correctamente: la Raspberry Pi actúa como nodo central del sistema y no tendría que duplicarse necesariamente por cada nueva estación añadida.
+Como se observa en la Tabla \ref{tab:gastos_por_bloques}, el mayor peso económico corresponde al bloque de procesamiento y supervisión, principalmente por la Raspberry Pi 5. Este coste debe interpretarse correctamente: la Raspberry Pi actúa como nodo central del sistema y puede reutilizarse para varias estaciones siempre que la carga de datos y consulta se mantenga dentro de un rango asumible.
 
 \section{Coste aproximado por estación}
 
@@ -132,7 +132,7 @@ Esta estimación es útil para analizar una posible ampliación futura del siste
 
 \section{Ingresos y recursos disponibles}
 
-Durante el desarrollo del TFG no se han generado ingresos comerciales. Por ello, en este anexo el término ingresos se interpreta como recursos económicos o no económicos que han permitido realizar el proyecto.
+Durante el desarrollo del TFG, el proyecto se ha financiado mediante recursos propios y apoyos académicos o experimentales. Por ello, en este anexo el término ingresos se interpreta como recursos económicos o no económicos que han permitido realizar el proyecto.
 
 \begin{table}[H]
 \centering
@@ -158,7 +158,7 @@ ThingSpeak & Plataforma IoT utilizada para recepción y consulta de telemetría 
 \label{tab:ingresos_recursos_tierraviva}
 \end{table}
 
-La ausencia de ingresos comerciales es coherente con la naturaleza académica del proyecto. TierraViva se plantea como un prototipo funcional y documentado, no como una solución comercial en explotación.
+La financiación mediante aportación propia y recursos académicos es coherente con la naturaleza del TFG. TierraViva se plantea como un prototipo funcional y documentado, orientado a validar una arquitectura técnica de riego inteligente y a servir como base para futuras evoluciones.
 
 \section{Relación ingresos-gastos}
 
@@ -196,13 +196,13 @@ Desde el punto de vista económico directo, el proyecto queda equilibrado median
 
 \section{Coste de desarrollo valorado}
 
-Además del coste material, TierraViva requiere una dedicación significativa en análisis, diseño, programación, integración, pruebas y documentación. Aunque estas horas no suponen un pago directo dentro del marco académico del TFG, sí representan el valor técnico del trabajo realizado.
+Además del coste material, TierraViva requiere una dedicación significativa en análisis, diseño, programación, integración, pruebas y documentación. Estas horas representan el valor técnico del trabajo realizado dentro del marco académico del TFG.
 
 Para realizar una estimación orientativa se toma una dedicación acumulada de \textbf{720 horas} entre finales de agosto de 2025, momento en el que comenzó la definición inicial del proyecto, y julio de 2026, fecha prevista para la entrega y defensa del TFG, teniendo en cuenta que los primeros meses estuvieron más centrados en planificación, revisión bibliográfica y definición de alcance, mientras que la mayor carga técnica y documental se concentró entre marzo y junio de 2026.
 
-La estimación no pretende equivaler a una dedicación profesional registrada hora a hora, sino valorar de forma razonable el esfuerzo técnico y documental asociado al desarrollo del prototipo. Incluye análisis, diseño, montaje, programación, integración, pruebas, validación en Agrolab Móstoles, elaboración de evidencias, redacción de capítulos y preparación de anexos.
+La estimación se plantea como una valoración razonable del esfuerzo técnico y documental asociado al desarrollo del prototipo. Incluye análisis, diseño, montaje, programación, integración, pruebas, validación en Agrolab Móstoles, elaboración de evidencias, redacción de capítulos y preparación de anexos.
 
-Como coste interno de referencia se emplea un valor conservador de \textbf{15 \euro{}/h}. Esta cifra no pretende representar una tarifa profesional cerrada, sino valorar de forma sencilla el esfuerzo técnico y documental asociado al proyecto.
+Como coste interno de referencia se emplea un valor conservador de \textbf{15 \euro{}/h}. Esta cifra permite valorar de forma sencilla el esfuerzo técnico y documental asociado al proyecto.
 
 \begin{table}[H]
 \centering
@@ -263,14 +263,13 @@ Reserva de imprevistos & 42.05 \euro{} \\
 Coste de desarrollo valorado & 10800.00 \euro{} \\
 \hline
 \rowcolor{gray!15}
-\textbf{Coste total valorado con margen de reproducción} & \textbf{11242.05 \euro{}} \\
-\hline
+\textbf{Coste total valorado con margen de reproducción} & \textbf{11262.55 \euro{}} \\\hline
 \end{tabular}
 \caption{Coste total valorado del proyecto TierraViva.}
 \label{tab:coste_total_valorado}
 \end{table}
 
-Esta tabla permite distinguir claramente entre el coste material de reproducir el prototipo y el valor económico del trabajo técnico necesario para desarrollarlo. La diferencia entre ambos importes refleja que TierraViva no se limita a la compra de componentes, sino que incorpora diseño, integración, programación, pruebas y documentación.
+Esta tabla permite distinguir claramente entre el coste material de reproducir el prototipo y el valor económico del trabajo técnico necesario para desarrollarlo. La diferencia entre ambos importes refleja que el valor de TierraViva procede de la combinación de componentes, diseño, integración, programación, pruebas y documentación.
 
 \section{Escenarios de viabilidad}
 
@@ -289,7 +288,7 @@ Prototipo académico & Sistema desarrollado para validar arquitectura, comunicac
 \hline
 Reproducción técnica & Montaje equivalente por otra persona, considerando margen de seguridad para imprevistos. & Recomendable disponer de unos 462.55 \euro{}. \\
 \hline
-Ampliación con más estaciones & Incorporación de nuevas estaciones manteniendo el nodo central de supervisión. & Coste incremental orientativo de 108.15 \euro{} por estación, sin considerar variaciones de precios. \\
+Ampliación con más estaciones & Incorporación de nuevas estaciones manteniendo el nodo central de supervisión. & Coste incremental orientativo de 108.15 \euro{} por estación, sujeto a variaciones de precios y disponibilidad de componentes. \\
 \hline
 Evolución precomercial & Mejora de robustez, cajas estancas, protección ambiental, seguridad, instalación y pruebas prolongadas. & Requeriría inversión adicional y una nueva estimación económica. \\
 \hline
@@ -302,6 +301,6 @@ Evolución precomercial & Mejora de robustez, cajas estancas, protección ambien
 
 El análisis económico muestra que TierraViva es viable como prototipo académico con un coste material contenido. La inversión directa se concentra principalmente en el nodo de supervisión y en los elementos de alimentación y actuación, mientras que los sensores y módulos de estación mantienen un coste relativamente bajo.
 
-La principal diferencia aparece al valorar el tiempo de desarrollo. Aunque el desembolso material es reducido, el verdadero valor del proyecto está en la integración de componentes, la programación del \textit{firmware}, la comunicación LTE, la conexión con ThingSpeak, el \textit{backend} en Raspberry Pi, la API, el \textit{dashboard}, las pruebas, la validación en Agrolab de Móstoles y la documentación técnica.
+La principal diferencia aparece al valorar el tiempo de desarrollo. El valor principal del proyecto está en la integración de componentes, la programación del \textit{firmware}, la comunicación LTE, la conexión con ThingSpeak, el \textit{backend} en Raspberry Pi, la API, el \textit{dashboard}, las pruebas, la validación en Agrolab de Móstoles y la documentación técnica.
 
 Por tanto, TierraViva puede considerarse un prototipo económicamente razonable para un Trabajo de Fin de Grado y, al mismo tiempo, una muy buena base técnica ampliable para futuras versiones próximas a una implantación real.
