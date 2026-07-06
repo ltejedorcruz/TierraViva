@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # ============================================================
 #  TierraViva – Script de despliegue y gestión (Fase 2)
 # ============================================================

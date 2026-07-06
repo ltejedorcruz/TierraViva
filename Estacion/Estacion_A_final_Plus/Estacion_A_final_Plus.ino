@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <BH1750.h>

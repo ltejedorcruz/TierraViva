@@ -332,6 +332,15 @@ La memoria incluye:
   </a>
 </p>
 
+## Licencia
+
+El software desarrollado en este repositorio se distribuye bajo licencia MIT.
+
+SPDX-License-Identifier: MIT
+
+La memoria del Trabajo Fin de Grado, las figuras de elaboración propia, la documentación académica y el material textual asociado se distribuyen bajo licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0), salvo aquellos elementos de terceros que se indiquen expresamente con su fuente o licencia correspondiente.
+
+Los logotipos, marcas, capturas de plataformas externas y otros recursos de terceros incluidos en la memoria permanecen sujetos a sus respectivas condiciones de uso.
 
 <p align="center">
   <img src="docs/assets/footer.svg" alt="TierraViva footer" width="100%"/>
