@@ -408,6 +408,8 @@ Actuación temporizada & La parada de la bomba no depende de una orden externa. 
 \hline
 Separación 12 V / 5 V & La corriente de potencia no circula por el Arduino. \\
 \hline
+Condensador y diodo en la rama de bomba & Refuerzan la estabilidad y protección eléctrica del bloque de actuación durante la conmutación del motor. \\
+\hline
 Masa común & Garantiza una referencia eléctrica válida para señales y comunicación. \\
 \hline
 \end{tabular}
@@ -419,7 +421,7 @@ Antes de conectar los módulos electrónicos, el LM2596 debe ajustarse y verific
 
 Desde el punto de vista funcional, la bomba se activa únicamente durante el intervalo configurado por \textit{firmware}. Ante una lectura inválida, una condición interna incoherente o un periodo de \textit{cooldown} activo, la estación mantiene la bomba apagada y publica los códigos de estado correspondientes cuando la comunicación está disponible.
 
-La bomba de agua se comporta como una carga inductiva y puede introducir perturbaciones eléctricas durante el arranque, la parada o la conmutación mediante el relé. Para mejorar la estabilidad del bloque de actuación se incorporó un condensador electrolítico de \(2200~\mu\mathrm{F}\) en la rama de alimentación de la bomba, conectado entre el nodo positivo conmutado por el relé y la masa común. Su función es actuar como elemento local de apoyo energético y filtrado, reduciendo variaciones bruscas de tensión asociadas al funcionamiento del motor.
+La bomba de agua se comporta como una carga de motor y puede introducir perturbaciones eléctricas durante el arranque, la parada o la conmutación mediante el relé. Para mejorar la estabilidad del bloque de actuación se incorporó un condensador electrolítico de \(2200~\mu\mathrm{F}\) en la rama de alimentación de la bomba, conectado entre el nodo positivo conmutado por el relé y la masa común. Además, incorpora un diodo asociado a esta rama de actuación, situado junto al condensador y al bloque de bomba. Su función es actuar como elemento local de apoyo energético y filtrado, reduciendo variaciones bruscas de tensión asociadas al funcionamiento del motor.
 
 Aunque el sistema se valida inicialmente con una batería de 12 V, la arquitectura deja preparada una evolución hacia alimentación autónoma mediante panel solar. Esta ampliación no se considera validada en el prototipo actual, ya que requeriría dimensionar batería, panel y regulador de carga a partir del consumo real de Arduino, sensores, módem LTE, relé, bomba, frecuencia de telemetría y tiempos de actuación.
 

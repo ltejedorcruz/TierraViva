@@ -19,6 +19,9 @@
   <img src="https://img.shields.io/badge/Raspberry%20Pi-Supervisi%C3%B3n-A22846?style=flat-square&logo=raspberrypi&logoColor=white" alt="Raspberry Pi"/>
   <img src="https://img.shields.io/badge/FastAPI-API-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/SQLite-Hist%C3%B3rico-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite"/>
+  <a href="https://www.youtube.com/watch?v=oCnP5rSnTMI" target="_blank">
+    <img src="https://img.shields.io/badge/Ver%20v%C3%ADdeo%20de%20demostraci%C3%B3n-YouTube-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Ver vídeo en YouTube"/>
+  </a>
 </p>
 
 <p align="center">
@@ -320,6 +323,14 @@ La memoria incluye:
 * manual API;
 * glosario;
 * trazabilidad requisitos-pruebas.
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=oCnP5rSnTMI" target="_blank">
+    <img src="https://img.youtube.com/vi/oCnP5rSnTMI/maxresdefault.jpg"
+         alt="Vídeo de demostración de TierraViva"
+         width="900"/>
+  </a>
+</p>
 
 
 <p align="center">

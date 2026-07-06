@@ -26,7 +26,7 @@ El esquema de la estación puede dividirse en varios bloques funcionales:
     \item \textbf{Sensorización}: formada por el sensor capacitivo de humedad del suelo, el BME280 y el BH1750.
     \item \textbf{Comunicación}: formada por el módulo LTE A7670E-LASA y su antena.
     \item \textbf{Actuación}: formada por el módulo relé y la bomba de agua de 12 V.
-    \item \textbf{Protección y estabilización}: formada por resistencias, condensadores y elementos auxiliares de acondicionamiento eléctrico. Incluye el divisor resistivo de adaptación hacia el módulo LTE, los condensadores de desacoplo de alimentación y el condensador electrolítico de \(2200~\mu\mathrm{F}\) para mejorar la estabilidad durante la conmutación del motor.
+    \item \textbf{Protección y estabilización}: formada por resistencias, condensadores, diodo y elementos auxiliares de acondicionamiento eléctrico. Incluye el divisor resistivo de adaptación hacia el módulo LTE, los condensadores de desacoplo de alimentación, el condensador electrolítico de \(2200~\mu\mathrm{F}\) y el diodo asociado a la rama de bomba para mejorar la estabilidad y protección eléctrica durante la conmutación del motor.
 \end{itemize}
 
 \section{Correspondencia con el cableado del prototipo}
@@ -70,6 +70,8 @@ Sensorización ambiental & BME280 y BH1750 & Medir temperatura, humedad relativa
 Sensorización de suelo & Sensor capacitivo de humedad & Medir el estado hídrico del sustrato mediante entrada analógica. \\
 \hline
 Actuación & Relé y bomba 12 V & Activar físicamente el riego cuando se cumplen las condiciones definidas. \\
+\hline
+Protección y estabilización & Divisor resistivo, condensadores y diodo & Acondicionar señales, estabilizar la alimentación y reforzar la protección eléctrica de la rama de actuación. \\
 \hline
 \caption{Correspondencia entre el esquema eléctrico y los bloques funcionales de la estación.}
 \label{tab:correspondencia_esquema_cableado}\\
